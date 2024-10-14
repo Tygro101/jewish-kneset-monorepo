@@ -1,0 +1,13 @@
+.clock-content{
+    font-family: Nexa-Bold;
+    height: fit-content;
+    //padding: 10px 15px;
+    background: #795548;
+    color: white;
+    border-radius: 3px;
+    letter-spacing: 3px;
+    font-size: 20rem;
+    display: grid;
+    grid-template-columns: min-content min-content min-content min-content min-content;
+    gap: 2px;
+}

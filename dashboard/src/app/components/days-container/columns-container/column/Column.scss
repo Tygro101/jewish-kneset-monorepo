@@ -1,0 +1,23 @@
+
+.column {
+    max-height: 100%;
+    height: fit-content;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    /* margin: 20px 0; */
+    background: #ffd4b6;
+
+    .title{
+        font-family: Frank-Bold;
+        padding: 3px 0;
+        font-size: 14px;
+        text-align: center;
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+        background: white;
+        width: 100%;
+        border-radius: 2px;
+    }
+}
