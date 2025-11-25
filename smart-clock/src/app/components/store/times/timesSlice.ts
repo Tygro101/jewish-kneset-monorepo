@@ -2,8 +2,9 @@ import { createAsyncThunk, createSlice, AsyncThunk } from "@reduxjs/toolkit"
 import { TimeState } from "./timesState";
 import { WebWorkerManager } from "@shared/core/services/workers/webWorkerManager.service";
 import { CitiesEnum } from "@shared/core/services/workers/handlers/models/shared-models";
-import { TypedObjectMap } from "@shared/models/shared";
+import { TypedObjectMap } from "@shared/models/core";
 import { StateKeys } from "../../../store.models";
+
 const workersManager = WebWorkerManager.getInstance();
 
 export const calculateTimes = createAsyncThunk(

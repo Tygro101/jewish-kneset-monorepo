@@ -4,6 +4,7 @@ import { WebWorkerManager } from "@shared/core/services/workers/webWorkerManager
 import { CitiesEnum, IClockTitle } from "@shared/core/services/workers/handlers/models/shared-models";
 import { TypedMap } from "@shared/models/shared";
 import { StateKeys } from "../../../store.models";
+import { TitlesKeys } from '@shared/core/services/workers/handlers/models/titles-of-aiom';
 
 import { enableMapSet } from 'immer';
 
@@ -13,9 +14,23 @@ const workersManager = WebWorkerManager.getInstance();
 
 export const calculateTitles = createAsyncThunk(
     "times/calculateTitles",
-    (metadata: {date: Date, location: CitiesEnum}, thankAPI) => {
-        workersManager.calculateTitles<TypedMap<IClockTitle>>({date: metadata.date, location: metadata.location}).subscribe((res: TypedMap<IClockTitle>)=>{
-            thankAPI.dispatch(setTitles(res))
+    (metadata: { date: Date, location: CitiesEnum }, thankAPI) => {
+        workersManager.calculateTitles<TypedMap<IClockTitle>>({ date: metadata.date, location: metadata.location }).subscribe((res: TypedMap<IClockTitle>) => {
+            const serialize = (input: any) => {
+                const out: any = {};
+                if (input instanceof Map) {
+                    input.forEach((v: any, k: string) => {
+                        out[k] = { ...v, date: v && v.date ? (v.date instanceof Date ? v.date.toISOString() : v.date) : v?.date };
+                    });
+                } else {
+                    Object.keys(input || {}).forEach((k) => {
+                        const v = (input as any)[k];
+                        out[k] = { ...v, date: v && v.date ? (v.date instanceof Date ? v.date.toISOString() : v.date) : v?.date };
+                    });
+                }
+                return out as TypedMap<IClockTitle>;
+            };
+            thankAPI.dispatch(setTitles(serialize(res)));
         });
     },
 )
@@ -26,8 +41,9 @@ export const titlesSlice = createSlice({
     initialState,
     // The `reducers` field lets us define reducers and generate associated actions
     reducers: {
-        setTitles: (state, action)=>{
-            return {};
+        setTitles: (state, action) => {
+
+            return action.payload;
         }
     },
     // The `extraReducers` field lets the slice handle actions defined elsewhere,

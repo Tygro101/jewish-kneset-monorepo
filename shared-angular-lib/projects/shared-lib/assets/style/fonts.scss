@@ -1,0 +1,16 @@
+// should move to fonts
+@font-face {
+    font-family: Open-Sans;
+    src: url('../fonts/open-sans/OpenSans-VariableFont_wdth,wght.ttf') format('truetype');
+    font-weight: 100 900;
+    /* Adjust based on the font’s variable range */
+    font-style: normal;
+}
+
+@font-face {
+    font-family: Roboto-Mono;
+    src: url('../fonts/roboto-mono/RobotoMono-VariableFont_wght.ttf') format('truetype');
+    font-weight: 100 900;
+    /* Adjust based on the font’s variable range */
+    font-style: normal;
+}

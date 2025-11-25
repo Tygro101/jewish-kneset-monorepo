@@ -1,0 +1,30 @@
+<form>
+    <mat-form-field>
+        <mat-label>Email</mat-label>
+        <input type="email" matInput [formControl]="$any(this.formGroup?.controls?.text)"
+            placeholder="Ex. pat@example.com">
+        @if (this.formGroup?.controls?.text.hasError('email') && !this.formGroup?.controls?.text.hasError('required')) {
+        <mat-error>Please enter a valid email address</mat-error>
+        }
+        @if (this.formGroup?.controls?.text.hasError('required')) {
+        <mat-error>Email is <strong>required</strong></mat-error>
+        }
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>Enter a date range</mat-label>
+        <mat-date-range-input [formGroup]="$any(formGroup.controls.range)" [rangePicker]="picker">
+          <input matStartDate formControlName="start" placeholder="Start date">
+          <input matEndDate formControlName="end" placeholder="End date">
+        </mat-date-range-input>
+        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      
+        @if ($any(formGroup.controls.range)?.controls?.start.hasError('matStartDateInvalid')) {
+          <mat-error>Invalid start date</mat-error>
+        }
+        @if ($any(formGroup.controls.range)?.controls?.end.hasError('matEndDateInvalid')) {
+          <mat-error>Invalid end date</mat-error>
+        }
+      </mat-form-field>
+</form>

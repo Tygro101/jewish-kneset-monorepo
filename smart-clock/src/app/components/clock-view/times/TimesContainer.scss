@@ -1,0 +1,33 @@
+.times-content {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    padding-block-start: 60px;
+
+    .time-wrapper {
+        display: grid;
+        grid-template-rows: auto;
+        align-items: center;
+        inline-size: 100%;
+        block-size: 145px;
+        background: #0E1529;
+        border-radius: 8px;
+        border: 1px solid #9fb1cb57;
+        padding: 12px;
+        direction: rtl;
+
+        .time-title {
+            display: flex;
+            gap: 10px;
+            color: #90a1b9;
+        }
+
+        .time-value {
+            font-family: 'Inconsolata-Regular';
+            font-size: 30px;
+            color: oklch(0.968 0.007 247.896);
+
+        }
+    }
+
+}

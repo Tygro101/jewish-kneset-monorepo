@@ -1,0 +1,15 @@
+<div class="time-containers">
+    <div class="times">
+        <ng-container *ngFor="let key of splicedKeys?.secondSet">
+            <div class="name item">{{_times[key].shortName}}</div>
+            <div class="time item">{{_times[key].date | date:'HH:mm' }}</div>
+        </ng-container>
+    </div>
+    <div class="times">
+        <ng-container *ngFor="let key of splicedKeys?.firstSet">
+            <div class="name item">{{_times[key].shortName}}</div>
+            <div class="time item">{{_times[key].date | date:'HH:mm' }}</div>
+        </ng-container>
+    </div>
+    <div></div>
+</div>

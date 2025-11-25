@@ -1,7 +1,7 @@
 import { addMilliseconds, differenceInMilliseconds, subMilliseconds } from "date-fns";
 import { HDate } from '@hebcal/core'
 import { TypedMap } from "../models/shared-models";
-import * as ShaaFactors from "../time-calculation/consts";
+import * as ShaaFactors from "../constants/calculations";
 import { TzetCochavimGeonimKey, TzetCochavimRabinoTamKey, AlotHaShaharKey, TallitAndTefillinKey, SofShemaMagenAvrahamKey, SofBirkotKeriatShemaMagenAvrahamKey, SofShemaGraKey, SofBirkotKeriatShemaGraKey, MinchaGdolaKey, MinchaKtanaKey, PlagMinchaKey, TzetShabatKey, TzetTzumKatanKey, NerotShabatKey, TzetTzumGadolKey } from "../constants/times.keys";
 
 

@@ -17,7 +17,8 @@ export default defineConfig({
     open: false,
     port: 3001, 
     fs: {
-      allow: ['../shared/src', "./src"]
+      // Allow access to the monorepo shared folder and the project root/src
+      allow: [shardFolderDir, rootDir, resolve(__dirname)]
     }
   },
   build: {

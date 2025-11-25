@@ -1,12 +1,12 @@
 import { addMilliseconds, differenceInMilliseconds, parse, subMilliseconds, setMonth, setDay } from "date-fns";
 import { excludeHagName, msToMinute, tzum } from "./help.methods";
-import * as ShaaFactors from "./consts";
+import * as ShaaFactors from "../constants/calculations";
 import { TypedMap, TimesHolder, CitiesEnum } from "../models/shared-models";
 import { getSunCalc } from "./timeCalculations";
 import { HebrewCalendar, HDate, Location, Event, gematriya, OmerEvent, CalOptions, Locale } from '@hebcal/core';
 import * as Hebcal from "hebcal";
 import { omerTodayIs, HDate as hebcalDate } from '@hebcal/hdate';
-import { cities } from "./consts";
+
 
 const temp = new HDate(setDay(setMonth(new Date(), 5), 12))
 const calendar = HebrewCalendar.calendar({

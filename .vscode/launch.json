@@ -10,6 +10,13 @@
             "name": "smart-clock",
             "url": "http://localhost:3001",
             "webRoot": "${workspaceFolder}/smart-clock"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "new dashboard",
+            "url": "http://localhost:4200",
+            "webRoot": "${workspaceFolder}/smart-clock"
         }
     ]
 }

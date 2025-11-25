@@ -2,11 +2,13 @@ import { TimeDataHolder, TimesHolder, TypedMap, CitiesEnum } from "./shared-mode
 import { HebrewCalendar, HDate, Location, Event, DailyLearning, flags } from '@hebcal/core';
 import '@hebcal/learning';
 import { getTimes, GetTimesResult } from 'sunCalc';
-import { cities, nameConfiguration, shortNameConfiguration, timeOrderConfiguration } from "../time-calculation/consts";
+
 import { calcAlotAshahar, calcGraSofBirkotShema, calcGraSofShema, calcMagenAvrahamSofBirkotKeriatShema, calcMagenAvrahamSofShema, calcMinchaGdola, calcMinchaKtana, calcNerotShabat, calcPlagMincha, calcShaaZmanit, calcShaaZmanitAroch, calcShaaZmanitMagenAvraham, calcTallitAndTefillin, calcTzetCochavimGeonim, calcTzetCochavimRabbenuTam, CalcTzetTzumKatan, calcTzetShabat, CalcTzetTzumGadol } from "../methods/calculation.methods";
 import { AlotHaShaharKey, ChatzotLailahKey, ChatzotYomKey, NetzKey, ShkiahKey, TzetCochavimGeonimKey } from "../constants/times.keys";
 import { DefaultOptions } from "../constants/calendar.options";
-import { subDays } from "date-fns";
+import { addDays, subDays } from "date-fns";
+import { TimeResponse } from "../../../../../models/times";
+import { shortNameConfiguration, cities, nameConfiguration, timeOrderConfiguration } from "../constants/calculations";
 
 
 
@@ -27,12 +29,13 @@ export class ZmaniAiom {
 
 
 
-    calculateTimes(): TypedMap<TimeDataHolder> {
+    calculateTimes(): TypedMap<TimeResponse> {
         const calendar = HebrewCalendar.calendar({
             ...DefaultOptions,
             start: this.date,
             end: this.date,
         })
+        console.log(shortNameConfiguration);
         //const learning = DailyLearning.lookup('dafYomi', this.hebCalDay, true);
         //const mishnaYomi = DailyLearning.lookup('mishnaYomi', this.hebCalDay, true);
         //const rambam1 = DailyLearning.lookup('rambam1', this.hebCalDay, true);
@@ -40,7 +43,7 @@ export class ZmaniAiom {
         this.setTimeData(this.zmanim.sunriseEnd, NetzKey, this.dayTimes);
         this.setTimeData(this.zmanim.sunset, ShkiahKey, this.dayTimes);
         this.setTimeData(this.zmanim.solarNoon, ChatzotYomKey, this.dayTimes);
-        this.setTimeData(this.zmanim.nadir, ChatzotLailahKey, this.dayTimes);
+        this.setTimeData(addDays(this.zmanim.nadir, 1), ChatzotLailahKey, this.dayTimes);
 
         this.shaaZmanit = calcShaaZmanit(this.zmanim.sunset, this.zmanim.sunriseEnd);
         this.addToDayTimes(calcTzetCochavimGeonim(this.zmanim.sunset, this.shaaZmanit));
@@ -80,15 +83,20 @@ export class ZmaniAiom {
                 this.addToDayTimes(CalcTzetTzumGadol(this.dayTimes?.[ShkiahKey].date, this.shaaZmanit));
             }
         });
-        return this.dayTimes;
+        return Object.keys(this.dayTimes).reduce((res: TypedMap<TimeResponse>, key)=>{
+            res[key] = {date: this.dayTimes[key].date.toISOString(), name: this.dayTimes[key].name, shortName: this.dayTimes[key].shortName as string };
+            return res;
+        }, {});
     }
 
     private getSunCalc(date: Date, city: string) {
         const cityLatLan = cities[city];
-        return getTimes(date, cityLatLan.lat, cityLatLan.long);
+        return getTimes(date, cityLatLan.lat, cityLatLan.long, cityLatLan.elevation ?? 0);
     }
 
-    private setTimeData(date: Date, key: string, dayTimes: TimesHolder) {
+    private setTimeData(date: Date, key: string, dayTimes: TimesHolder): void {
+        if(!shortNameConfiguration[key]) console.log(`no short name ${key}`);
+        if(!nameConfiguration[key]) console.log(`no name ${key}`);
         dayTimes[key] = { date: date, name: nameConfiguration[key], shortName: shortNameConfiguration[key], order: timeOrderConfiguration[key] };
     }
 

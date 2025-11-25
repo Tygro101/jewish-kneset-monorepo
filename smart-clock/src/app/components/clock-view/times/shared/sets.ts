@@ -21,12 +21,12 @@ const generateMorningSets = (): { map: MapProp, isEnabled: IsEnabled } => {
         return false;
     }
     const map: MapProp = new Map();
-    map.set(AlotHaShaharKey, { format: defaultFormat, title: '' });
-    map.set(NetzKey, { format: defaultFormat, title: '' });
-    map.set(SofShemaMagenAvrahamKey, { format: defaultFormat, title: '' });
-    map.set(SofShemaGraKey, { format: defaultFormat, title: '' });
-    map.set(SofBirkotKeriatShemaMagenAvrahamKey, { format: defaultFormat, title: '' });
-    map.set(SofBirkotKeriatShemaGraKey, { format: defaultFormat, title: '' });
+    map.set(AlotHaShaharKey, { format: defaultFormat, key: '' });
+    map.set(NetzKey, { format: defaultFormat, key: '' });
+    map.set(SofShemaMagenAvrahamKey, { format: defaultFormat, key: '' });
+    map.set(SofShemaGraKey, { format: defaultFormat, key: '' });
+    map.set(SofBirkotKeriatShemaMagenAvrahamKey, { format: defaultFormat, key: '' });
+    map.set(SofBirkotKeriatShemaGraKey, { format: defaultFormat, key: '' });
     return { map, isEnabled };
 }
 
@@ -41,10 +41,10 @@ const generateNoonSets = (): { map: MapProp, isEnabled: IsEnabled } => {
         return false;
     }
     const map: MapProp = new Map();
-    map.set(ChatzotYomKey, { format: defaultFormat, title: '' });
-    map.set(MinchaGdolaKey, { format: defaultFormat, title: '' });
-    map.set(PlagMinchaKey, { format: defaultFormat, title: '' });
-    map.set(TzetCochavimGeonimKey, { format: defaultFormat, title: '' });
+    map.set(ChatzotYomKey, { format: defaultFormat, key: '' });
+    map.set(MinchaGdolaKey, { format: defaultFormat, key: '' });
+    map.set(PlagMinchaKey, { format: defaultFormat, key: '' });
+    map.set(TzetCochavimGeonimKey, { format: defaultFormat, key: '' });
     return { map, isEnabled };
 }
 

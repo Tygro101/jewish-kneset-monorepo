@@ -1,0 +1,41 @@
+.time-containers {
+    inline-size: 100%;
+    block-size: auto;
+    border-radius: 5px;
+    font-size: var(--time-size);
+    background: var(--secondary-background);
+    color: var(--base-font-color);
+    font-family: Roboto-Mono;
+    font-weight: 600;
+    box-shadow: var(--shadow-color) 0px 2px 8px 0px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 10px;
+
+    .times {
+        padding: 5px;
+        display: grid;
+        grid-template-columns: 1fr 0.4fr;
+
+        .time {
+            justify-content: center;
+            &:last-child {
+                border-bottom: none; // Remove border for the last item
+            }
+        }
+
+        .name {
+            padding-inline: 10px;
+            &:nth-last-child(-n+2) {
+                border-bottom: none; // Remove border for the last two items
+            }
+        }
+
+        .item{
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            display: flex;
+            align-items: center;
+            block-size: 35px;
+        }
+    }
+}

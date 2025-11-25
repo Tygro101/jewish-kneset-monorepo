@@ -1,8 +1,9 @@
 import { ZmaniAiom } from "../models/zmani-aiom";
 import { CitiesEnum } from "../models/shared-models";
 
-onmessage = (event) => {
-    console.log(event);
-    const timesObject = new ZmaniAiom({date: new Date(), city: CitiesEnum.NETIVOT_NEVA_SHARON});
-    postMessage(timesObject.calculateTimes());
-  };
+onmessage = (event: { data:{data: { date: Date, location: CitiesEnum }} }) => {
+  console.log(event);
+  const data = event.data.data;
+  const timesObject = new ZmaniAiom({ date: data.date, city: data.location });
+  postMessage(timesObject.calculateTimes());
+};

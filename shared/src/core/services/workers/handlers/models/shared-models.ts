@@ -14,6 +14,8 @@ export enum CitiesEnum {
     times: TimesHolder,
     dayTitles: TitlesHolder
   }
+
+  export type TypedMap<T> = {[key: string]: T};
   
   export type TimesHolder = { [key: string]: TimeDataHolder };
   

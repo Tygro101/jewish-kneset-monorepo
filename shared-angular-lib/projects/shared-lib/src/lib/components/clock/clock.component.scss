@@ -1,0 +1,14 @@
+.clock {
+    inline-size: 100%;
+    block-size: 100%;
+    border-radius: 5px;
+    font-size: var(--clock-font-size);
+    background: var(--secondary-background);
+    color: var(--base-font-color);
+    font-family: Roboto-Mono;
+    display: flex;
+    font-weight: 600;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-color) 0px 2px 8px 0px;
+}

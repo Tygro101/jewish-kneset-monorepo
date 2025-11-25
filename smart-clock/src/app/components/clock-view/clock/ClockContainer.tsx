@@ -14,14 +14,12 @@ export const ClockContainer = (props: any) => {
         return () => {
             clearInterval(handle);
         }
-    }, [])
+    }, []);
+    const hours = currentDate.getHours().toString().padStart(2, '0');
+    const minutes = currentDate.getMinutes().toString().padStart(2, '0');
+    const seconds = currentDate.getSeconds().toString().padStart(2, '0');
 
     return <div className="clock-content">
-        <div className="hours">{format(currentDate, 'HH')}</div>
-        <div>:</div>
-        <div className="minutes">{format(currentDate, 'mm')}</div>
-        <div className="seconds-divider">:</div>
-        <div className="seconds">{format(currentDate, 'ss')}</div>
-
+        {hours}:{minutes}:{seconds}
     </div>
 }

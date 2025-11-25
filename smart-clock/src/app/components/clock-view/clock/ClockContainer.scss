@@ -1,13 +1,15 @@
 .clock-content{
-    font-family: Nexa-Bold;
+   font-family: 'Inconsolata-SemiBold';
     height: fit-content;
     //padding: 10px 15px;
-    background: #795548;
-    color: white;
+    //background: #795548;
+    color: #5ee9b5;
+    white-space: nowrap;
     border-radius: 3px;
     letter-spacing: 3px;
-    font-size: 20rem;
+    font-size: 8rem;
     display: grid;
     grid-template-columns: min-content min-content min-content min-content min-content;
     gap: 2px;
+    font-weight: bold;
 }

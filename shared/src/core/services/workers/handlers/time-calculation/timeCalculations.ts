@@ -10,7 +10,7 @@ import { getTimes } from 'sunCalc';
 
 import * as Hebcal from "hebcal";
 import { add, addDays, addMilliseconds, differenceInMilliseconds, parse, subDays, subMilliseconds } from 'date-fns';
-import { cities, hagFilter, hagNaming, titlesOrderConfiguration, nameConfiguration, shortNameConfiguration, timeOrderConfiguration, RABINO_TAM_FACTOR, GEONIM_FACTOR, ALOT_ASHAHAR_FACTOR, TALLIT_TEFILLIN_FACTOR, MAGEN_AVRAHAM_TFILA_FACTOR, MAGEN_AVRAHAM_SHMA_FACTOR, GRA_SHEMA_FACTOR, GRA_TFILA_FACTOR, MINCHA_GDOLA, MINCHA_KETANA, PLAG_MINCHA, NEROT_SHABAT, TZET_SHABAT, TZET_TZUM, tzumList } from './consts';
+import { cities, hagFilter, hagNaming, titlesOrderConfiguration, nameConfiguration, shortNameConfiguration, timeOrderConfiguration, RABINO_TAM_FACTOR, GEONIM_FACTOR, ALOT_ASHAHAR_FACTOR, TALLIT_TEFILLIN_FACTOR, MAGEN_AVRAHAM_TFILA_FACTOR, MAGEN_AVRAHAM_SHMA_FACTOR, GRA_SHEMA_FACTOR, GRA_TFILA_FACTOR, MINCHA_GDOLA, MINCHA_KETANA, PLAG_MINCHA, NEROT_SHABAT, TZET_SHABAT, TZET_TZUM, tzumList } from '../constants/calculations';
 import { DayTimes, TimeDataHolder, TimesHolder, TitlesHolder, CitiesEnum } from '../models/shared-models';
 import { getDayName, excludeHagName, msToMinute, tzum } from './help.methods';
 import { getHag, getParasha } from './calc.methods';
@@ -58,7 +58,7 @@ export const calcDayTitles = (hebCalDay: any, city: string): TitlesHolder => {
     console.log(month);
     console.log(molad);
     console.log(MoladTitles.molad.replace('${חודש}', month.getName(('h')).replace('${זמן}', '54')))
-    setTitleData(titles,  MoladTitles.molad.replace('${חודש}', month.getName(('h')).replace('${זמן}', '54')), 'molad', "SMALL");
+    setTitleData(titles, MoladTitles.molad.replace('${חודש}', month.getName(('h')).replace('${זמן}', '54')), 'molad', "SMALL");
 
   }
   return titles;
