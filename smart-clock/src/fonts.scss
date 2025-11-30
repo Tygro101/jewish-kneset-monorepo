@@ -55,37 +55,49 @@
 }
 
 @font-face {
-    font-family: 'Inconsolata-ExtraBold';
-    src: local('Inconsolata-ExtraBold'), url('./assets/fonts/Inconsolata/Inconsolata-ExtraBold.ttf') format('truetype');
-    font-weight: 800;
-}
-
-@font-face {
-    font-family: 'Inconsolata-Black';
-    src: local('Inconsolata-Black'), url('./assets/fonts/Inconsolata/Inconsolata-Black.ttf') format('truetype');
-    font-weight: 900;
-}
-
-@font-face {
-    font-family: 'Inconsolata-Medium';
-    src: local('Inconsolata-Medium'), url('./assets/fonts/Inconsolata/Inconsolata-Medium.ttf') format('truetype');
-    font-weight: 500;
-}
-
-@font-face {
-    font-family: 'Inconsolata-Regular';
+    font-family: 'Inconsolata';
     src: local('Inconsolata-Regular'), url('./assets/fonts/Inconsolata/Inconsolata-Regular.ttf') format('truetype');
     font-weight: 400;
 }
 
 @font-face {
-    font-family: 'Inconsolata-Light';
+    font-family: 'Inconsolata';
+    src: local('Inconsolata-Medium'), url('./assets/fonts/Inconsolata/Inconsolata-Medium.ttf') format('truetype');
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: 'Inconsolata';
+    src: local('Inconsolata-SemiBold'), url('./assets/fonts/Inconsolata/Inconsolata-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+}
+
+@font-face {
+    font-family: 'Inconsolata';
+    src: local('Inconsolata-Bold'), url('./assets/fonts/Inconsolata/Inconsolata-Bold.ttf') format('truetype');
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: 'Inconsolata';
+    src: local('Inconsolata-ExtraBold'), url('./assets/fonts/Inconsolata/Inconsolata-ExtraBold.ttf') format('truetype');
+    font-weight: 800;
+}
+
+@font-face {
+    font-family: 'Inconsolata';
+    src: local('Inconsolata-Black'), url('./assets/fonts/Inconsolata/Inconsolata-Black.ttf') format('truetype');
+    font-weight: 900;
+}
+
+@font-face {
+    font-family: 'Inconsolata';
     src: local('Inconsolata-Light'), url('./assets/fonts/Inconsolata/Inconsolata-Light.ttf') format('truetype');
     font-weight: 300;
 }
 
 @font-face {
-    font-family: 'Inconsolata-ExtraLight';
+    font-family: 'Inconsolata';
     src: local('Inconsolata-ExtraLight'), url('./assets/fonts/Inconsolata/Inconsolata-ExtraLight.ttf') format('truetype');
     font-weight: 200;
 }

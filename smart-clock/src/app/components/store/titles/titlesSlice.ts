@@ -1,10 +1,8 @@
 import { createAsyncThunk, createSlice, AsyncThunk } from "@reduxjs/toolkit"
 import { TitlesState } from "./titlesState";
 import { WebWorkerManager } from "@shared/core/services/workers/webWorkerManager.service";
-import { CitiesEnum, IClockTitle } from "@shared/core/services/workers/handlers/models/shared-models";
-import { TypedMap } from "@shared/models/shared";
+import { CitiesEnum, IClockTitle, TypedMap } from "@shared/core/services/workers/handlers/models/shared-models";
 import { StateKeys } from "../../../store.models";
-import { TitlesKeys } from '@shared/core/services/workers/handlers/models/titles-of-aiom';
 
 import { enableMapSet } from 'immer';
 

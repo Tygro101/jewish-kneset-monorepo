@@ -35,3 +35,26 @@ export const NerotYomTovKey = 'nerotYomTovKey';
 export const TzetShabatKey = 'tzetShabat';
 export const TzetTzumKatanKey = 'tzetTzumKatan';
 export const TzetTzumGadolKey = 'tzetTzumGadol';
+
+export enum TimesKeys {
+	TzetCochavimGeonim = 'tzetCochavimGeonim',
+	TzetCochavimRabinoTam = 'tzetCochavimRabinoTam',
+	Netz = 'netz',
+	Shkiah = 'shkiah',
+	ChatzotYom = 'chatzotYom',
+	ChatzotLailah = 'chatzotLailah',
+	AlotHaShahar = 'alotHaShahar',
+	TallitAndTefillin = 'TallitAndTefillinKey',
+	SofShemaMagenAvraham = 'SofShemaMagenAvraham',
+	SofBirkotKeriatShemaMagenAvraham = 'SofBirkotKeriatShemaMagenAvraham',
+	SofShemaGra = 'sofShemaGra',
+	SofBirkotKeriatShemaGra = 'SofBirkotKeriatShemaGra',
+	MinchaGdola = 'minchaGdola',
+	MinchaKtana = 'minchaKtana',
+	PlagMincha = 'plagMincha',
+	NerotShabat = 'nerotShabatKey',
+	NerotYomTov = 'nerotYomTovKey',
+	TzetShabat = 'tzetShabat',
+	TzetTzumKatan = 'tzetTzumKatan',
+	TzetTzumGadol = 'tzetTzumGadol'
+}

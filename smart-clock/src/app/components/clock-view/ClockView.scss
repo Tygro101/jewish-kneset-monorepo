@@ -2,13 +2,22 @@
   height: 100vh;
   width: 100%;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   background: #020618;
   padding-block: 50px;
   padding-inline: 40px;
 
   .header {
-    font-size: 10rem;
+    font-size: clamp(4rem, 8vw + 2rem, 12rem);
+  }
+
+  .center-container {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+
+    .center-title {
+      color: #e2e8f0;
+    }
   }
 
   .main-time-container {
@@ -17,7 +26,7 @@
     grid-template-columns: auto;
     gap: 10px;
     border-bottom: solid 1px #314158;
-    padding-block-end: 60px;
+    padding-block-end: 36px;
 
     .date {
       color: #90a1b9;
@@ -26,7 +35,8 @@
     }
 
     .main {
-      font-family: 'Inconsolata-SemiBold';
+      font-family: 'Inconsolata', monospace;
+      font-weight: 600;
       display: flex;
       align-content: center;
       overflow: hidden;
@@ -34,7 +44,13 @@
       margin-inline-end: auto;
       margin-inline-start: auto;
     }
+
+
+
   }
 
-
+  .titles {
+    overflow-y: hidden;
+    overflow-x: hidden;
+  }
 }

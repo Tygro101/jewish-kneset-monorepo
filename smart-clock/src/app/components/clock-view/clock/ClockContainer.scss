@@ -1,5 +1,5 @@
 .clock-content{
-   font-family: 'Inconsolata-SemiBold';
+   font-family: 'Inconsolata';
     height: fit-content;
     //padding: 10px 15px;
     //background: #795548;
@@ -7,9 +7,8 @@
     white-space: nowrap;
     border-radius: 3px;
     letter-spacing: 3px;
-    font-size: 8rem;
+    font-size: clamp(6rem, 6vw + 2rem, 10rem);
     display: grid;
     grid-template-columns: min-content min-content min-content min-content min-content;
     gap: 2px;
-    font-weight: bold;
 }

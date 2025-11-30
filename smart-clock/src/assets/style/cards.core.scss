@@ -16,17 +16,17 @@
     .column-card-name {
         font-family: Frank-Bold;
         color: #1a1a1a;
-        font-size: 14px;
+        font-size: clamp(12px, 1.6vw, 14px);
 
         .column-card-description {
             font-family: Frank-SemiBold;
-            font-size: 12px;
+            font-size: clamp(10px, 1.2vw, 12px);
             color: #525252;
         }
     }
 
     .column-card-time {
-        font-size: 14px;
+        font-size: clamp(12px, 1.6vw, 14px);
         font-family: Frank-SemiBold;
         color: #ff6a00;
         padding: 0 2px;

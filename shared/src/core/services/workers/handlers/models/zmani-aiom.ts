@@ -8,7 +8,7 @@ import { AlotHaShaharKey, ChatzotLailahKey, ChatzotYomKey, NetzKey, ShkiahKey, T
 import { DefaultOptions } from "../constants/calendar.options";
 import { addDays, subDays } from "date-fns";
 import { TimeResponse } from "../../../../../models/times";
-import { shortNameConfiguration, cities, nameConfiguration, timeOrderConfiguration } from "../constants/calculations";
+import { shortNameConfiguration, cities, nameConfiguration, timeOrderConfiguration, generalNameConfiguration } from "../constants/calculations";
 
 
 
@@ -16,9 +16,9 @@ export class ZmaniAiom {
     private hebCalDay: HDate;
     private zmanim: GetTimesResult;
     private dayTimes: TypedMap<TimeDataHolder> = {};
-    private shaaZmanit: number;
-    private shaaZmanitAroch: number;
-    private shaaZmanitMagenAvraham: number;
+    private shaaZmanit!: number;
+    private shaaZmanitAroch!: number;
+    private shaaZmanitMagenAvraham!: number;
     private date: Date;
 
     constructor({ date, city = CitiesEnum.NETIVOT_NEVA_SHARON }: { date: Date, city?: string }) {
@@ -35,7 +35,7 @@ export class ZmaniAiom {
             start: this.date,
             end: this.date,
         })
-        console.log(shortNameConfiguration);
+        //console.log(shortNameConfiguration);
         //const learning = DailyLearning.lookup('dafYomi', this.hebCalDay, true);
         //const mishnaYomi = DailyLearning.lookup('mishnaYomi', this.hebCalDay, true);
         //const rambam1 = DailyLearning.lookup('rambam1', this.hebCalDay, true);
@@ -47,7 +47,6 @@ export class ZmaniAiom {
 
         this.shaaZmanit = calcShaaZmanit(this.zmanim.sunset, this.zmanim.sunriseEnd);
         this.addToDayTimes(calcTzetCochavimGeonim(this.zmanim.sunset, this.shaaZmanit));
-
 
         this.shaaZmanitAroch = calcShaaZmanitAroch(this.zmanim.sunriseEnd, this.dayTimes?.[TzetCochavimGeonimKey].date, this.shaaZmanit);
 
@@ -84,7 +83,7 @@ export class ZmaniAiom {
             }
         });
         return Object.keys(this.dayTimes).reduce((res: TypedMap<TimeResponse>, key)=>{
-            res[key] = {date: this.dayTimes[key].date.toISOString(), name: this.dayTimes[key].name, shortName: this.dayTimes[key].shortName as string };
+            res[key] = {date: this.dayTimes[key].date.toISOString(), name: this.dayTimes[key].name, generalName:  this.dayTimes[key].generalName, shortName: this.dayTimes[key].shortName as string };
             return res;
         }, {});
     }
@@ -97,7 +96,7 @@ export class ZmaniAiom {
     private setTimeData(date: Date, key: string, dayTimes: TimesHolder): void {
         if(!shortNameConfiguration[key]) console.log(`no short name ${key}`);
         if(!nameConfiguration[key]) console.log(`no name ${key}`);
-        dayTimes[key] = { date: date, name: nameConfiguration[key], shortName: shortNameConfiguration[key], order: timeOrderConfiguration[key] };
+        dayTimes[key] = { date: date, name: nameConfiguration[key], shortName: shortNameConfiguration[key], generalName: generalNameConfiguration[key], order: timeOrderConfiguration[key] };
     }
 
     private addToDayTimes(res: TypedMap<Date>): void {

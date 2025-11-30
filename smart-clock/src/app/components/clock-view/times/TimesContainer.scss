@@ -3,16 +3,17 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
     padding-block-start: 60px;
+    direction: rtl;
 
     .time-wrapper {
         display: grid;
         grid-template-rows: auto;
         align-items: center;
         inline-size: 100%;
-        block-size: 145px;
+        block-size: 120px;
         background: #0E1529;
-        border-radius: 8px;
-        border: 1px solid #9fb1cb57;
+        border-radius: 14px;
+        border: 1px solid #8795a857;
         padding: 12px;
         direction: rtl;
 
@@ -23,10 +24,31 @@
         }
 
         .time-value {
-            font-family: 'Inconsolata-Regular';
-            font-size: 30px;
-            color: oklch(0.968 0.007 247.896);
+            direction: rtl;
+            font-family: 'Inconsolata';
+            font-size: clamp(14px, 4.2vw, 22px);
+            color: #e2e8f0;
 
+        }
+    }
+
+    .current {
+        .time-wrapper {
+            background: linear-gradient(to right bottom, oklab(0.596 -0.13883 0.041849 / 0.4) 0%, oklab(0.508 -0.114299 0.0293215 / 0.4) 100%);
+            border-color: oklab(0.696 -0.162114 0.0511765 / 0.6);
+        }
+
+
+        .time-title {
+            color: var(--color-emerald-200);
+
+            svg {
+                color: var(--color-emerald-300);
+            }
+        }
+
+        .time-value {
+            color: var(--color-emerald-100);
         }
     }
 

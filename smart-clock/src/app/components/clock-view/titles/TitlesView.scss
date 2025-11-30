@@ -1,0 +1,21 @@
+.titles-container {
+    display: grid;
+    grid-template-rows: 1fr;
+    gap: 18px;
+    padding-block: 32px;
+
+    .title {
+        color: #e2e8f0;
+        font-size: 20px;
+        font-weight: 500;
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        font-family: 'Inconsolata', monospace;
+        .icon{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}

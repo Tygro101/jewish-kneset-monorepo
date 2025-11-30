@@ -50,7 +50,7 @@ export const calcAlotAshahar = (sunriseEnd: Date, shaaZmanitAroch: number): Type
 
 // zman Tallit and Tefillin
 export const calcTallitAndTefillin = (sunriseEnd: Date, shaaZmanitAroch: number): TypedMap<Date> => {
-    return { [TallitAndTefillinKey]: subMilliseconds(sunriseEnd, shaaZmanitAroch * ShaaFactors.TALLIT_TEFILLIN_FACTOR) }
+    return { [TallitAndTefillinKey]: subMilliseconds(sunriseEnd, ShaaFactors.TALLIT_TEFILLIN_FACTOR) }
 }
 
 // sof shema

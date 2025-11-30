@@ -33,11 +33,13 @@ export enum CitiesEnum {
     date: Date;
     name: string;
     shortName?: string;
+    generalName?: string;
     highlight?: boolean;
     order: number;
   }
 
-  export interface IClockTitle{
+  export interface IClockTitle {
     date: Date;
+    prefix?: string;
     title: string;
   }

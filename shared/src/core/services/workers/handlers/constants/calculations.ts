@@ -87,12 +87,19 @@ export const shortNameConfiguration: { [key: string]: string } = {
     [ChatzotLailahKey]: "חצות לילה"
 }
 
+export const generalNameConfiguration: { [key: string]: string } = {
+    [SofShemaMagenAvrahamKey]: 'סוף זמן ק"ש',
+    [SofShemaGraKey]: 'סוף זמן ק"ש',
+    [SofBirkotKeriatShemaMagenAvrahamKey]:'ס"ז תפילה',
+    [SofBirkotKeriatShemaGraKey]: 'ס"ז תפילה',
+}
+
 
 export const MILLISECONDS: number = 1000;
 export const GEONIM_FACTOR: number = 0.225;
 export const RABINO_TAM_FACTOR: number = 1.2;
 export const ALOT_ASHAHAR_FACTOR: number = 1.2;
-export const TALLIT_TEFILLIN_FACTOR: number = 1.1;
+export const TALLIT_TEFILLIN_FACTOR: number = 60 * 60 * MILLISECONDS;
 export const MAGEN_AVRAHAM_SHMA_FACTOR: number = 3; // the day starts from alot ashahar.
 export const GRA_SHEMA_FACTOR: number = 3; // the day starts from anitz.
 export const MAGEN_AVRAHAM_TFILA_FACTOR: number = 4; // the day starts from alot ashahar.

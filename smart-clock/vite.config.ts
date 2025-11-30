@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { resolve } from 'path';
 
 const shardFolderDir = resolve(__dirname, "..","shared","src");
+const shardReactFolderDir = resolve(__dirname, "..","shared-react","src");
 const rootDir = resolve(__dirname,"src");
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,7 +11,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@root": rootDir,
-      "@shared":  shardFolderDir
+      "@shared":  shardFolderDir,
+      "@shared-react": shardReactFolderDir
     }
   },
   server: {

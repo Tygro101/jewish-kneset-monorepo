@@ -1,0 +1,30 @@
+.icon-button {
+    border-radius: 50%;
+
+    background: var(--color-emerald-100);
+    block-size: 24px;
+    inline-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: oklab(0.696 -0.162114 0.0511766 / 0.3);
+
+    &:active {
+        opacity: 0.6;
+    }
+
+    .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        svg {
+            color: var(--color-emerald-400);
+            block-size: 18px;
+            inline-size: 18px;
+        }
+
+
+    }
+
+}
