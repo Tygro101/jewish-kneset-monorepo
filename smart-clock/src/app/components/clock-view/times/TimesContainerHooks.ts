@@ -21,6 +21,9 @@ const timesMap: TypedObjectMap<TimesMap> = {
         { main: TimesKeys.Netz },
         { main: TimesKeys.SofShemaMagenAvraham, additions: [TimesKeys.SofShemaGra] },
         { main: TimesKeys.SofBirkotKeriatShemaMagenAvraham, additions: [TimesKeys.SofBirkotKeriatShemaGra] },
+        { main: TimesKeys.ChatzotYom },
+        { main: TimesKeys.MinchaGdola },
+        { main: TimesKeys.MinchaKtana },
     ],
     [AFTER_NOON_KEY]: [
         { main: TimesKeys.ChatzotYom },
@@ -29,6 +32,8 @@ const timesMap: TypedObjectMap<TimesMap> = {
         { main: TimesKeys.PlagMincha },
         { main: TimesKeys.Shkiah },
         { main: TimesKeys.TzetCochavimGeonim, additions: [TimesKeys.TzetCochavimRabinoTam] },
+        { main: TimesKeys.TzetShabat, additions: [TimesKeys.TzetCochavimRabinoTam] },
+        { main: TimesKeys.ChatzotLailah}
     ]
 };
 
@@ -41,7 +46,7 @@ export const getRelevantKey = (times: TimeState): TimesMap => {
             const sofDate = new Date(sofItem.date);
             const threshold = new Date(sofDate.getTime() + 40 * 60 * 1000); // +40 minutes
             if (now > threshold) {
-                return timesMap[AFTER_NOON_KEY];
+                return timesMap[MORNING_KEY];
             }
         }
     } catch (e) {

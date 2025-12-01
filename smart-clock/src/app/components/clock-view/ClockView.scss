@@ -17,6 +17,27 @@
 
     .center-title {
       color: #e2e8f0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      .view-position {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        .dot {
+          display: block;
+          background: var(--color-slate-600);
+          border-radius: 50%;
+          inline-size: 8px;
+          block-size: 8px;
+
+          &-selected{
+            background: var(--color-emerald-600);
+          }
+        }
+       
+        
+      }
+
     }
   }
 

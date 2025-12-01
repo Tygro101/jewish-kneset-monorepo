@@ -47,15 +47,15 @@ export const TimesContainer = (props: TimesProps) => {
                     <div className="time-wrapper">
                         <div className="time-title">
                             <div className="icon" style={{ color: iconObj.color }} dangerouslySetInnerHTML={{ __html: iconObj.icon }} />
-                            <div className="title">{props.times[item.main].generalName || props.times[item.main].name} </div>
+                            <div className="title">{props.times[item.main]?.generalName || props.times[item.main]?.name} </div>
                         </div>
                         <div className="time-value">
                             <div>
-                                {format(new Date(props.times[item.main].date), 'hh:mm:ss')}
+                                {props.times[item.main]?.date && format(new Date(props.times[item.main]?.date), 'hh:mm:ss')}
                             </div>
                             {item.additions && item.additions?.filter(key => !!props.times[key]).map((key) => {
                                 return <div>
-                                    {format(new Date(props.times[key].date), 'hh:mm:ss')}
+                                    {format(new Date(props.times[key]?.date), 'hh:mm:ss')}
                                 </div>
                             })}
 
