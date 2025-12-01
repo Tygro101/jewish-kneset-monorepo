@@ -1,8 +1,8 @@
 .times-content {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
-    padding-block-start: 60px;
+    gap: calc(30px * var(--ui-scale));
+    padding-block-start: calc(80px * var(--ui-scale));
     direction: rtl;
 
     .time-wrapper {
@@ -10,23 +10,32 @@
         grid-template-rows: auto;
         align-items: center;
         inline-size: 100%;
-        block-size: 120px;
+        block-size: calc(140px * var(--ui-scale));
         background: #0E1529;
-        border-radius: 14px;
+        border-radius: calc(14px * var(--ui-scale));
         border: 1px solid #8795a857;
-        padding: 12px;
+        padding: calc(12px * var(--ui-scale));
         direction: rtl;
 
         .time-title {
             display: flex;
-            gap: 10px;
+            font-size: calc(22px * var(--ui-scale));
+            gap: calc(10px * var(--ui-scale));
             color: #90a1b9;
+
+            svg {
+                block-size: calc(25px * var(--ui-scale));
+                inline-size: calc(25px * var(--ui-scale));
+            }
+
         }
 
         .time-value {
+            //display: flex;
+            gap: calc(10px * var(--ui-scale));
             direction: rtl;
             font-family: 'Inconsolata';
-            font-size: clamp(14px, 4.2vw, 22px);
+            font-size: calc(30px * var(--ui-scale));
             color: #e2e8f0;
 
         }

@@ -5,10 +5,9 @@
     //background: #795548;
     color: #5ee9b5;
     white-space: nowrap;
-    border-radius: 3px;
-    letter-spacing: 3px;
-    font-size: clamp(6rem, 6vw + 2rem, 10rem);
+    border-radius: calc(3px * var(--ui-scale));
+    letter-spacing: calc(3px * var(--ui-scale));
+    font-size: calc(160px * var(--ui-scale));
     display: grid;
     grid-template-columns: min-content min-content min-content min-content min-content;
-    gap: 2px;
 }

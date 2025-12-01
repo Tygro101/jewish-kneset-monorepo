@@ -1,0 +1,1 @@
+Start-Process -FilePath 'C:\Users\tayeb\AppData\Local\Android\Sdk\emulator\emulator.exe' -ArgumentList '-avd','13.3inch_API_34' -WindowStyle Hidden; Start-Sleep -Seconds 10; & 'C:\Users\tayeb\AppData\Local\Android\Sdk\platform-tools\adb.exe' devices -l

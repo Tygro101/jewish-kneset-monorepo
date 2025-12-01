@@ -4,11 +4,11 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   background: #020618;
-  padding-block: 50px;
-  padding-inline: 40px;
+  padding-block: calc(50px * var(--ui-scale));
+  padding-inline: calc(40px * var(--ui-scale));
 
   .header {
-    font-size: clamp(4rem, 8vw + 2rem, 12rem);
+    font-size: calc(6rem * var(--ui-scale));
   }
 
   .center-container {
@@ -21,14 +21,14 @@
       grid-template-columns: 1fr auto;
       .view-position {
         display: flex;
-        gap: 5px;
+        gap: calc(6px * var(--ui-scale));
         align-items: center;
         .dot {
           display: block;
           background: var(--color-slate-600);
           border-radius: 50%;
-          inline-size: 8px;
-          block-size: 8px;
+          inline-size: calc(8px * var(--ui-scale));
+          block-size: calc(8px * var(--ui-scale));
 
           &-selected{
             background: var(--color-emerald-600);
@@ -45,12 +45,17 @@
     block-size: fit-content;
     display: grid;
     grid-template-columns: auto;
-    gap: 10px;
-    border-bottom: solid 1px #314158;
-    padding-block-end: 36px;
+    gap: calc(10px * var(--ui-scale));
+    border-bottom: solid calc(1px * var(--ui-scale)) #314158;
+    padding-block-end: calc(36px * var(--ui-scale));
 
     .date {
       color: #90a1b9;
+      font-size: calc(26px * var(--ui-scale));
+      display: flex;
+      gap: calc(10px * var(--ui-scale));
+      align-items: center;
+      justify-content: center;
       text-align: center;
       font-family: 'Noto Sans Hebrew Variable';
     }
@@ -64,6 +69,7 @@
       text-align: center;
       margin-inline-end: auto;
       margin-inline-start: auto;
+      font-size: calc(200px * var(--ui-scale));
     }
 
 

@@ -1,21 +1,29 @@
 .titles-container {
     display: grid;
     grid-template-rows: 1fr;
-    gap: 18px;
-    padding-block: 32px;
+    gap: calc(18px * var(--ui-scale));
+    padding-block: calc(32px * var(--ui-scale));
 
     .title {
         color: #e2e8f0;
-        font-size: 20px;
+        font-size: calc(22px * var(--ui-scale));
         font-weight: 500;
         display: flex;
-        gap: 20px;
+        gap: calc(15px * var(--ui-scale));
         align-items: center;
         font-family: 'Inconsolata', monospace;
-        .icon{
+
+        .icon {
             display: flex;
             align-items: center;
             justify-content: center;
+
+
+            svg {
+                block-size: calc(25px * var(--ui-scale));
+                inline-size: calc(25px * var(--ui-scale));
+            }
+
         }
     }
 }

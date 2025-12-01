@@ -25,7 +25,6 @@ enum ClockCenterViews {
 }
 
 
-
 const netzMap: MapProp = new Map();
 netzMap.set(NetzKey, { key: NetzKey, format: 'H:mm:ss' })
 
@@ -78,11 +77,12 @@ export const ClockView = () => {
 
     return <div className="content-container" >
         <div className="main-time-container">
+            
             <div className="main">
                 <ClockContainer></ClockContainer>
             </div>
             <div className="date">
-                {(titles[TitlesKeys.HebrewDate] as IClockTitle)?.title} - {time.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} 
+                {(titles[TitlesKeys.HebrewDate] as IClockTitle)?.title}   -  {time.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} 
             </div>
         </div>
 

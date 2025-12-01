@@ -53,6 +53,8 @@ export const TimesContainer = (props: TimesProps) => {
                             <div>
                                 {props.times[item.main]?.date && format(new Date(props.times[item.main]?.date), 'hh:mm:ss')}
                             </div>
+                            {//item.additions && item.additions.length && <span>-</span> 
+                            }
                             {item.additions && item.additions?.filter(key => !!props.times[key]).map((key) => {
                                 return <div>
                                     {format(new Date(props.times[key]?.date), 'hh:mm:ss')}
