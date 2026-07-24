@@ -1,64 +1,83 @@
-.times-content {
+.zmanim-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: calc(30px * var(--ui-scale));
-    padding-block-start: calc(80px * var(--ui-scale));
+    grid-template-columns: repeat(var(--zman-cols, 3), 1fr);
+    grid-template-rows: repeat(var(--zman-rows, 2), 1fr);
+    gap: clamp(20px, 4cqmin, 48px);
+    height: 100%;
+    min-height: 0;
     direction: rtl;
+}
 
-    .time-wrapper {
-        display: grid;
-        grid-template-rows: auto;
-        align-items: center;
-        inline-size: 100%;
-        block-size: calc(140px * var(--ui-scale));
-        background: #0E1529;
-        border-radius: calc(14px * var(--ui-scale));
-        border: 1px solid #8795a857;
-        padding: calc(12px * var(--ui-scale));
-        direction: rtl;
+.zman-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: clamp(8px, 4cqmin, 18px);
+    padding: clamp(8px, 2cqmin, 24px);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+    transition: border-color 0.2s;
 
-        .time-title {
-            display: flex;
-            font-size: calc(22px * var(--ui-scale));
-            gap: calc(10px * var(--ui-scale));
-            color: #90a1b9;
+    &.current {
+        background: var(--current-bg);
+        border-color: var(--current-border);
 
-            svg {
-                block-size: calc(25px * var(--ui-scale));
-                inline-size: calc(25px * var(--ui-scale));
-            }
-
+        .zman-name {
+            color: var(--text-primary);
         }
 
-        .time-value {
-            //display: flex;
-            gap: calc(10px * var(--ui-scale));
-            direction: rtl;
-            font-family: 'Inconsolata';
-            font-size: calc(30px * var(--ui-scale));
-            color: #e2e8f0;
-
+        .zman-time-main {
+            color: var(--accent-emerald);
+            text-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
         }
     }
+}
 
-    .current {
-        .time-wrapper {
-            background: linear-gradient(to right bottom, oklab(0.596 -0.13883 0.041849 / 0.4) 0%, oklab(0.508 -0.114299 0.0293215 / 0.4) 100%);
-            border-color: oklab(0.696 -0.162114 0.0511765 / 0.6);
-        }
+.zman-glow {
+    position: absolute;
+    inset: 0;
+    background: var(--current-glow);
+    pointer-events: none;
+}
 
+.zman-name {
+    font-family: var(--font-hebrew);
+    font-weight: 600;
+    font-size: calc(var(--ui-scale) * clamp(18px, min(4cqw, 11cqh), 48px));
+    color: var(--text-secondary);
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 
-        .time-title {
-            color: var(--color-emerald-200);
+.zman-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-            svg {
-                color: var(--color-emerald-300);
-            }
-        }
+.zman-time-main {
+    font-family: var(--font-clock);
+    font-weight: 800;
+    font-size: calc(var(--ui-scale) * clamp(28px, min(6cqw, 20cqh), 96px));
+    color: var(--zman-blue);
+    line-height: 1.1;
+}
 
-        .time-value {
-            color: var(--color-emerald-100);
-        }
-    }
-
+.zman-time-addition {
+    font-family: var(--font-clock);
+    font-weight: 600;
+    font-size: calc(var(--ui-scale) * clamp(16px, min(3.5cqw, 8cqh), 40px));
+    color: var(--text-faint);
+    opacity: 0.6;
+    line-height: 1.2;
 }

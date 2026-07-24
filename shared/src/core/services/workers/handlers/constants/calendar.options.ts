@@ -8,4 +8,7 @@ export const DefaultOptions: CalOptions = {
     il: true,
     locale: 'he',
     molad: true,
+    omer: true,
+    sedrot: true,
+    shabbatMevarchim: true,
 }

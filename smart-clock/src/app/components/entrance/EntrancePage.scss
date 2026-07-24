@@ -1,0 +1,91 @@
+.entrance-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  background: var(--bg-primary, #0b1020);
+  direction: rtl;
+}
+
+.entrance-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 3rem 4rem;
+  border-radius: 1.5rem;
+  background: var(--bg-card, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  backdrop-filter: blur(12px);
+}
+
+.entrance-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--text-primary, #eee);
+  margin: 0;
+}
+
+.entrance-subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary, #aaa);
+  margin: 0;
+}
+
+.entrance-form {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.entrance-input {
+  padding: 0.65rem 1rem;
+  font-size: 1.1rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15));
+  background: var(--bg-input, rgba(0, 0, 0, 0.3));
+  color: var(--text-primary, #eee);
+  outline: none;
+  min-width: 14rem;
+  direction: ltr;
+  text-align: center;
+
+  &:focus {
+    border-color: var(--accent, #6cf);
+    box-shadow: 0 0 0 2px rgba(102, 204, 255, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.entrance-btn {
+  padding: 0.65rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 0.6rem;
+  border: none;
+  background: var(--accent, #6cf);
+  color: #000;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.85;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.entrance-error {
+  color: #f66;
+  font-size: 0.9rem;
+  margin: 0;
+  max-width: 20rem;
+  text-align: center;
+}

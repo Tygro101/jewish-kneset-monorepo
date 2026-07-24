@@ -1,13 +1,41 @@
-.clock-content{
-   font-family: 'Inconsolata';
-    height: fit-content;
-    //padding: 10px 15px;
-    //background: #795548;
-    color: #5ee9b5;
+.clock-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-clock);
+    font-weight: 900;
+    font-size: calc(var(--ui-scale) * clamp(72px, 18vw, 200px));
+    color: var(--accent-emerald);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    text-shadow: 0 0 40px var(--accent-emerald-glow);
     white-space: nowrap;
-    border-radius: calc(3px * var(--ui-scale));
-    letter-spacing: calc(3px * var(--ui-scale));
-    font-size: calc(160px * var(--ui-scale));
-    display: grid;
-    grid-template-columns: min-content min-content min-content min-content min-content;
+    direction: ltr;
+}
+
+.clock-segment {
+    display: inline-block;
+}
+
+.clock-colon {
+    display: inline-block;
+    opacity: 0.4;
+}
+
+.clock-colon.blink {
+    animation: colon-blink 1s step-end infinite;
+}
+
+@keyframes colon-blink {
+    0%, 100% {
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 0.1;
+    }
+}
+
+.clock-content.countdown {
+    color: var(--zman-blue);
+    text-shadow: 0 0 40px var(--accent-emerald-glow);
 }

@@ -1,4 +1,6 @@
 export enum StateKeys {
     Titles = 'titles',
-    Times = 'times'
+    Times = 'times',
+    Config = 'config',
+    Settings = 'settings',
 }

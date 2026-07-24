@@ -42,4 +42,7 @@ export enum CitiesEnum {
     date: Date;
     prefix?: string;
     title: string;
+    /** Consecutive days (incl. today) this title has appeared, capped at 3.
+        1 = new today, 2 = also yesterday, 3 = 3+ days in a row. Used for ranking. */
+    streak?: number;
   }

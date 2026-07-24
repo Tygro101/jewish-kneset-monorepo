@@ -1,9 +1,53 @@
 :root {
-  --ui-scale: 1;
-  --ui-font: calc(16px * var(--ui-scale));
-  --ui-space: calc(8px * var(--ui-scale));
-  
-  --color-amber-400: oklch(.828 .189 84.429);
+  /* ── Typography ── */
+  --font-clock: 'Nunito', sans-serif;
+  --font-hebrew: 'Heebo', sans-serif;
+
+  /* Central UI scale: multiplies every font size. Default ~+20% bump.
+     Acts as the ceiling the JS fit-guard resets to before shrinking to fit. */
+  --ui-scale: 1.2;
+
+  /* ── App Background ── */
+  --app-bg: #080d18;
+
+  /* ── Settings panel background (overridden by applyTheme) ── */
+  --panel-bg: rgba(8, 13, 24, 0.97);
+
+  /* ── Card Surfaces ── */
+  --card-bg: rgba(15, 24, 41, 0.6);
+  --card-bg-strong: rgba(15, 24, 41, 0.8);
+  --card-border: rgba(255, 255, 255, 0.05);
+  --card-border-hover: rgba(255, 255, 255, 0.08);
+  --card-radius: clamp(10px, 1.4vw, 18px);
+  --card-row-divider: rgba(255, 255, 255, 0.03);
+
+  /* ── Accent (Emerald) ── */
+  --accent-emerald: #34d399;
+  --accent-emerald-dim: rgba(52, 211, 153, 0.2);
+  --accent-emerald-glow: rgba(52, 211, 153, 0.3);
+  --accent-emerald-subtle: rgba(52, 211, 153, 0.04);
+  --accent-emerald-border: rgba(52, 211, 153, 0.35);
+
+  /* ── Zman Time Colors ── */
+  --zman-blue: #60a5fa;
+  --zman-blue-featured: #93c5fd;
+
+  /* ── Current Zman Highlight ── */
+  --current-bg: rgba(52, 211, 153, 0.08);
+  --current-border: rgba(52, 211, 153, 0.35);
+  --current-glow: radial-gradient(ellipse at 50% 120%, rgba(52, 211, 153, 0.08) 0%, transparent 70%);
+
+  /* ── Text Tiers ── */
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --text-faint: #475569;
+
+  /* ── Dividers ── */
+  --divider-gradient: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.2), transparent);
+
+  /* ── Legacy OKLCH (kept for potential use) ── */
   --color-emerald-100: oklch(.95 .052 163.051);
   --color-emerald-200: oklch(.905 .093 164.15);
   --color-emerald-300: oklch(.845 .143 164.978);
@@ -11,14 +55,6 @@
   --color-emerald-500: oklch(.696 .17 162.48);
   --color-emerald-600: oklch(.596 .145 163.225);
   --color-emerald-700: oklch(.508 .118 165.612);
-  --color-teal-400: oklch(.777 .152 181.912);
-  --color-cyan-400: oklch(.789 .154 211.53);
-  --color-sky-300: oklch(.828 .111 230.318);
-  --color-blue-400: oklch(.707 .165 254.624);
-  --color-indigo-400: oklch(.673 .182 276.935);
-  --color-purple-400: oklch(.714 .203 305.504);
-  --color-pink-400: oklch(.718 .202 349.761);
-  --color-rose-400: oklch(.712 .194 13.428);
   --color-slate-100: oklch(.968 .007 247.896);
   --color-slate-200: oklch(.929 .013 255.508);
   --color-slate-300: oklch(.869 .022 252.894);

@@ -1,110 +1,85 @@
-import { useEffect, useRef, useState } from "react";
-import { useAutoScrollOnOverflow } from '../../hooks/useAutoScrollOnOverflow';
+import { useRef } from 'react';
+import { useDailyRecalc } from '../../hooks/useDailyRecalc';
+import { useFitToScreen } from '../../hooks/useFitToScreen';
 import { ClockContainer } from "./clock/ClockContainer";
 import './ClockView.scss';
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import { getTimesSelector } from "../store/times/timesSelectors";
 import { calculateTimes } from "../store/times/timesSlice";
-import { useSelector } from "react-redux";
 import { CitiesEnum, IClockTitle } from "@shared/core/services/workers/handlers/models/shared-models";
 import { calculateTitles } from "../store/titles/titlesSlice";
 import { getTitlesSelector } from "../store/titles/titlesSelectors";
-import { MapProp, TimesContainer } from "./times/TimesContainer";
+import { TimesContainer } from "./times/TimesContainer";
 import { TitlesKeys } from '@shared/core/services/workers/handlers/models/titles-of-aiom';
-import { NetzKey } from "@shared/core/services/workers/handlers/constants/times.keys";
-import { TitlesContainer } from "./titles/TitlesView";
-import { IconButton } from '@shared-react/buttons/IconButton';
-import Plus from '../../../assets/icons/plus.svg?raw';
-import { AgendaContainer } from "./agenda/AgendaContainer";
-
-// will be moved to folder
-
-enum ClockCenterViews {
-    Annotations = 'Annotations',
-    Agenda = 'Agenda'
-}
-
-
-const netzMap: MapProp = new Map();
-netzMap.set(NetzKey, { key: NetzKey, format: 'H:mm:ss' })
+import { TitlesContainer, getCalendarHeadline } from "./titles/TitlesView";
+import { TodaysSchedule } from "./schedule/TodaysSchedule";
+import { SettingsMenu } from "../settings/SettingsMenu";
 
 export const ClockView = () => {
     const dispatch = useAppDispatch();
     const times = useAppSelector(getTimesSelector);
     const titles = useAppSelector(getTitlesSelector);
+    const rootRef = useRef<HTMLDivElement>(null);
 
-    const [currentView, setCurrentView] = useState(ClockCenterViews.Annotations);
+    // Fit-guard: shrinks --ui-scale only when content overflows on this tablet/day.
+    useFitToScreen(rootRef, [times, titles]);
 
-    // toggle currentView between possible enum values every 3 seconds
-    // useEffect(() => {
-    //     const values = Object.values(ClockCenterViews) as ClockCenterViews[];
-    //     const id = setInterval(() => {
-    //         setCurrentView(prev => {
-    //             const idx = values.indexOf(prev);
-    //             const next = values[(idx + 1) % values.length];
-    //             return next;
-    //         });
-    //     }, 3000);
-    //     return () => clearInterval(id);
-    // }, []);
-
-
-    useEffect(() => {
+    // Recalculate zmanim/titles on mount, at each midnight, and on visibility restore.
+    useDailyRecalc(() => {
         dispatch(calculateTimes({ date: new Date(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
         dispatch(calculateTitles({ date: new Date(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
-    }, [])
-
-
-
-    const titlesRef = useRef<HTMLDivElement | null>(null);
-    const time = new Date();
-    // attach auto-scroll on overflow for titles container
-    useAutoScrollOnOverflow({
-        deps: [titles],
-        containerRef: titlesRef,
-        options: { downDuration: 5000, upDuration: 5000, pauseMs: 10000, startPauseMs: 3000 }
     });
 
+    const time = new Date();
+    const hebrewDate = (titles[TitlesKeys.HebrewDate] as IClockTitle)?.title ?? '';
+    const calendarHeadline = getCalendarHeadline(titles);
+    const gregorianDate = time.toLocaleDateString('he-IL', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
 
-    const centerView = (view: ClockCenterViews, props: any): JSX.Element => {
-        switch (view) {
-            case ClockCenterViews.Agenda:
-                return <AgendaContainer></AgendaContainer>;
-            default:
-                return <TitlesContainer {...props}></TitlesContainer>
-        }
-    }
+    return (
+        <div className="clock-app" ref={rootRef}>
+            {/* Ambient glow */}
+            <div className="ambient-glow" />
 
-    return <div className="content-container" >
-        <div className="main-time-container">
-            
-            <div className="main">
-                <ClockContainer></ClockContainer>
-            </div>
-            <div className="date">
-                {(titles[TitlesKeys.HebrewDate] as IClockTitle)?.title}   -  {time.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} 
-            </div>
-        </div>
+            {/* Settings (theme) gear — top-right */}
+            <SettingsMenu />
 
-        <div className="center-container">
-            {
-                false && <div className="center-title">
-                    <IconButton icon={Plus}></IconButton>
-                    <div className="view-position">
-                        <span className={`dot ${currentView === ClockCenterViews.Annotations ? 'dot-selected' : ''}`}></span>
-                        <span className={`dot ${currentView === ClockCenterViews.Agenda ? 'dot-selected' : ''}`}></span>
-                    </div>
-
+            {/* Header: Clock + Date */}
+            <header className="header-section">
+                <div className="clock-wrapper">
+                    <ClockContainer />
                 </div>
-            }
-            <div className="titles" ref={titlesRef}>
-                {centerView(currentView, { titles })}
-            </div>
-        </div>
+                <div className="date-block">
+                    <div className="date-hebrew">{hebrewDate}</div>
+                    {calendarHeadline && (
+                        <div className="date-calendar">{calendarHeadline}</div>
+                    )}
+                    <div className="date-gregorian">{gregorianDate}</div>
+                </div>
+                <div className="divider" />
+            </header>
 
-        <div className="times">
-            <TimesContainer times={times} map={netzMap}></TimesContainer>
-        </div>
+            {/* Info Cards: תפילה / לימוד יומי */}
+            <section className="info-section">
+                <TitlesContainer titles={titles} />
+            </section>
 
-    </div>
-}
+            {/* Zmanim */}
+            <section className="zmanim-section">
+                <div className="zmanim-header">
+                    <span className="zmanim-title">זמני היום</span>
+                </div>
+                <TimesContainer times={times} />
+            </section>
+
+            {/* Today's Schedule (from tenant config) */}
+            <section className="schedule-section">
+                <TodaysSchedule />
+            </section>
+        </div>
+    );
+};

@@ -1,0 +1,285 @@
+.settings {
+    position: fixed;
+    top: clamp(12px, 2dvh, 24px);
+    right: clamp(12px, 2vw, 24px);
+    z-index: 100;
+    direction: rtl;
+}
+
+.settings-gear {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid var(--card-border);
+    background: var(--card-bg-strong);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.35s;
+    outline: none;
+
+    &:hover {
+        color: var(--accent-emerald);
+        border-color: var(--accent-emerald-border);
+    }
+}
+
+/* Dialog overlay */
+.settings-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.settings-dialog {
+    width: min(90vw, 340px);
+    max-height: 86dvh;
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid var(--card-border);
+    background: var(--panel-bg);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
+    direction: rtl;
+    scrollbar-width: thin;
+}
+
+.settings-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.settings-dialog-title {
+    font-family: var(--font-hebrew);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.settings-close {
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
+
+    &:hover {
+        color: var(--accent-emerald);
+        background: var(--accent-emerald-subtle);
+    }
+}
+
+.settings-section-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+}
+
+/* Dark / light toggle */
+.settings-mode {
+    display: flex;
+    gap: 4px;
+    padding: 3px;
+    border-radius: 10px;
+    background: var(--accent-emerald-subtle);
+    margin-bottom: 14px;
+}
+
+.settings-mode-btn {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: var(--font-hebrew);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    &.active {
+        background: var(--accent-emerald-dim);
+        color: var(--accent-emerald);
+        font-weight: 700;
+    }
+}
+
+.settings-divider {
+    height: 1px;
+    background: var(--card-border);
+    margin-bottom: 14px;
+}
+
+/* Countdown row: toggle + minutes select */
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.settings-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+
+    input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+}
+
+.settings-toggle-track {
+    width: 38px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--card-border);
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.settings-toggle-thumb {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    transition: transform 0.2s, background 0.2s;
+}
+
+.settings-toggle input:checked + .settings-toggle-track {
+    background: var(--accent-emerald-dim);
+}
+
+.settings-toggle input:checked + .settings-toggle-track .settings-toggle-thumb {
+    transform: translateX(-16px);
+    background: var(--accent-emerald);
+}
+
+.settings-toggle-label {
+    font-family: var(--font-hebrew);
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.settings-minutes {
+    font-family: var(--font-hebrew);
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg-strong);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: opacity 0.2s;
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}
+
+/* Color families */
+.settings-colors {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: min(46dvh, 360px);
+    overflow-y: auto;
+    padding-inline-end: 2px;
+    scrollbar-width: thin;
+}
+
+.settings-color {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    outline: none;
+
+    &.active {
+        background: color-mix(in srgb, var(--swatch) 12%, transparent);
+        border-color: color-mix(in srgb, var(--swatch) 40%, transparent);
+    }
+}
+
+.settings-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--swatch);
+    border: 2px solid transparent;
+
+    .settings-color.active & {
+        border-color: var(--swatch);
+    }
+}
+
+.settings-color-names {
+    flex: 1;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+}
+
+.settings-color-he {
+    font-family: var(--font-hebrew);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+
+    .settings-color.active & {
+        color: var(--swatch);
+        font-weight: 700;
+    }
+}
+
+.settings-color-en {
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--text-dim);
+}
+
+.settings-color-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--swatch);
+}

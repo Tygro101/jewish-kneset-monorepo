@@ -1,0 +1,59 @@
+<svg viewBox="0 0 1024 1024" width="400" height="400" xmlns="http://www.w3.org/2000/svg"
+    data-fg-d3bl1="0.8:2.7613:/src/app/App.tsx:40:7:1226:2356:e:svg:xtetxtetetxtetxtetxtetxtetxtetxte"
+    data-fgid-d3bl1=":r1:">
+    <rect x="0" y="0" width="1024" height="1024" rx="220" ry="220" fill="#0e1117"
+        data-fg-d3bl3="0.8:2.7613:/src/app/App.tsx:47:9:1403:80:e:rect"></rect>
+    <defs data-fg-d3bl5="0.8:2.7613:/src/app/App.tsx:50:9:1539:370:e:defs:ete">
+        <radialGradient id="glow" cx="50%" cy="60%" r="45%"
+            data-fg-d3bl6="0.8:2.7613:/src/app/App.tsx:51:11:1556:217:e:radialGradient:ete">
+            <stop offset="0%" stop-color="#00e5c3" stop-opacity="0.22"
+                data-fg-d3bl7="0.8:2.7613:/src/app/App.tsx:52:13:1621:56:e:stop"></stop>
+            <stop offset="100%" stop-color="#00e5c3" stop-opacity="0"
+                data-fg-d3bl8="0.8:2.7613:/src/app/App.tsx:53:13:1690:55:e:stop"></stop>
+        </radialGradient>
+        <clipPath id="above-horizon"
+            data-fg-d3bl9="0.8:2.7613:/src/app/App.tsx:55:11:1784:109:e:clipPath:e">
+            <rect x="0" y="0" width="1024" height="620"
+                data-fg-d3bl10="0.8:2.7613:/src/app/App.tsx:56:13:1826:45:e:rect"></rect>
+        </clipPath>
+    </defs>
+    <circle cx="512" cy="620" r="360" fill="url(#glow)"
+        data-fg-d3bl11="0.8:2.7613:/src/app/App.tsx:60:9:1919:52:e:circle"></circle>
+    <line x1="120" y1="620" x2="904" y2="620" stroke="#00b89e" stroke-width="6"
+        stroke-linecap="round" opacity="0.7"
+        data-fg-d3bl13="0.8:2.7613:/src/app/App.tsx:63:9:2010:200:e:line"></line>
+    <line x1="180" y1="642" x2="844" y2="642" stroke="#00b89e" stroke-width="3"
+        stroke-linecap="round" opacity="0.25"
+        data-fg-d3bl15="0.8:2.7613:/src/app/App.tsx:75:9:2269:211:e:line"></line>
+    <g clip-path="url(#above-horizon)"
+        data-fg-d3bl17="0.8:2.7613:/src/app/App.tsx:87:9:2542:411:e:g:x">
+        <line x1="318.9776804096072" y1="585.9649571772817" x2="190.95267251802017"
+            y2="563.3906940805807" stroke="#00e5c3" stroke-width="7" stroke-linecap="round"
+            opacity="0.95" data-fg-d3bl19="0.8:2.7613:/src/app/App.tsx:89:13:2623:303:e:line"></line>
+        <line x1="354.7838542200114" y1="502.9569160262539" x2="290.6139987996079"
+            y2="455.184228690031" stroke="#00e5c3" stroke-width="4.5" stroke-linecap="round"
+            opacity="0.6" data-fg-d3bl19="0.8:2.7613:/src/app/App.tsx:89:13:2623:303:e:line"></line>
+        <line x1="424.03536068070946" y1="444.8480024966111" x2="365.69146725464947"
+            y2="328.67575925456754" stroke="#00e5c3" stroke-width="7" stroke-linecap="round"
+            opacity="0.95" data-fg-d3bl19="0.8:2.7613:/src/app/App.tsx:89:13:2623:303:e:line"></line>
+        <line x1="512" y1="424" x2="512" y2="344" stroke="#00e5c3" stroke-width="4.5"
+            stroke-linecap="round" opacity="0.6"
+            data-fg-d3bl19="0.8:2.7613:/src/app/App.tsx:89:13:2623:303:e:line"></line>
+        <line x1="599.9646393192907" y1="444.84800249661123" x2="658.3085327453507"
+            y2="328.67575925456765" stroke="#00e5c3" stroke-width="7" stroke-linecap="round"
+            opacity="0.95" data-fg-d3bl19="0.8:2.7613:/src/app/App.tsx:89:13:2623:303:e:line"></line>
+        <line x1="669.2161457799887" y1="502.9569160262539" x2="733.3860012003921"
+            y2="455.18422869003103" stroke="#00e5c3" stroke-width="4.5" stroke-linecap="round"
+            opacity="0.6" data-fg-d3bl19="0.8:2.7613:/src/app/App.tsx:89:13:2623:303:e:line"></line>
+        <line x1="705.0223195903927" y1="585.9649571772817" x2="833.0473274819799"
+            y2="563.3906940805807" stroke="#00e5c3" stroke-width="7" stroke-linecap="round"
+            opacity="0.95" data-fg-d3bl19="0.8:2.7613:/src/app/App.tsx:89:13:2623:303:e:line"></line>
+    </g>
+    <path d="M 344 620 A 168 168 0 0 1 680 620 Z" fill="#00e5c3"
+        data-fg-d3bl21="0.8:2.7613:/src/app/App.tsx:104:9:3026:108:e:path"></path>
+    <path d="M 407.84000000000003 620 A 104.16 104.16 0 0 1 616.16 620 Z"
+        fill="rgba(255,255,255,0.12)"
+        data-fg-d3bl23="0.8:2.7613:/src/app/App.tsx:110:9:3184:154:e:path"></path>
+    <path d="M 344 620 A 168 168 0 0 1 680 620" fill="none" stroke="rgba(255,255,255,0.25)"
+        stroke-width="3" data-fg-d3bl25="0.8:2.7613:/src/app/App.tsx:116:9:3395:174:e:path"></path>
+</svg>

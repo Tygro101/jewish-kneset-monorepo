@@ -1,27 +1,46 @@
-# vite-template-redux
+# Smart Clock — Offline-First PWA
 
-Uses [Vite](https://vitejs.dev/), [Vitest](https://vitest.dev/), and [React Testing Library](https://github.com/testing-library/react-testing-library) to create a modern [React](https://react.dev/) app compatible with [Create React App](https://create-react-app.dev/)
+A fullscreen clock display for bet knesset showing prayer times (zmanim), Hebrew dates, and daily titles. All computations are performed client-side using `@hebcal/core`, `@hebcal/learning`, and `suncalc` — no runtime server calls needed.
 
-```sh
-npx degit reduxjs/redux-templates/packages/vite-template-redux my-app
-```
+## PWA / Offline Support
 
-## Goals
+The app is configured as a Progressive Web App with a service worker (via `vite-plugin-pwa` / Workbox):
 
-- Easy migration from Create React App or Vite
-- As beginner friendly as Create React App
-- Optimized performance compared to Create React App
-- Customizable without ejecting
+- **Precaching**: All JS, CSS, fonts, web workers, and the HTML shell are precached on first load.
+- **Offline**: After the first online load, the app runs entirely offline from the SW cache.
+- **Auto-update**: The SW polls the host every 30 minutes for new builds. When detected, assets are downloaded and the page reloads automatically (brief flicker).
+- **Daily recalculation**: Zmanim and titles recalculate at local midnight and on visibility-restore, so an always-on device stays correct across days.
 
 ## Scripts
 
-- `dev`/`start` - start dev server and open browser
-- `build` - build for production
-- `preview` - locally preview production build
-- `test` - launch test runner
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Dev server on port 3001 |
+| `npm run dev:local` | Dev server exposed on LAN |
+| `npm run build` | Production build → `build/` (includes `sw.js`) |
+| `npm run preview` | Serve the production build locally |
+| `npm test` | Run Vitest tests |
 
-## Inspiration
+## Building for Production
 
-- [Create React App](https://github.com/facebook/create-react-app/tree/main/packages/cra-template)
-- [Vite](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react)
-- [Vitest](https://github.com/vitest-dev/vitest/tree/main/examples/react-testing-lib)
+```bash
+npm run build
+```
+
+Output is in `build/`. Deploy the contents to a static HTTPS host. Devices running the `react-container` app will auto-update via the service worker.
+
+## Configuration
+
+- **Location**: Hardcoded to `CitiesEnum.NETIVOT_NEVA_SHARON` in `ClockView.tsx`. To change location, update the enum value and rebuild.
+- **Update interval**: 30 minutes, set in `main.tsx` (`UPDATE_INTERVAL_MS`).
+- **Precache patterns**: Configured in `vite.config.ts` under the `VitePWA` plugin options.
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `vite.config.ts` | PWA plugin config (Workbox, manifest, precache patterns) |
+| `src/main.tsx` | SW registration, periodic update poll |
+| `src/app/hooks/useDailyRecalc.ts` | Midnight recalculation hook |
+| `src/app/components/clock-view/ClockView.tsx` | Main view, uses `useDailyRecalc` |
+| `public/icon.svg` | PWA manifest icon |

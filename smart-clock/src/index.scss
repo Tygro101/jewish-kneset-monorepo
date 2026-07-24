@@ -1,41 +1,22 @@
 @use './fonts' as *;
 @use './theme.scss' as *;
 
-
-
-body {
-  margin: 0;
-
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
-}
-
-
 * {
   box-sizing: border-box;
   direction: rtl;
 }
 
-html {
-  font-size: calc(16px + (20 - 16) * ((100vw - 320px) / (1280 - 320)));
-}
-
-/* Base responsive font scaling */
-body {
-  font-size: clamp(14px, 1.2rem + 0.2vw, 18px);
-}
-
-/* Ensure the page fills the entire viewport on all screen sizes */
 html,
 body,
 #root {
   height: 100%;
   min-height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
 }

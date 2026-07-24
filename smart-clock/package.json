@@ -16,53 +16,39 @@
     "type-check": "tsc"
   },
   "dependencies": {
-    "@hebcal/core": "^5.4.8",
-    "@hebcal/learning": "^5.1.1",
-    "@reduxjs/toolkit": "^1.8.1",
-    "@types/events": "^3.0.2",
-    "@types/suncalc": "^1.9.1",
-    "@types/uuid": "^9.0.2",
-    "date-fns": "^2.30.0",
+    "@hebcal/core": "^6.6.0",
+    "@hebcal/learning": "^6.9.5",
+    "@reduxjs/toolkit": "^2.12.0",
+    "@types/suncalc": "^1.9.2",
+    "date-fns": "^4.4.0",
     "events": "^3.3.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-redux": "^8.0.1",
-    "rxjs": "^7.8.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-redux": "^9.3.0",
+    "rxjs": "^7.8.2",
     "suncalc": "^1.9.0",
-    "uuid": "^9.0.0"
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^14.0.0",
-    "@testing-library/user-event": "^14.2.5",
-    "@types/react": "^18.0.15",
-    "@types/react-dom": "^18.0.6",
-    "@types/testing-library__jest-dom": "^5.14.5",
-    "@vitejs/plugin-react": "^5.1.1",
-    "eslint": "^8.0.0",
-    "eslint-config-react-app": "^7.0.1",
-    "eslint-plugin-prettier": "^4.2.1",
-    "jsdom": "^21.1.0",
-    "prettier": "^2.7.1",
-    "prettier-config-nick": "^1.0.2",
-    "sass": "^1.66.1",
-    "typescript": "^5.0.2",
-    "vite": "^7.2.4",
-    "vitest": "^4.0.13"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ],
-    "plugins": [
-      "prettier"
-    ],
-    "rules": {
-      "prettier/prettier": "error",
-      "react/jsx-no-target-blank": "off"
-    }
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "eslint": "^9.0.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.9.5",
+    "prettier-config-nick": "^1.0.8",
+    "sass": "^1.101.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.64.0",
+    "vite": "^8.1.4",
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^4.1.10"
   },
   "prettier": "prettier-config-nick"
 }

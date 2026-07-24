@@ -2,77 +2,62 @@ import { useEffect, useState } from "react";
 import { TimeState } from "../../store/times/timesState";
 import { TimesKeys } from "@shared/core/services/workers/handlers/constants/times.keys";
 import { TypedObjectMap } from "@shared/models/core";
+import { buildSections, getActiveSection } from "./timesSections";
 
 export type MapProp = Map<string, { key: string, format: string }>;
 export type MultiMapProp = Map<string, MapProp>;
 export type IsEnabled = (daytimes: TypedObjectMap<Date>) => boolean;
 export type IsEnabledMap = Map<string, IsEnabled>;
 
-const MORNING_KEY = 'morning';
-const AFTER_NOON_KEY = 'after-noon'
+export type TimesMap = Array<{ main: TimesKeys, additions?: Array<TimesKeys> }>;
 
-type TimesMap = Array<{ main: TimesKeys, additions?: Array<TimesKeys> }>;
+export const MARKED_TIME_GRACE_MINUTES = 10;
+const MARKED_TIME_GRACE_MS = MARKED_TIME_GRACE_MINUTES * 60 * 1000;
 
-const timesMap: TypedObjectMap<TimesMap> = {
-    [MORNING_KEY]: [
-        { main: TimesKeys.ChatzotLailah },
-        { main: TimesKeys.AlotHaShahar },
-        { main: TimesKeys.TallitAndTefillin },
-        { main: TimesKeys.Netz },
-        { main: TimesKeys.SofShemaMagenAvraham, additions: [TimesKeys.SofShemaGra] },
-        { main: TimesKeys.SofBirkotKeriatShemaMagenAvraham, additions: [TimesKeys.SofBirkotKeriatShemaGra] },
-        { main: TimesKeys.ChatzotYom },
-        { main: TimesKeys.MinchaGdola },
-        { main: TimesKeys.MinchaKtana },
-    ],
-    [AFTER_NOON_KEY]: [
-        { main: TimesKeys.ChatzotYom },
-        { main: TimesKeys.MinchaGdola },
-        { main: TimesKeys.MinchaKtana },
-        { main: TimesKeys.PlagMincha },
-        { main: TimesKeys.Shkiah },
-        { main: TimesKeys.TzetCochavimGeonim, additions: [TimesKeys.TzetCochavimRabinoTam] },
-        { main: TimesKeys.TzetShabat, additions: [TimesKeys.TzetCochavimRabinoTam] },
-        { main: TimesKeys.ChatzotLailah}
-    ]
-};
+/**
+ * Finds the "current" card index — order-independent.
+ *
+ * ChatzotLailah is the largest timestamp of the day (next day ~00:48) but may
+ * appear first in the array. This algorithm does NOT assume chronological order:
+ *
+ *  - Among times that haven't passed beyond the 10-minute grace, pick the soonest.
+ *  - If every time has already passed, pick the most recently passed one.
+ */
+export const getClosestKeyIndex = (
+    times: TimeState,
+    relevantKeys: TimesMap,
+    now: Date = new Date(),
+): number => {
+    const cutoffMs = now.getTime() - MARKED_TIME_GRACE_MS;
 
-export const getRelevantKey = (times: TimeState): TimesMap => {
-    try {
-        const now = new Date();
-        const sofKey = TimesKeys.SofBirkotKeriatShemaMagenAvraham as unknown as string;
-        const sofItem = times?.[sofKey];
-        if (sofItem && sofItem.date) {
-            const sofDate = new Date(sofItem.date);
-            const threshold = new Date(sofDate.getTime() + 40 * 60 * 1000); // +40 minutes
-            if (now > threshold) {
-                return timesMap[MORNING_KEY];
+    let bestFutureIdx = -1;
+    let bestFutureMs = Infinity;
+    let lastPassedIdx = -1;
+    let lastPassedMs = -Infinity;
+
+    for (const [idx, item] of relevantKeys.entries()) {
+        const timeItem = times[item.main as unknown as string];
+        if (!timeItem || !timeItem.date) continue;
+        const timeMs = new Date(timeItem.date).getTime();
+        if (Number.isNaN(timeMs)) continue;
+
+        if (timeMs > cutoffMs) {
+            // This time is still upcoming (or within grace)
+            if (timeMs < bestFutureMs) {
+                bestFutureMs = timeMs;
+                bestFutureIdx = idx;
+            }
+        } else {
+            // This time has passed beyond grace
+            if (timeMs > lastPassedMs) {
+                lastPassedMs = timeMs;
+                lastPassedIdx = idx;
             }
         }
-    } catch (e) {
-        // fallback to morning on any error
     }
 
-    return timesMap[MORNING_KEY];
-}
-
-export const getClosestKeyIndex = (times: TimeState, relevantKeys: TimesMap): number => {
-    const relevant = relevantKeys.length ? relevantKeys : getRelevantKey(times);
-    const now = new Date().getTime();
-    let closestIndex = -1;
-    let smallestDiff = Number.POSITIVE_INFINITY;
-    relevant.forEach((item, idx) => {
-        const timeItem = times[item.main as unknown as string];
-        if (!timeItem || !timeItem.date) return;
-        const t = new Date(timeItem.date).getTime();
-        const diff = Math.abs(t - now);
-        if (diff < smallestDiff) {
-            smallestDiff = diff;
-            closestIndex = idx;
-        }
-    });
-    return closestIndex;
-}
+    return bestFutureIdx !== -1 ? bestFutureIdx : lastPassedIdx;
+};
 
 export const useTimesContainerLogic = (times: TimeState) => {
     const [closestIndex, setClosestIndex] = useState<number>(-1);
@@ -81,10 +66,11 @@ export const useTimesContainerLogic = (times: TimeState) => {
     useEffect(() => {
         const compute = () => {
             try {
-                const relevant = getRelevantKey(times);
-                setRelevantKeys(relevant);
-                const idx = getClosestKeyIndex(times, relevant);
-                setClosestIndex(idx);
+                const now = new Date();
+                const sections = buildSections(times, now);
+                const active = getActiveSection(times, sections, now);
+                setRelevantKeys(active.times);
+                setClosestIndex(getClosestKeyIndex(times, active.times, now));
             } catch (e) {
                 setRelevantKeys([]);
                 setClosestIndex(-1);
@@ -96,4 +82,4 @@ export const useTimesContainerLogic = (times: TimeState) => {
     }, [times]);
 
     return { relevantKeys, closestIndex } as const;
-}
+};

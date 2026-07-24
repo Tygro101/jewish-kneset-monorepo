@@ -1,29 +1,72 @@
-.titles-container {
+.info-cards {
     display: grid;
-    grid-template-rows: 1fr;
-    gap: calc(18px * var(--ui-scale));
-    padding-block: calc(32px * var(--ui-scale));
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(12px, 3cqw, 32px);
+    height: 100%;
+}
 
-    .title {
-        color: #e2e8f0;
-        font-size: calc(22px * var(--ui-scale));
-        font-weight: 500;
-        display: flex;
-        gap: calc(15px * var(--ui-scale));
-        align-items: center;
-        font-family: 'Inconsolata', monospace;
+.info-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg-strong);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+}
 
-        .icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+.info-card-header {
+    display: flex;
+    align-items: center;
+    padding: clamp(8px, 2cqmin, 20px) clamp(12px, 2.5cqmin, 26px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    background: var(--accent-emerald-subtle);
+    flex-shrink: 0;
+}
 
+.info-card-title {
+    font-family: var(--font-hebrew);
+    font-weight: 700;
+    font-size: calc(var(--ui-scale) * clamp(15px, 3cqw, 34px));
+    color: var(--accent-emerald);
+}
 
-            svg {
-                block-size: calc(25px * var(--ui-scale));
-                inline-size: calc(25px * var(--ui-scale));
-            }
+.info-card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+}
 
-        }
+.info-card-row {
+    display: flex;
+    align-items: center;
+    gap: clamp(8px, 1.5cqw, 20px);
+    padding: clamp(8px, 2cqmin, 22px) clamp(12px, 2.5cqmin, 26px);
+
+    &.has-border {
+        border-bottom: 1px solid var(--card-row-divider);
     }
+}
+
+.info-card-label {
+    min-width: clamp(48px, 10cqw, 120px);
+    font-family: var(--font-hebrew);
+    font-weight: 600;
+    font-size: calc(var(--ui-scale) * clamp(12px, 2cqw, 24px));
+    color: var(--text-faint);
+    flex-shrink: 0;
+}
+
+.info-card-divider {
+    width: 1px;
+    height: clamp(12px, 2cqw, 24px);
+    background: rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+}
+
+.info-card-value {
+    font-family: var(--font-hebrew);
+    font-size: calc(var(--ui-scale) * clamp(13px, 2.4cqw, 28px));
+    color: var(--text-secondary);
+    line-height: 1.4;
 }

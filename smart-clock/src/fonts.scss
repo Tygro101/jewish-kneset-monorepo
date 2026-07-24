@@ -1,122 +1,19 @@
+/* ── Nunito (variable weight 200-1000, Latin numbers/clock) ── */
 @font-face {
-    font-family: "Frank-Regular";
-    src: local("Frank-Regular"),
-        url("./assets/fonts/FrankRuhlLibre-Regular.ttf") format("truetype");
+    font-family: 'Nunito';
+    src: local('Nunito'),
+         url('./assets/fonts/Nunito/Nunito-Variable.ttf') format('truetype');
+    font-weight: 200 1000;
+    font-style: normal;
+    font-display: swap;
 }
 
+/* ── Heebo (variable weight 100-900, Hebrew UI text) ── */
 @font-face {
-    font-family: "Frank-SemiBold";
-    src: local("Frank-SemiBold"),
-        url("./assets/fonts/FrankRuhlLibre-SemiBold.ttf") format("truetype");
-}
-
-@font-face {
-    font-family: "Frank-Bold";
-    src: local("Frank-Bold"),
-        url("./assets/fonts/FrankRuhlLibre-Bold.ttf") format("truetype");
-}
-
-@font-face {
-    font-family: "Frank-Medium";
-    src: local("Frank-Medium"),
-        url("./assets/fonts/FrankRuhlLibre-Medium.ttf") format("truetype");
-}
-
-@font-face {
-    font-family: "Clock-Font-Type-1";
-    src: local("Clock-Font-Type-1"),
-        url("./assets/fonts/BlackOpsOne-Regular.ttf") format("truetype");
-}
-
-@font-face {
-    font-family: 'Clock-Font-Type-2';
-    src: local("Clock-Font-Type-2"),
-        url("./assets/fonts/KeaniaOne-Regular.ttf") format("truetype");
-}
-
-@font-face {
-    font-family: 'Digital-Mono-Fonts';
-    src: local("Digital-Mono-Fonts"),
-        url("./assets/fonts/digital-7.ttf") format("truetype");
-}
-
-//monospace
-
-@font-face {
-    font-family: 'Inconsolata-SemiBold';
-    src: local("Inconsolata-SemiBold"),
-        url("./assets/fonts/Inconsolata/Inconsolata-SemiBold.ttf") format("truetype");
-}
-
-@font-face {
-    font-family: 'Inconsolata-Bold';
-    src: local("Inconsolata-Bold"),
-        url("./assets/fonts/Inconsolata/Inconsolata-Bold.ttf") format("truetype");
-}
-
-@font-face {
-    font-family: 'Inconsolata';
-    src: local('Inconsolata-Regular'), url('./assets/fonts/Inconsolata/Inconsolata-Regular.ttf') format('truetype');
-    font-weight: 400;
-}
-
-@font-face {
-    font-family: 'Inconsolata';
-    src: local('Inconsolata-Medium'), url('./assets/fonts/Inconsolata/Inconsolata-Medium.ttf') format('truetype');
-    font-weight: 500;
-}
-
-@font-face {
-    font-family: 'Inconsolata';
-    src: local('Inconsolata-SemiBold'), url('./assets/fonts/Inconsolata/Inconsolata-SemiBold.ttf') format('truetype');
-    font-weight: 600;
-}
-
-@font-face {
-    font-family: 'Inconsolata';
-    src: local('Inconsolata-Bold'), url('./assets/fonts/Inconsolata/Inconsolata-Bold.ttf') format('truetype');
-    font-weight: 700;
-}
-
-@font-face {
-    font-family: 'Inconsolata';
-    src: local('Inconsolata-ExtraBold'), url('./assets/fonts/Inconsolata/Inconsolata-ExtraBold.ttf') format('truetype');
-    font-weight: 800;
-}
-
-@font-face {
-    font-family: 'Inconsolata';
-    src: local('Inconsolata-Black'), url('./assets/fonts/Inconsolata/Inconsolata-Black.ttf') format('truetype');
-    font-weight: 900;
-}
-
-@font-face {
-    font-family: 'Inconsolata';
-    src: local('Inconsolata-Light'), url('./assets/fonts/Inconsolata/Inconsolata-Light.ttf') format('truetype');
-    font-weight: 300;
-}
-
-@font-face {
-    font-family: 'Inconsolata';
-    src: local('Inconsolata-ExtraLight'), url('./assets/fonts/Inconsolata/Inconsolata-ExtraLight.ttf') format('truetype');
-    font-weight: 200;
-}
-
-
-// nexa 
-@font-face {
-    font-family: 'Nexa-Bold';
-    src: local("Nexa-Bold"),
-        url("./assets/fonts/nexa/NexaBold.ttf") format("opentype");
-}
-
-/* Variable Noto Sans Hebrew (width + weight axes) */
-@font-face {
-    font-family: 'Noto Sans Hebrew Variable';
-    src: local('Noto Sans Hebrew Variable'),
-         url('./assets/fonts/nano-sents/NotoSansHebrew-VariableFont_wdth,wght.ttf') format('truetype');
+    font-family: 'Heebo';
+    src: local('Heebo'),
+         url('./assets/fonts/Heebo/Heebo-Variable.ttf') format('truetype');
     font-weight: 100 900;
-    font-stretch: 75% 125%;
     font-style: normal;
     font-display: swap;
 }
