@@ -5,7 +5,7 @@
     width: 100vw;
     display: grid;
     grid-template-rows: auto minmax(0, 0.9fr) minmax(0, 1.6fr);
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: clamp(12px, 3dvh, 40px);
     background: var(--app-bg);
     padding: clamp(12px, 2.5dvh, 44px) clamp(12px, 3vw, 40px);
@@ -16,18 +16,6 @@
 
 .header-section { grid-column: 1 / -1; }
 .info-section { grid-column: 1 / -1; }
-
-/* ── Schedule Section ── */
-.schedule-section {
-    position: relative;
-    z-index: 1;
-    container-type: size;
-    container-name: schedule;
-    display: grid;
-    place-items: stretch;
-    min-height: 0;
-    overflow: hidden;
-}
 
 /* ── Ambient emerald glow ── */
 .ambient-glow {

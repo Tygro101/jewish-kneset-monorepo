@@ -12,7 +12,6 @@ import { getTitlesSelector } from "../store/titles/titlesSelectors";
 import { TimesContainer } from "./times/TimesContainer";
 import { TitlesKeys } from '@shared/core/services/workers/handlers/models/titles-of-aiom';
 import { TitlesContainer, getCalendarHeadline } from "./titles/TitlesView";
-import { TodaysSchedule } from "./schedule/TodaysSchedule";
 import { SettingsMenu } from "../settings/SettingsMenu";
 
 export const ClockView = () => {
@@ -76,10 +75,6 @@ export const ClockView = () => {
                 <TimesContainer times={times} />
             </section>
 
-            {/* Today's Schedule (from tenant config) */}
-            <section className="schedule-section">
-                <TodaysSchedule />
-            </section>
         </div>
     );
 };

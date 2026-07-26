@@ -1,17 +1,30 @@
 /**
  * Application configuration for the Smart Clock container.
- * Change SMART_CLOCK_URL to point at the deployed smart-clock host.
  */
+
+/** Production HTTPS origin where the smart-clock PWA is deployed. */
+const PRODUCTION_URL = 'https://jewish-kneset.github.io';
+
+/**
+ * Development URL — your PC's LAN IP + port.
+ * Only used in React Native __DEV__ builds (metro bundler dev mode).
+ * Change the IP/port to match your local dev server.
+ */
+const DEV_URL = 'http://192.168.86.53:3001';
+
 export const AppConfig = {
   /**
    * The URL where the smart-clock PWA is served.
-   *
-   * For local development: use your PC's LAN IP + port (not localhost, which
-   * refers to the device itself).
-   *
-   * For production: use the public HTTPS URL where smart-clock/build/ is deployed.
+   * In production builds this is always the HTTPS origin;
+   * in __DEV__ mode it falls back to the local dev server for convenience.
    */
-  SMART_CLOCK_URL: 'http://192.168.86.53:3001',
+  SMART_CLOCK_URL: __DEV__ ? DEV_URL : PRODUCTION_URL,
+
+  /**
+   * The HTTPS origin used for navigation guards (origin lock).
+   * Always points at the production host regardless of build mode.
+   */
+  SMART_CLOCK_ORIGIN: PRODUCTION_URL,
 
   /**
    * Custom User-Agent suffix appended by the WebView.

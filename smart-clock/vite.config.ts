@@ -38,7 +38,7 @@ export default defineConfig({
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'tenant-presentations',
-              expiration: { maxEntries: 40, maxAgeSeconds: 30 * 24 * 60 * 60 }, // 30 days
+              expiration: { maxEntries: 40, maxAgeSeconds: 10 * 60 }, // 10 minutes
             },
           },
         ],

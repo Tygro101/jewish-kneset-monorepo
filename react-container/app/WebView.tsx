@@ -58,7 +58,7 @@ const SmartClockWebView = () => {
       mediaPlaybackRequiresUserAction={false}
       // --- Security / gating ---
       userAgent={AppConfig.USER_AGENT}
-      originWhitelist={['https://*', 'http://*']}
+      originWhitelist={['https://*']}
       // --- Error handling ---
       onMessage={handleMessage}
       onError={handleError}
@@ -72,9 +72,9 @@ const SmartClockWebView = () => {
           </Text>
         </View>
       )}
-      // Disable navigation away from the clock
+      // Disable navigation away from the clock — origin-locked to HTTPS host
       onShouldStartLoadWithRequest={(request) => {
-        // Allow the initial URL and service-worker related requests
+        // Allow navigation only to the expected HTTPS origin or about:blank (used by service workers)
         return request.url.startsWith(AppConfig.SMART_CLOCK_URL) || request.url === 'about:blank';
       }}
     />

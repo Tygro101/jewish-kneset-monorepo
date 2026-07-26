@@ -5,3 +5,11 @@ compatibility_date = "2024-01-01"
 # Secrets (do NOT put values here; use `wrangler secret put`):
 #   GITHUB_CLIENT_ID
 #   GITHUB_CLIENT_SECRET
+
+[vars]
+ENVIRONMENT = "production"
+
+# For local development, override with:
+# [env.dev.vars]
+# ENVIRONMENT = "development"
+# Then run: wrangler dev --env dev
