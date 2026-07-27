@@ -33,8 +33,12 @@ jobs:
           cache: 'npm'
           cache-dependency-path: smart-clock/package-lock.json
 
-      - name: Install dependencies
+      - name: Install smart-clock dependencies
         working-directory: smart-clock
+        run: npm ci
+
+      - name: Install shared dependencies
+        working-directory: shared
         run: npm ci
 
       - name: Build
