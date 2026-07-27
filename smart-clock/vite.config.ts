@@ -8,6 +8,7 @@ const shardReactFolderDir = resolve(__dirname, "..","shared-react","src");
 const rootDir = resolve(__dirname,"src");
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: "/jewish-kneset-monorepo/",
   plugins: [
     react(),
     VitePWA({
@@ -52,7 +53,7 @@ export default defineConfig({
         theme_color: '#000000',
         icons: [
           {
-            src: '/icon.svg',
+            src: 'icon.svg',
             sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'any',
