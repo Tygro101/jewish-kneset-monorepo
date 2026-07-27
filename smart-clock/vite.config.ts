@@ -66,7 +66,7 @@ export default defineConfig({
     alias: {
       "@root": rootDir,
       "@shared":  shardFolderDir,
-      "@shared-react": shardReactFolderDir
+      "@shared-react": shardReactFolderDir,
     },
     dedupe: ['react', 'react-dom'],
   },

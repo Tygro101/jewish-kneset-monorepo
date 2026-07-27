@@ -1,7 +1,7 @@
 import { TimeDataHolder, TimesHolder, TypedMap, CitiesEnum } from "./shared-models";
 import { HebrewCalendar, HDate, Location, Event, DailyLearning, flags } from '@hebcal/core';
 import '@hebcal/learning';
-import { getTimes, GetTimesResult } from 'sunCalc';
+import { getTimes, GetTimesResult } from 'suncalc';
 
 import { calcAlotAshahar, calcGraSofBirkotShema, calcGraSofShema, calcMagenAvrahamSofBirkotKeriatShema, calcMagenAvrahamSofShema, calcMinchaGdola, calcMinchaKtana, calcNerotShabat, calcPlagMincha, calcShaaZmanit, calcShaaZmanitAroch, calcShaaZmanitMagenAvraham, calcTallitAndTefillin, calcTzetCochavimGeonim, calcTzetCochavimRabbenuTam, CalcTzetTzumKatan, calcTzetShabat, CalcTzetTzumGadol } from "../methods/calculation.methods";
 import { AlotHaShaharKey, ChatzotLailahKey, ChatzotYomKey, NetzKey, ShkiahKey, TzetCochavimGeonimKey } from "../constants/times.keys";
