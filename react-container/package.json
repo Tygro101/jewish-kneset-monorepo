@@ -13,7 +13,11 @@
     "prebuild": "expo prebuild --platform android --clean",
     "run:android": "expo run:android",
     "build:apk:debug": "cd android && .\\gradlew.bat assembleDebug && cd ..",
-    "build:apk:release": "cd android && .\\gradlew.bat assembleRelease && cd .."
+    "build:apk:release": "cd android && .\\gradlew.bat assembleRelease && cd ..",
+    "build:release": "npx expo prebuild --platform android --clean && cd android && .\\gradlew.bat assembleRelease && cd ..",
+    "build:release:install": "npx expo prebuild --platform android --clean && cd android && .\\gradlew.bat assembleRelease && cd .. && adb install -r android\\app\\build\\outputs\\apk\\release\\app-release.apk",
+    "deploy:wifi": "adb -s 192.168.86.151:42195 install -r android\\app\\build\\outputs\\apk\\release\\app-release.apk",
+    "build:release:wifi": "npx expo prebuild --platform android --clean && cd android && .\\gradlew.bat assembleRelease && cd .. && adb -s 192.168.86.151:42195 install -r android\\app\\build\\outputs\\apk\\release\\app-release.apk"
   },
   "jest": {
     "preset": "jest-expo"

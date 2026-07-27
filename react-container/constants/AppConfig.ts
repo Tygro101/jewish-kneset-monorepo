@@ -3,7 +3,7 @@
  */
 
 /** Production HTTPS origin where the smart-clock PWA is deployed. */
-const PRODUCTION_URL = 'https://jewish-kneset.github.io';
+const PRODUCTION_URL = 'https://tygro101.github.io/jewish-kneset-monorepo/';
 
 /**
  * Development URL — your PC's LAN IP + port.
