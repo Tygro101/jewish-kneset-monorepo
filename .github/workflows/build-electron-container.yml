@@ -1,0 +1,45 @@
+name: Build Electron Container
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'electron-container/**'
+      - '.github/workflows/build-electron-container.yml'
+  pull_request:
+    paths:
+      - 'electron-container/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: electron-container/package-lock.json
+
+      - name: Install dependencies
+        working-directory: electron-container
+        run: npm ci
+
+      - name: Type-check and test
+        working-directory: electron-container
+        run: npm run verify
+
+      - name: Build installer
+        working-directory: electron-container
+        run: npm run dist:win
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: smart-clock-setup
+          path: electron-container/release/SmartClockSetup-*.exe
+          if-no-files-found: error

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Smart Clock — אין חיבור</title>
+    <style>
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: #000;
+        color: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      main {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 24px;
+        box-sizing: border-box;
+      }
+      h1 { font-size: 2rem; margin: 0 0 12px; }
+      .detail { color: #aaa; font-size: 1.1rem; margin-bottom: 20px; }
+      .hint { color: #888; font-size: 0.9rem; max-width: 640px; line-height: 1.6; }
+      .countdown { color: #6cf; font-size: 1.3rem; margin-top: 24px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>⚠️ שעון חכם — טעינה נכשלה</h1>
+      <p class="detail" id="detail"></p>
+      <p class="hint">
+        בדוק את חיבור הרשת. לאחר טעינה מוצלחת אחת, האפליקציה תעבוד גם ללא אינטרנט.
+      </p>
+      <p class="countdown" id="countdown"></p>
+    </main>
+    <script>
+      var params = new URLSearchParams(location.search);
+      var seconds = Number(params.get('retry') || '5');
+      var code = params.get('code');
+      document.getElementById('detail').textContent = code
+        ? '\u05E7\u05D5\u05D3 \u05E9\u05D2\u05D9\u05D0\u05D4: ' + code
+        : '';
+      var remaining = Number.isFinite(seconds) && seconds > 0 ? Math.round(seconds) : 5;
+      var el = document.getElementById('countdown');
+      function render() {
+        el.textContent = remaining > 0
+          ? '\u05E0\u05D9\u05E1\u05D9\u05D5\u05DF \u05D7\u05D5\u05D6\u05E8 \u05D1\u05E2\u05D5\u05D3 ' + remaining + ' \u05E9\u05E0\u05D9\u05D5\u05EA\u2026'
+          : '\u05DE\u05E0\u05E1\u05D4 \u05E9\u05D5\u05D1\u2026';
+      }
+      render();
+      setInterval(function() {
+        if (remaining > 0) remaining -= 1;
+        render();
+      }, 1000);
+    </script>
+  </body>
+</html>
