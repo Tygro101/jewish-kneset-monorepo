@@ -75,21 +75,21 @@ describe('settingsSlice', () => {
     describe('loadSettings', () => {
         it('falls back to defaults on invalid JSON', () => {
             store['smartclock-settings'] = '{not valid';
-            expect(loadSettings()).toEqual({ netzCountdownEnabled: false, netzCountdownMinutes: 5 });
+            expect(loadSettings()).toEqual({ netzCountdownEnabled: false, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false });
         });
 
         it('falls back to defaults when key is missing', () => {
-            expect(loadSettings()).toEqual({ netzCountdownEnabled: false, netzCountdownMinutes: 5 });
+            expect(loadSettings()).toEqual({ netzCountdownEnabled: false, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false });
         });
 
         it('reads persisted values', () => {
             store['smartclock-settings'] = JSON.stringify({ netzCountdownEnabled: true, netzCountdownMinutes: 3 });
-            expect(loadSettings()).toEqual({ netzCountdownEnabled: true, netzCountdownMinutes: 3 });
+            expect(loadSettings()).toEqual({ netzCountdownEnabled: true, netzCountdownMinutes: 3, presentationsBlocked: false, messagesBlocked: false });
         });
 
         it('ignores invalid minutes in storage', () => {
             store['smartclock-settings'] = JSON.stringify({ netzCountdownEnabled: true, netzCountdownMinutes: 99 });
-            expect(loadSettings()).toEqual({ netzCountdownEnabled: true, netzCountdownMinutes: 5 });
+            expect(loadSettings()).toEqual({ netzCountdownEnabled: true, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false });
         });
     });
 });

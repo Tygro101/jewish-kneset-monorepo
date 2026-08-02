@@ -22,24 +22,41 @@ export default defineConfig({
         skipWaiting: true,
         runtimeCaching: [
           {
-            // Cache tenant config.json from GitHub Pages (stale-while-revalidate for Shabbat resilience)
+            // Tenant config.json: network is authoritative so a deactivated
+            // presentation disappears on the very next poll. The cached copy is
+            // only a fallback for offline / slow network (5s timeout).
+            // The cache key drops the `?t=` cache-buster so we keep one entry per tenant.
             urlPattern: ({ url }) =>
               url.hostname.endsWith('github.io') && url.pathname.endsWith('config.json'),
-            handler: 'StaleWhileRevalidate',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'tenant-config',
+              networkTimeoutSeconds: 5,
               expiration: { maxEntries: 4 },
+              plugins: [
+                {
+                  cacheKeyWillBeUsed: async ({ request }) => {
+                    const u = new URL(request.url);
+                    u.search = '';
+                    return u.toString();
+                  },
+                },
+              ],
             },
           },
           {
-            // Cache tenant presentations (PDFs, images) from GitHub Pages
+            // Tenant presentations (PDFs, images) from GitHub Pages.
+            // CacheFirst + long retention: uploaded file names carry a Date.now()
+            // prefix so they are effectively immutable, and pruneMediaCache()
+            // authoritatively removes entries no longer in the active config.
+            // Long cache = offline / Shabbat resilience.
             urlPattern: ({ url }) =>
               url.hostname.endsWith('github.io') &&
               /\.(pdf|png|jpe?g|gif|webp)$/i.test(url.pathname),
-            handler: 'StaleWhileRevalidate',
+            handler: 'CacheFirst',
             options: {
               cacheName: 'tenant-presentations',
-              expiration: { maxEntries: 40, maxAgeSeconds: 10 * 60 }, // 10 minutes
+              expiration: { maxEntries: 100, maxAgeSeconds: 30 * 24 * 60 * 60 }, // 30 days
             },
           },
         ],

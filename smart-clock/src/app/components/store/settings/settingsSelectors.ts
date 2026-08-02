@@ -5,3 +5,9 @@ export const getNetzCountdownEnabledSelector = (state: RootState) =>
 
 export const getNetzCountdownMinutesSelector = (state: RootState) =>
     state.settings.netzCountdownMinutes;
+
+export const getPresentationsBlockedSelector = (state: RootState) =>
+    state.settings.presentationsBlocked;
+
+export const getMessagesBlockedSelector = (state: RootState) =>
+    state.settings.messagesBlocked;

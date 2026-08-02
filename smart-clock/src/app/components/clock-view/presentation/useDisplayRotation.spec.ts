@@ -3,8 +3,8 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useDisplayRotation } from './useDisplayRotation';
-import type { TenantConfig, ScheduleEvent, Presentation } from '../../store/config/configState';
+import { useDisplayRotation, resolveSlideDurationMs, resolveDurationMs } from './useDisplayRotation';
+import type { TenantConfig, ScheduleEvent, Presentation, DisplayMessage } from '../../store/config/configState';
 
 // localStorage mock (needed by configSlice indirect import)
 const storeMock: Record<string, string> = {};
@@ -20,6 +20,10 @@ Object.defineProperty(globalThis, 'localStorage', {
   writable: true,
 });
 
+const PRES_A: Presentation = { title: 'Announcements', file: 'presentations/ann.pdf', type: 'pdf' };
+const PRES_B: Presentation = { title: 'Halacha', file: 'presentations/halacha.jpg', type: 'image' };
+const PRES_C: Presentation = { title: 'Shiur', file: 'presentations/shiur.png', type: 'image' };
+
 function makeConfig(overrides: Partial<TenantConfig> = {}): TenantConfig {
   return {
     tenant: { id: 'test', displayName: 'Test' },
@@ -30,12 +34,14 @@ function makeConfig(overrides: Partial<TenantConfig> = {}): TenantConfig {
       thursday: [] as ScheduleEvent[], friday: [] as ScheduleEvent[],
       shabbat: [] as ScheduleEvent[],
     },
-    activePresentations: [
-      { title: 'Announcements', file: '/presentations/ann.pdf', type: 'pdf' },
-      { title: 'Halacha', file: '/presentations/halacha.jpg', type: 'image' },
-    ] as Presentation[],
+    activePresentations: [PRES_A, PRES_B],
     ...overrides,
   };
+}
+
+/** Config identical to `base` except for the presentations list. */
+function withPresentations(base: TenantConfig, activePresentations: Presentation[]): TenantConfig {
+  return { ...base, activePresentations };
 }
 
 describe('useDisplayRotation', () => {
@@ -50,10 +56,13 @@ describe('useDisplayRotation', () => {
   it('stays on dashboard when config is null', () => {
     const { result } = renderHook(() => useDisplayRotation(null));
     expect(result.current).toEqual({ kind: 'dashboard' });
+
+    act(() => { vi.advanceTimersByTime(300_000); });
+    expect(result.current).toEqual({ kind: 'dashboard' });
   });
 
   it('stays on dashboard when no active presentations', () => {
-    const config = makeConfig({ activePresentations: [] as Presentation[] });
+    const config = makeConfig({ activePresentations: [] });
     const { result } = renderHook(() => useDisplayRotation(config));
     expect(result.current).toEqual({ kind: 'dashboard' });
 
@@ -62,79 +71,445 @@ describe('useDisplayRotation', () => {
   });
 
   it('starts on dashboard', () => {
-    const config = makeConfig();
-    const { result } = renderHook(() => useDisplayRotation(config));
+    const { result } = renderHook(() => useDisplayRotation(makeConfig()));
     expect(result.current).toEqual({ kind: 'dashboard' });
   });
 
-  it('cycles to first presentation after dashboard duration', () => {
-    const config = makeConfig(); // 10s dashboard, 5s per presentation
-    const { result } = renderHook(() => useDisplayRotation(config));
+  it('cycles to the first presentation after the dashboard duration', () => {
+    const { result } = renderHook(() => useDisplayRotation(makeConfig()));
 
-    // After 10s (dashboard duration), should switch to presentation 0
     act(() => { vi.advanceTimersByTime(10_000); });
-    expect(result.current).toEqual({ kind: 'presentation', index: 0 });
+    expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
   });
 
   it('cycles through all presentations then back to dashboard', () => {
-    const config = makeConfig(); // 10s dashboard, 5s per pres, 2 presentations
-    const { result } = renderHook(() => useDisplayRotation(config));
+    const { result } = renderHook(() => useDisplayRotation(makeConfig()));
 
-    // Dashboard → pres[0]
     act(() => { vi.advanceTimersByTime(10_000); });
-    expect(result.current).toEqual({ kind: 'presentation', index: 0 });
+    expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
 
-    // pres[0] → pres[1]
     act(() => { vi.advanceTimersByTime(5_000); });
-    expect(result.current).toEqual({ kind: 'presentation', index: 1 });
+    expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_B });
 
-    // pres[1] → dashboard (cycle restarts)
     act(() => { vi.advanceTimersByTime(5_000); });
     expect(result.current).toEqual({ kind: 'dashboard' });
   });
 
-  it('full cycle repeats', () => {
-    const config = makeConfig();
-    const { result } = renderHook(() => useDisplayRotation(config));
+  it('repeats the full cycle', () => {
+    const { result } = renderHook(() => useDisplayRotation(makeConfig()));
 
-    // One full cycle: 10 + 5 + 5 = 20s
+    // 10 + 5 + 5 = 20s → back to dashboard
     act(() => { vi.advanceTimersByTime(20_000); });
     expect(result.current).toEqual({ kind: 'dashboard' });
 
-    // Second cycle: another 10s → pres[0]
     act(() => { vi.advanceTimersByTime(10_000); });
-    expect(result.current).toEqual({ kind: 'presentation', index: 0 });
+    expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
   });
 
   it('cleans up timers on unmount', () => {
-    const config = makeConfig();
-    const { result, unmount } = renderHook(() => useDisplayRotation(config));
+    const { unmount } = renderHook(() => useDisplayRotation(makeConfig()));
 
     unmount();
-    // Advancing timers after unmount should not throw
+    // Advancing timers after unmount should not throw or update state
     act(() => { vi.advanceTimersByTime(60_000); });
-    // No assertion needed — verifying no error/leak
   });
 
-  it('resets when config changes', () => {
-    const config1 = makeConfig();
-    const config2 = makeConfig({
-      activePresentations: [
-        { title: 'Only One', file: '/presentations/one.jpg', type: 'image' },
-      ],
+  it('returns the presentation object, never an index', () => {
+    const { result } = renderHook(() => useDisplayRotation(makeConfig()));
+
+    act(() => { vi.advanceTimersByTime(10_000); });
+    expect(result.current).not.toHaveProperty('index');
+    if (result.current.kind !== 'presentation') throw new Error('expected a presentation');
+    expect(result.current.presentation.file).toBe(PRES_A.file);
+  });
+
+  describe('config changes mid-cycle', () => {
+    it('lets a removed slide finish its turn, then skips it', () => {
+      const config = makeConfig(); // [A, B]
+      const { result, rerender } = renderHook(
+        ({ cfg }) => useDisplayRotation(cfg),
+        { initialProps: { cfg: config } },
+      );
+
+      // Dashboard → A
+      act(() => { vi.advanceTimersByTime(10_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+
+      // A is deactivated in the CMS while it is on screen.
+      rerender({ cfg: withPresentations(config, [PRES_B]) });
+      // It finishes its turn rather than blanking mid-slide.
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+      act(() => { vi.advanceTimersByTime(4_999); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+
+      // At the boundary the cycle is recomputed from the new list — A is gone.
+      act(() => { vi.advanceTimersByTime(1); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+
+      // From here on only B is ever shown.
+      act(() => { vi.advanceTimersByTime(10_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_B });
+      act(() => { vi.advanceTimersByTime(5_000); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+      act(() => { vi.advanceTimersByTime(10_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_B });
     });
 
-    const { result, rerender } = renderHook(
-      ({ cfg }) => useDisplayRotation(cfg),
-      { initialProps: { cfg: config1 } },
-    );
+    it('never shows a removed slide again in later cycles', () => {
+      const config = makeConfig(); // [A, B]
+      const { result, rerender } = renderHook(
+        ({ cfg }) => useDisplayRotation(cfg),
+        { initialProps: { cfg: config } },
+      );
 
-    // Advance to first presentation of config1
-    act(() => { vi.advanceTimersByTime(10_000); });
-    expect(result.current).toEqual({ kind: 'presentation', index: 0 });
+      rerender({ cfg: withPresentations(config, [PRES_A]) }); // B deactivated
 
-    // Switch config → should reset to dashboard
-    rerender({ cfg: config2 });
-    expect(result.current).toEqual({ kind: 'dashboard' });
+      const seen: string[] = [];
+      // Three full cycles of (10s dashboard + 5s slide)
+      for (let i = 0; i < 6; i++) {
+        act(() => { vi.advanceTimersByTime(i % 2 === 0 ? 10_000 : 5_000); });
+        if (result.current.kind === 'presentation') seen.push(result.current.presentation.title);
+      }
+
+      expect(seen).not.toContain(PRES_B.title);
+      expect(seen).toContain(PRES_A.title);
+    });
+
+    it('finishes the current slide then stays on dashboard when the list empties', () => {
+      const config = makeConfig(); // [A, B]
+      const { result, rerender } = renderHook(
+        ({ cfg }) => useDisplayRotation(cfg),
+        { initialProps: { cfg: config } },
+      );
+
+      act(() => { vi.advanceTimersByTime(10_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+
+      // Everything deactivated while A is on screen.
+      rerender({ cfg: withPresentations(config, []) });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+
+      // A finishes its turn…
+      act(() => { vi.advanceTimersByTime(5_000); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+
+      // …and the dashboard stays put indefinitely.
+      act(() => { vi.advanceTimersByTime(300_000); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+    });
+
+    it('resumes rotation when presentations are added back after emptying', () => {
+      const config = makeConfig();
+      const { result, rerender } = renderHook(
+        ({ cfg }) => useDisplayRotation(cfg),
+        { initialProps: { cfg: withPresentations(config, []) } },
+      );
+
+      act(() => { vi.advanceTimersByTime(60_000); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+
+      rerender({ cfg: withPresentations(config, [PRES_C]) });
+
+      // Next dashboard boundary picks up the new list.
+      act(() => { vi.advanceTimersByTime(10_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_C });
+    });
+
+    it('includes a newly added slide in a subsequent cycle', () => {
+      const config = withPresentations(makeConfig(), [PRES_A]);
+      const { result, rerender } = renderHook(
+        ({ cfg }) => useDisplayRotation(cfg),
+        { initialProps: { cfg: config } },
+      );
+
+      act(() => { vi.advanceTimersByTime(10_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+
+      // C is activated in the CMS.
+      rerender({ cfg: withPresentations(config, [PRES_A, PRES_C]) });
+
+      const seen: string[] = [];
+      // Two full cycles at the new length: (10 + 5 + 5) twice
+      for (const ms of [5_000, 10_000, 5_000, 5_000, 10_000, 5_000, 5_000]) {
+        act(() => { vi.advanceTimersByTime(ms); });
+        if (result.current.kind === 'presentation') seen.push(result.current.presentation.title);
+      }
+
+      expect(seen).toContain(PRES_C.title);
+      expect(seen).toContain(PRES_A.title);
+    });
+
+    it('picks up changed durations at the next boundary', () => {
+      const config = withPresentations(makeConfig(), [PRES_A]);
+      const { result, rerender } = renderHook(
+        ({ cfg }) => useDisplayRotation(cfg),
+        { initialProps: { cfg: config } },
+      );
+
+      act(() => { vi.advanceTimersByTime(10_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+
+      rerender({
+        cfg: {
+          ...config,
+          displaySettings: { mainDashboardDurationSeconds: 2, presentationDurationSeconds: 5 },
+        },
+      });
+
+      // A finishes at its original 5s, then the shorter dashboard applies.
+      act(() => { vi.advanceTimersByTime(5_000); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+      act(() => { vi.advanceTimersByTime(2_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+    });
+
+    it('starts rotating once the config finishes loading', () => {
+      const config = makeConfig();
+      const { result, rerender } = renderHook(
+        ({ cfg }) => useDisplayRotation(cfg),
+        { initialProps: { cfg: null as TenantConfig | null } },
+      );
+
+      expect(result.current).toEqual({ kind: 'dashboard' });
+
+      rerender({ cfg: config });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+
+      act(() => { vi.advanceTimersByTime(10_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+    });
+  });
+
+  describe('per-slide durationSeconds', () => {
+    it('uses the slide override for one slide and the global default for another', () => {
+      const first: Presentation = { ...PRES_A, durationSeconds: 10 };
+      const config = makeConfig({
+        displaySettings: { mainDashboardDurationSeconds: 30, presentationDurationSeconds: 20 },
+        activePresentations: [first, PRES_B],
+      });
+      const { result } = renderHook(() => useDisplayRotation(config));
+
+      // Dashboard runs its 30s.
+      act(() => { vi.advanceTimersByTime(29_999); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+      act(() => { vi.advanceTimersByTime(1); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: first });
+
+      // First slide honours its own 10s, not the global 20s.
+      act(() => { vi.advanceTimersByTime(9_999); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: first });
+      act(() => { vi.advanceTimersByTime(1); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_B });
+
+      // Second slide has no override → global 20s.
+      act(() => { vi.advanceTimersByTime(19_999); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_B });
+      act(() => { vi.advanceTimersByTime(1); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+    });
+
+    it('applies a duration added mid-rotation only from the next cycle', () => {
+      const base = makeConfig({
+        displaySettings: { mainDashboardDurationSeconds: 30, presentationDurationSeconds: 20 },
+        activePresentations: [PRES_A],
+      });
+      const { result, rerender } = renderHook(
+        ({ cfg }) => useDisplayRotation(cfg),
+        { initialProps: { cfg: base } },
+      );
+
+      act(() => { vi.advanceTimersByTime(30_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+
+      // CMS adds a shorter per-slide duration while the slide is on screen.
+      const fasterA: Presentation = { ...PRES_A, durationSeconds: 10 };
+      rerender({ cfg: withPresentations(base, [fasterA]) });
+
+      // The current turn still runs out the 20s it was scheduled with, and keeps
+      // showing the object captured at the boundary (no durationSeconds yet).
+      act(() => { vi.advanceTimersByTime(10_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+      act(() => { vi.advanceTimersByTime(9_999); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+      act(() => { vi.advanceTimersByTime(1); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+
+      // Next cycle picks up the 10s override.
+      act(() => { vi.advanceTimersByTime(30_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: fasterA });
+      act(() => { vi.advanceTimersByTime(9_999); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: fasterA });
+      act(() => { vi.advanceTimersByTime(1); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+    });
+  });
+
+  describe('messages step', () => {
+    /** Config with a 30s dashboard / 20s presentation default. */
+    function msgConfig(overrides: Partial<TenantConfig> = {}): TenantConfig {
+      return {
+        tenant: { id: 'test', displayName: 'Test' },
+        displaySettings: { mainDashboardDurationSeconds: 30, presentationDurationSeconds: 20 },
+        weeklySchedule: {} as TenantConfig['weeklySchedule'],
+        activePresentations: [PRES_A],
+        ...overrides,
+      };
+    }
+
+    const DONOR: DisplayMessage = { type: 'donor', title: 'Test', body: 'Body' };
+
+    it('has no messages step when the config has no activeMessages key', () => {
+      const { result } = renderHook(() => useDisplayRotation(msgConfig()));
+
+      act(() => { vi.advanceTimersByTime(30_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+
+      // Presentation is the last step → straight back to the dashboard.
+      act(() => { vi.advanceTimersByTime(20_000); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+    });
+
+    it('has no messages step when activeMessages is empty', () => {
+      const { result } = renderHook(() => useDisplayRotation(msgConfig({ activeMessages: [] })));
+
+      act(() => { vi.advanceTimersByTime(30_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+
+      act(() => { vi.advanceTimersByTime(20_000); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+    });
+
+    it('places the messages step after all presentations', () => {
+      const { result } = renderHook(
+        () => useDisplayRotation(msgConfig({ activeMessages: [DONOR] })),
+      );
+
+      act(() => { vi.advanceTimersByTime(30_000); });
+      expect(result.current).toEqual({ kind: 'presentation', presentation: PRES_A });
+
+      act(() => { vi.advanceTimersByTime(20_000); });
+      expect(result.current.kind).toBe('messages');
+    });
+
+    it('carries the messages array on the step', () => {
+      const { result } = renderHook(
+        () => useDisplayRotation(msgConfig({ activeMessages: [DONOR] })),
+      );
+
+      act(() => { vi.advanceTimersByTime(50_000); });
+      if (result.current.kind !== 'messages') throw new Error('expected the messages step');
+      expect(result.current.messages).toEqual([DONOR]);
+    });
+
+    it('lasts the sum of the per-message durations', () => {
+      const messages: DisplayMessage[] = [
+        { type: 'donor', title: 'First', body: 'Body', durationSeconds: 10 },
+        { type: 'announcement', title: 'Second', body: 'Body' },
+      ];
+      const { result } = renderHook(
+        () => useDisplayRotation(msgConfig({ activePresentations: [], activeMessages: messages })),
+      );
+
+      act(() => { vi.advanceTimersByTime(30_000); });
+      expect(result.current.kind).toBe('messages');
+
+      // 10s override + 20s global default = 30s for the whole step.
+      act(() => { vi.advanceTimersByTime(29_999); });
+      expect(result.current.kind).toBe('messages');
+      act(() => { vi.advanceTimersByTime(2); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+    });
+
+    it('rotates dashboard → messages → dashboard when there are no presentations', () => {
+      const { result } = renderHook(
+        () => useDisplayRotation(msgConfig({ activePresentations: [], activeMessages: [DONOR] })),
+      );
+
+      act(() => { vi.advanceTimersByTime(30_000); });
+      expect(result.current.kind).toBe('messages');
+
+      act(() => { vi.advanceTimersByTime(20_000); });
+      expect(result.current).toEqual({ kind: 'dashboard' });
+    });
+  });
+});
+
+describe('resolveSlideDurationMs', () => {
+  const slide = (durationSeconds?: number): Presentation =>
+    durationSeconds === undefined ? { ...PRES_A } : { ...PRES_A, durationSeconds };
+
+  it('honours a valid per-slide override', () => {
+    expect(resolveSlideDurationMs(slide(30), 20)).toBe(30_000);
+  });
+
+  it('falls back to the global default when absent', () => {
+    expect(resolveSlideDurationMs(slide(), 20)).toBe(20_000);
+  });
+
+  it('falls back for zero', () => {
+    expect(resolveSlideDurationMs(slide(0), 20)).toBe(20_000);
+  });
+
+  it('falls back for a negative value', () => {
+    expect(resolveSlideDurationMs(slide(-10), 20)).toBe(20_000);
+  });
+
+  it('falls back for NaN', () => {
+    expect(resolveSlideDurationMs(slide(NaN), 20)).toBe(20_000);
+  });
+
+  it('falls back for Infinity', () => {
+    expect(resolveSlideDurationMs(slide(Infinity), 20)).toBe(20_000);
+  });
+
+  it('falls back for a non-number', () => {
+    const bad: Presentation = { ...PRES_A, durationSeconds: '30' as unknown as number };
+    expect(resolveSlideDurationMs(bad, 20)).toBe(20_000);
+  });
+
+  it('clamps up to the minimum', () => {
+    expect(resolveSlideDurationMs(slide(2), 20)).toBe(5_000);
+  });
+
+  it('clamps down to the maximum', () => {
+    expect(resolveSlideDurationMs(slide(9999), 20)).toBe(300_000);
+  });
+});
+
+describe('resolveDurationMs', () => {
+  it('honours a valid override', () => {
+    expect(resolveDurationMs(30, 20)).toBe(30_000);
+  });
+
+  it('falls back to the global default when absent', () => {
+    expect(resolveDurationMs(undefined, 20)).toBe(20_000);
+  });
+
+  it('falls back for zero', () => {
+    expect(resolveDurationMs(0, 20)).toBe(20_000);
+  });
+
+  it('falls back for a negative value', () => {
+    expect(resolveDurationMs(-10, 20)).toBe(20_000);
+  });
+
+  it('falls back for NaN', () => {
+    expect(resolveDurationMs(NaN, 20)).toBe(20_000);
+  });
+
+  it('falls back for Infinity', () => {
+    expect(resolveDurationMs(Infinity, 20)).toBe(20_000);
+  });
+
+  it('falls back for a non-number', () => {
+    expect(resolveDurationMs('30' as unknown as number, 20)).toBe(20_000);
+  });
+
+  it('clamps up to the minimum', () => {
+    expect(resolveDurationMs(2, 20)).toBe(5_000);
+  });
+
+  it('clamps down to the maximum', () => {
+    expect(resolveDurationMs(9999, 20)).toBe(300_000);
   });
 });

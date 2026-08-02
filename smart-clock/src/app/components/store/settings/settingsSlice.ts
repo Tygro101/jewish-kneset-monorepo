@@ -7,6 +7,8 @@ const STORAGE_KEY = 'smartclock-settings';
 const DEFAULTS: SettingsState = {
     netzCountdownEnabled: false,
     netzCountdownMinutes: 5,
+    presentationsBlocked: false,
+    messagesBlocked: false,
 };
 
 /** Loads settings from localStorage, falling back to DEFAULTS on any problem. */
@@ -25,7 +27,15 @@ export function loadSettings(): SettingsState {
         )
             ? parsed.netzCountdownMinutes
             : DEFAULTS.netzCountdownMinutes;
-        return { netzCountdownEnabled: enabled, netzCountdownMinutes: minutes };
+        const presentationsBlocked =
+            typeof parsed.presentationsBlocked === 'boolean'
+                ? parsed.presentationsBlocked
+                : DEFAULTS.presentationsBlocked;
+        const messagesBlocked =
+            typeof parsed.messagesBlocked === 'boolean'
+                ? parsed.messagesBlocked
+                : DEFAULTS.messagesBlocked;
+        return { netzCountdownEnabled: enabled, netzCountdownMinutes: minutes, presentationsBlocked, messagesBlocked };
     } catch {
         return { ...DEFAULTS };
     }
@@ -57,8 +67,16 @@ export const settingsSlice = createSlice({
                 persist(state);
             }
         },
+        setPresentationsBlocked: (state, action: PayloadAction<boolean>) => {
+            state.presentationsBlocked = action.payload;
+            persist(state);
+        },
+        setMessagesBlocked: (state, action: PayloadAction<boolean>) => {
+            state.messagesBlocked = action.payload;
+            persist(state);
+        },
     },
 });
 
-export const { setNetzCountdownEnabled, setNetzCountdownMinutes } = settingsSlice.actions;
+export const { setNetzCountdownEnabled, setNetzCountdownMinutes, setPresentationsBlocked, setMessagesBlocked } = settingsSlice.actions;
 export default settingsSlice.reducer;

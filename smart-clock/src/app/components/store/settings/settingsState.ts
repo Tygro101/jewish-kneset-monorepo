@@ -6,4 +6,8 @@ export interface SettingsState {
     netzCountdownEnabled: boolean;
     /** How many minutes before netz the countdown begins. */
     netzCountdownMinutes: number;
+    /** When true, presentation slides (images/PDFs) are not shown in the rotation. */
+    presentationsBlocked: boolean;
+    /** When true, text messages (donor recognition, announcements) are not shown in the rotation. */
+    messagesBlocked: boolean;
 }

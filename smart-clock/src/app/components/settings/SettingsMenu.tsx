@@ -4,10 +4,14 @@ import { useAppDispatch, useAppSelector } from '../../hooks';
 import {
     getNetzCountdownEnabledSelector,
     getNetzCountdownMinutesSelector,
+    getPresentationsBlockedSelector,
+    getMessagesBlockedSelector,
 } from '../store/settings/settingsSelectors';
 import {
     setNetzCountdownEnabled,
     setNetzCountdownMinutes,
+    setPresentationsBlocked,
+    setMessagesBlocked,
 } from '../store/settings/settingsSlice';
 import { NETZ_COUNTDOWN_MINUTE_OPTIONS } from '../store/settings/settingsState';
 import './SettingsMenu.scss';
@@ -21,6 +25,8 @@ export const SettingsMenu = () => {
     const dispatch = useAppDispatch();
     const countdownEnabled = useAppSelector(getNetzCountdownEnabledSelector);
     const countdownMinutes = useAppSelector(getNetzCountdownMinutesSelector);
+    const presentationsBlocked = useAppSelector(getPresentationsBlockedSelector);
+    const messagesBlocked = useAppSelector(getMessagesBlockedSelector);
 
     // Apply theme whenever the selection changes (also runs once on mount).
     useEffect(() => {
@@ -117,6 +123,37 @@ export const SettingsMenu = () => {
                                     <option key={m} value={m}>{m} דק׳</option>
                                 ))}
                             </select>
+                        </div>
+
+                        <div className="settings-divider" />
+
+                        {/* Content visibility */}
+                        <div className="settings-section-label">תצוגת תוכן</div>
+                        <div className="settings-row">
+                            <label className="settings-toggle">
+                                <input
+                                    type="checkbox"
+                                    checked={!presentationsBlocked}
+                                    onChange={(e) => dispatch(setPresentationsBlocked(!e.target.checked))}
+                                />
+                                <span className="settings-toggle-track">
+                                    <span className="settings-toggle-thumb" />
+                                </span>
+                                <span className="settings-toggle-label">מצגות</span>
+                            </label>
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-toggle">
+                                <input
+                                    type="checkbox"
+                                    checked={!messagesBlocked}
+                                    onChange={(e) => dispatch(setMessagesBlocked(!e.target.checked))}
+                                />
+                                <span className="settings-toggle-track">
+                                    <span className="settings-toggle-thumb" />
+                                </span>
+                                <span className="settings-toggle-label">הודעות (התורם השבועי)</span>
+                            </label>
                         </div>
 
                         <div className="settings-divider" />

@@ -43,11 +43,44 @@ describe('configApi', () => {
 
       const result = await fetchTenantConfig('test-tenant');
 
-      expect(fetch).toHaveBeenCalledWith(
-        'https://jewish-kneset.github.io/test-tenant/config.json',
-        { cache: 'no-cache' },
-      );
+      expect(fetch).toHaveBeenCalledTimes(1);
+      const [calledUrl, calledInit] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0];
+      const parsed = new URL(calledUrl as string);
+      expect(parsed.origin + parsed.pathname)
+        .toBe('https://jewish-kneset.github.io/test-tenant/config.json');
+      expect(calledInit).toEqual({ cache: 'no-store' });
       expect(result).toEqual(mockConfig);
+    });
+
+    it('appends a cache-busting t param to the URL', async () => {
+      (fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockConfig),
+      });
+
+      const before = Date.now();
+      await fetchTenantConfig('test-tenant');
+      const after = Date.now();
+
+      const calledUrl = (fetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+      const t = new URL(calledUrl).searchParams.get('t');
+      expect(t).not.toBeNull();
+      expect(Number(t)).toBeGreaterThanOrEqual(before);
+      expect(Number(t)).toBeLessThanOrEqual(after);
+    });
+
+    it('uses cache: no-store so the HTTP cache is bypassed', async () => {
+      (fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockConfig),
+      });
+
+      await fetchTenantConfig('test-tenant');
+
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('config.json?t='),
+        { cache: 'no-store' },
+      );
     });
 
     it('throws on 404 (invalid tenant ID)', async () => {

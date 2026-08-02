@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useMemo } from "react"
 import ReactDOM from "react-dom/client"
 import { Provider } from "react-redux"
 import { store } from "./app/store"
@@ -6,12 +6,15 @@ import "./index.scss"
 import { ClockView } from "./app/components/clock-view/ClockView"
 import { EntrancePage } from "./app/components/entrance/EntrancePage"
 import { PresentationView } from "./app/components/clock-view/presentation/PresentationView"
+import { MessagesView } from "./app/components/clock-view/messages/MessagesView"
 import { useDisplayRotation } from "./app/components/clock-view/presentation/useDisplayRotation"
 import { applyTheme, loadTheme } from "./app/shared/themes"
 import { registerSW } from 'virtual:pwa-register'
 import { useAppDispatch, useAppSelector } from "./app/hooks"
 import { getConfigSelector } from "./app/components/store/config/configSelectors"
 import { loadConfig } from "./app/components/store/config/configSlice"
+import { useConfigAutoRefresh } from "./app/hooks/useConfigAutoRefresh"
+import { getPresentationsBlockedSelector, getMessagesBlockedSelector } from "./app/components/store/settings/settingsSelectors"
 
 // Apply the persisted theme (family + dark/light) before the app renders.
 const savedTheme = loadTheme();
@@ -49,7 +52,27 @@ const updateSW = registerSW({
 function AppRoot() {
   const dispatch = useAppDispatch();
   const { status, tenantId, data } = useAppSelector(getConfigSelector);
-  const view = useDisplayRotation(data);
+  const presentationsBlocked = useAppSelector(getPresentationsBlockedSelector);
+  const messagesBlocked = useAppSelector(getMessagesBlockedSelector);
+
+  // Derive a config with blocked sections stripped so the rotation hook ignores them.
+  const effectiveConfig = useMemo(() => {
+    if (!data) return null;
+    if (!presentationsBlocked && !messagesBlocked) return data;
+    return {
+      ...data,
+      activePresentations: presentationsBlocked ? [] : data.activePresentations,
+      // activeMessages will be used by a future rotation step; strip it now so
+      // the hook never sees messages when blocked.
+      ...(messagesBlocked ? { activeMessages: [] } : {}),
+    };
+  }, [data, presentationsBlocked, messagesBlocked]);
+
+  const view = useDisplayRotation(effectiveConfig);
+
+  // Poll config.json every 5 minutes so CMS changes (e.g. a deactivated
+  // presentation) reach the display without a reload.
+  useConfigAutoRefresh();
 
   useEffect(() => {
     if (tenantId && status === 'idle') {
@@ -66,13 +89,25 @@ function AppRoot() {
   }
 
   if (status === 'ready') {
-    // When rotating to a presentation, overlay it on top of the dashboard
-    if (view.kind === 'presentation' && data) {
-      const pres = data.activePresentations[view.index];
+    // When rotating to a presentation, overlay it on top of the dashboard.
+    // The rotation hook hands us the presentation object itself, so a config
+    // refresh that shrinks the list can never produce an out-of-range lookup.
+    if (view.kind === 'messages') {
       return (
         <>
           <ClockView />
-          <PresentationView presentation={pres} />
+          <MessagesView
+            messages={view.messages}
+            defaultSeconds={data?.displaySettings.presentationDurationSeconds ?? 20}
+          />
+        </>
+      );
+    }
+    if (view.kind === 'presentation') {
+      return (
+        <>
+          <ClockView />
+          <PresentationView presentation={view.presentation} />
         </>
       );
     }
