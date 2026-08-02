@@ -57,3 +57,4 @@ Hash-based routing — no server-side rewrites needed, offline-safe via Workbox 
 | `src/app/components/tv-view/TvClockView.tsx` | Landscape/TV dashboard |
 | `src/app/components/tv-view/TvClockView.scss` | TV layout + scoped leaf overrides |
 | `public/icon.svg` | PWA manifest icon |
+
