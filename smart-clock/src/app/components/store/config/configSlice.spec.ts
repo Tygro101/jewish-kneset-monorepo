@@ -16,7 +16,7 @@ const mockStorage = {
 Object.defineProperty(globalThis, 'localStorage', { value: mockStorage, writable: true });
 
 // Import AFTER localStorage mock is in place (configSlice reads it at module init).
-import configReducer, { loadConfig, clearTenant, savedTenantId } from './configSlice';
+import configReducer, { loadConfig, refreshConfig, clearTenant, savedTenantId } from './configSlice';
 import type { ConfigState, TenantConfig } from './configState';
 
 const mockConfig: TenantConfig = {
@@ -40,6 +40,8 @@ describe('configSlice', () => {
     expect(state.status).toBe('idle');
     expect(state.tenantId).toBeNull();
     expect(state.data).toBeNull();
+    expect(state.refreshing).toBe(false);
+    expect(state.lastRefreshError).toBeUndefined();
   });
 
   describe('loadConfig thunk', () => {
@@ -79,6 +81,70 @@ describe('configSlice', () => {
     });
   });
 
+  describe('refreshConfig thunk', () => {
+    const readyState = (): ConfigState => ({
+      tenantId: 'test-tenant',
+      data: mockConfig,
+      status: 'ready',
+      refreshing: false,
+    });
+
+    it('sets refreshing on pending without touching status or data', () => {
+      const state = configReducer(readyState(), refreshConfig.pending('req1'));
+      expect(state.refreshing).toBe(true);
+      expect(state.status).toBe('ready');
+      expect(state.data).toEqual(mockConfig);
+    });
+
+    it('replaces data on fulfilled and clears the refresh error', () => {
+      const updated: TenantConfig = {
+        ...mockConfig,
+        activePresentations: [
+          { title: 'New', file: 'presentations/new.pdf', type: 'pdf' },
+        ],
+      };
+      const state = configReducer(
+        { ...readyState(), refreshing: true, lastRefreshError: 'earlier failure' },
+        refreshConfig.fulfilled(updated, 'req1'),
+      );
+      expect(state.refreshing).toBe(false);
+      expect(state.status).toBe('ready');
+      expect(state.data).toEqual(updated);
+      expect(state.lastRefreshError).toBeUndefined();
+    });
+
+    it('preserves existing data and stays ready on rejected', () => {
+      const state = configReducer(
+        { ...readyState(), refreshing: true },
+        refreshConfig.rejected(new Error('Failed to fetch'), 'req1'),
+      );
+      expect(state.refreshing).toBe(false);
+      expect(state.status).toBe('ready');
+      expect(state.data).toEqual(mockConfig);
+      expect(state.error).toBeUndefined();
+      expect(state.lastRefreshError).toBe('Failed to fetch');
+    });
+
+    it('does not blank the display on repeated failures', () => {
+      let state = configReducer(readyState(), refreshConfig.pending('a'));
+      state = configReducer(state, refreshConfig.rejected(new Error('offline'), 'a'));
+      state = configReducer(state, refreshConfig.pending('b'));
+      state = configReducer(state, refreshConfig.rejected(new Error('offline'), 'b'));
+
+      expect(state.data).toEqual(mockConfig);
+      expect(state.status).toBe('ready');
+    });
+
+    it('uses rejectWithValue payload as the refresh error when present', () => {
+      const state = configReducer(
+        readyState(),
+        refreshConfig.rejected(null, 'req1', undefined, 'No tenant selected'),
+      );
+      expect(state.lastRefreshError).toBe('No tenant selected');
+      expect(state.data).toEqual(mockConfig);
+    });
+  });
+
   describe('clearTenant', () => {
     it('resets state and removes localStorage entry', () => {
       store['betKnesetId'] = 'old-tenant';
@@ -86,12 +152,14 @@ describe('configSlice', () => {
         tenantId: 'old-tenant',
         data: mockConfig,
         status: 'ready',
+        refreshing: false,
       };
 
       const state = configReducer(readyState, clearTenant());
       expect(state.tenantId).toBeNull();
       expect(state.data).toBeNull();
       expect(state.status).toBe('idle');
+      expect(state.refreshing).toBe(false);
       expect(mockStorage.removeItem).toHaveBeenCalledWith('betKnesetId');
     });
   });

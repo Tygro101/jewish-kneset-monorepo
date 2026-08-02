@@ -84,7 +84,7 @@ describe('TodaysSchedule', () => {
     const testStore = configureStore({
       reducer: { [StateKeys.Config]: configReducer },
       preloadedState: {
-        [StateKeys.Config]: { tenantId: 'test', data: mockConfig, status: 'ready' as const },
+        [StateKeys.Config]: { tenantId: 'test', data: mockConfig, status: 'ready' as const, refreshing: false },
       },
     });
 
@@ -135,7 +135,7 @@ describe('TodaysSchedule', () => {
     const testStore = configureStore({
       reducer: { [StateKeys.Config]: configReducer },
       preloadedState: {
-        [StateKeys.Config]: { tenantId: 'test', data: emptyConfig, status: 'ready' as const },
+        [StateKeys.Config]: { tenantId: 'test', data: emptyConfig, status: 'ready' as const, refreshing: false },
       },
     });
 
@@ -159,7 +159,7 @@ describe('TodaysSchedule', () => {
     const testStore = configureStore({
       reducer: { [StateKeys.Config]: configReducer },
       preloadedState: {
-        [StateKeys.Config]: { tenantId: null, data: null, status: 'idle' as const },
+        [StateKeys.Config]: { tenantId: null, data: null, status: 'idle' as const, refreshing: false },
       },
     });
 

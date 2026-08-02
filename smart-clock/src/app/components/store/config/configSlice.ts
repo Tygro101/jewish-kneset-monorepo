@@ -1,7 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { StateKeys } from '../../../store.models';
 import { fetchTenantConfig } from './configApi';
-import type { ConfigState } from './configState';
+import { pruneMediaCache } from './mediaCache';
+import type { ConfigState, TenantConfig } from './configState';
+import type { RootState } from '../../../store';
 
 const STORAGE_KEY = 'betKnesetId';
 
@@ -14,16 +16,49 @@ export function savedTenantId(): string | null {
   }
 }
 
-/** Async thunk: fetches config.json for the given tenant ID. */
+/**
+ * Fetches the config and immediately prunes media cached for presentations that
+ * are no longer active, so a deactivated slide cannot be served from the SW cache.
+ */
+async function fetchAndPrune(id: string): Promise<TenantConfig> {
+  const config = await fetchTenantConfig(id);
+  await pruneMediaCache(id, config.activePresentations ?? []);
+  return config;
+}
+
+/** Async thunk: fetches config.json for the given tenant ID (first load). */
 export const loadConfig = createAsyncThunk(
   'config/loadConfig',
-  async (id: string) => fetchTenantConfig(id),
+  async (id: string) => fetchAndPrune(id),
+);
+
+/**
+ * Async thunk: background re-fetch of the current tenant's config.
+ *
+ * Unlike `loadConfig` it never sets `status` to 'loading' or 'error', so the
+ * display is never blanked — on failure the previously loaded config keeps
+ * rendering and the error is recorded in `lastRefreshError`.
+ */
+export const refreshConfig = createAsyncThunk<
+  TenantConfig,
+  void,
+  { state: RootState; rejectValue: string }
+>(
+  'config/refreshConfig',
+  async (_arg, { getState, rejectWithValue }) => {
+    const tenantId = getState().config.tenantId;
+    if (!tenantId) {
+      return rejectWithValue('No tenant selected');
+    }
+    return fetchAndPrune(tenantId);
+  },
 );
 
 const initialState: ConfigState = {
   tenantId: savedTenantId(),
   data: null,
   status: 'idle',
+  refreshing: false,
 };
 
 export const configSlice = createSlice({
@@ -37,6 +72,8 @@ export const configSlice = createSlice({
       state.data = null;
       state.status = 'idle';
       state.error = undefined;
+      state.refreshing = false;
+      state.lastRefreshError = undefined;
     },
   },
   extraReducers: (builder) => {
@@ -50,11 +87,33 @@ export const configSlice = createSlice({
         state.status = 'ready';
         state.data = action.payload;
         state.error = undefined;
+        state.lastRefreshError = undefined;
         try { localStorage.setItem(STORAGE_KEY, action.payload.tenant.id); } catch { /* noop */ }
       })
       .addCase(loadConfig.rejected, (state, action) => {
         state.status = 'error';
         state.error = action.error.message || 'Failed to load config';
+      })
+      // --- Background refresh: never blanks the display ---
+      .addCase(refreshConfig.pending, (state) => {
+        state.refreshing = true;
+      })
+      .addCase(refreshConfig.fulfilled, (state, action) => {
+        state.refreshing = false;
+        state.data = action.payload;
+        state.status = 'ready';
+        state.lastRefreshError = undefined;
+      })
+      .addCase(refreshConfig.rejected, (state, action) => {
+        state.refreshing = false;
+        state.lastRefreshError =
+          (action.payload as string | undefined)
+          ?? action.error.message
+          ?? 'Failed to refresh config';
+        // Keep the existing `data` and stay 'ready' — stale beats blank.
+        if (state.data) {
+          state.status = 'ready';
+        }
       });
   },
 });

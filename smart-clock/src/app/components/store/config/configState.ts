@@ -11,6 +11,11 @@ export interface Presentation {
   title: string;
   file: string;
   type: 'pdf' | 'image';
+  /**
+   * Per-slide display duration in seconds. When absent or invalid,
+   * `displaySettings.presentationDurationSeconds` is used instead.
+   */
+  durationSeconds?: number;
 }
 
 export interface TenantConfig {
@@ -28,4 +33,8 @@ export interface ConfigState {
   data: TenantConfig | null;
   status: 'idle' | 'loading' | 'ready' | 'error';
   error?: string;
+  /** True while a background refresh (polling) is in flight. Never blanks the display. */
+  refreshing: boolean;
+  /** Last background-refresh failure. Does not affect `status` — stale data keeps showing. */
+  lastRefreshError?: string;
 }

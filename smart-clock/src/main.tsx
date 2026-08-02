@@ -12,6 +12,7 @@ import { registerSW } from 'virtual:pwa-register'
 import { useAppDispatch, useAppSelector } from "./app/hooks"
 import { getConfigSelector } from "./app/components/store/config/configSelectors"
 import { loadConfig } from "./app/components/store/config/configSlice"
+import { useConfigAutoRefresh } from "./app/hooks/useConfigAutoRefresh"
 
 // Apply the persisted theme (family + dark/light) before the app renders.
 const savedTheme = loadTheme();
@@ -51,6 +52,10 @@ function AppRoot() {
   const { status, tenantId, data } = useAppSelector(getConfigSelector);
   const view = useDisplayRotation(data);
 
+  // Poll config.json every 5 minutes so CMS changes (e.g. a deactivated
+  // presentation) reach the display without a reload.
+  useConfigAutoRefresh();
+
   useEffect(() => {
     if (tenantId && status === 'idle') {
       dispatch(loadConfig(tenantId));
@@ -66,13 +71,14 @@ function AppRoot() {
   }
 
   if (status === 'ready') {
-    // When rotating to a presentation, overlay it on top of the dashboard
-    if (view.kind === 'presentation' && data) {
-      const pres = data.activePresentations[view.index];
+    // When rotating to a presentation, overlay it on top of the dashboard.
+    // The rotation hook hands us the presentation object itself, so a config
+    // refresh that shrinks the list can never produce an out-of-range lookup.
+    if (view.kind === 'presentation') {
       return (
         <>
           <ClockView />
-          <PresentationView presentation={pres} />
+          <PresentationView presentation={view.presentation} />
         </>
       );
     }
