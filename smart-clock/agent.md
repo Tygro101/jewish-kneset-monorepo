@@ -1,8 +1,9 @@
 # Smart-Clock Project Context
 
 ## Target Hardware
-- 14-inch tablet, 16:10 aspect ratio
-- App runs in full-screen landscape mode
+- 14-inch tablet, 16:10 aspect ratio (portrait: default `/` route)
+- 16:9 TVs via `electron-container` (landscape: `#/tv` route, 1920×1080 / 1366×768)
+- App runs in full-screen mode on both form factors
 - Readability from a distance is critical — large fonts, high-contrast cards
 
 ## Display Goals
@@ -40,6 +41,12 @@ The day is divided into 3 sections, each showing ≤6 time cards:
 - Day-type detected from PRESENCE of time keys (NerotShabat, TzetShabat, TzetTzumKatan), not from titles
 
 ## Key Files
+- `src/app/routing/routes.ts` — `parseRoute()`, `AppRoute` type, `TV_HASH`
+- `src/app/routing/useRoute.ts` — `useRoute()` hook (hashchange subscription)
+- `src/app/components/clock-view/ClockView.tsx` — tablet/portrait composition layout
+- `src/app/components/tv-view/TvClockView.tsx` — landscape/TV composition layout (rail + main)
+- `src/app/components/tv-view/TvClockView.scss` — two-column grid + `.tv-app`-scoped leaf overrides
+- `src/app/components/tv-view/hasScheduleToday.ts` — pure predicate for schedule conditional
 - `src/app/components/clock-view/times/timesSections.ts` — section definitions and selection logic
 - `src/app/components/clock-view/times/timesSections.spec.ts` — section tests
 - `src/app/components/clock-view/times/TimesContainerHooks.ts` — React hook (uses sections, order-independent closest-index)
@@ -47,10 +54,24 @@ The day is divided into 3 sections, each showing ≤6 time cards:
 - `src/app/components/clock-view/times/TimesContainer.tsx` — renders the zmanim grid (adaptive cols/rows via CSS vars)
 - `src/app/components/clock-view/times/TimesContainer.scss` — grid layout (variable-driven 3×2 max)
 - `src/app/components/clock-view/titles/TitlesView.tsx` — prayer/study info cards + Tachanun suppression
-- `src/app/components/clock-view/ClockView.tsx` — main composition layout
 - `src/app/shared/themes.ts` — 11-family theme system
 - `shared/src/core/services/workers/handlers/models/titles-of-aiom.ts` — calculates Tachanun, holidays, etc.
 - `shared/src/core/services/workers/handlers/models/zmani-aiom.ts` — calculates all zmanim for the day
+
+## Routing
+- Hash-based (`#/tv`): no react-router, no GitHub Pages rewrite, offline-safe
+- `main.tsx` uses `useRoute()` → selects `ClockView` or `TvClockView` as `Dashboard`
+- Both overlays (`PresentationView`, `MessagesView`) are `position: fixed` and work over either layout
+- `electron-container` appends `#/tv` to the base URL via `resolveTargetUrl()`
+
+## TV Layout Architecture (TvClockView)
+- Two-column grid: `.tv-rail` (right in RTL, 38%) + `.tv-main` (left, 62%)
+- Rail: clock → dates → divider → titles (stacked) → schedule (conditional)
+- Main: section header → `.tv-zmanim` (TimesContainer, 3×2)
+- **Container queries are load-bearing.** `.tv-titles` declares `container-name: cards`; `.tv-zmanim` declares `container-name: zmanim`. Leaf cq-unit typography resolves against these.
+- Typography adjustments for TV are done only via `.tv-app .leaf-class` selectors in `TvClockView.scss` — never edit existing component SCSS for TV purposes.
+- Fit-guard: `ceil: 1.15, floor: 0.7` (tighter than tablet's `1.2 / 0.75`)
+- Schedule: clipped not scrolled, fade-mask bottom, NOT `data-fit-measure`
 
 ## Important Behaviors
 - **Tachanun suppression:** Hebcal emits "אין אומרים תחנון" on Shabbat/YT/CholHaMoed, but TitlesView.tsx hides it on those days since it's obvious. Shown only on "surprising" no-tachanun days (Rosh Chodesh, Lag BaOmer, etc.)

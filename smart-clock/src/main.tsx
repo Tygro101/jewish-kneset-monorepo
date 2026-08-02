@@ -8,6 +8,8 @@ import { EntrancePage } from "./app/components/entrance/EntrancePage"
 import { PresentationView } from "./app/components/clock-view/presentation/PresentationView"
 import { MessagesView } from "./app/components/clock-view/messages/MessagesView"
 import { useDisplayRotation } from "./app/components/clock-view/presentation/useDisplayRotation"
+import { useRoute } from "./app/routing/useRoute"
+import { TvClockView } from "./app/components/tv-view/TvClockView"
 import { applyTheme, loadTheme } from "./app/shared/themes"
 import { registerSW } from 'virtual:pwa-register'
 import { useAppDispatch, useAppSelector } from "./app/hooks"
@@ -50,6 +52,8 @@ const updateSW = registerSW({
  * 4. On idle (no saved ID) or error → render EntrancePage.
  */
 function AppRoot() {
+  const route = useRoute();
+  const Dashboard = route === 'tv' ? TvClockView : ClockView;
   const dispatch = useAppDispatch();
   const { status, tenantId, data } = useAppSelector(getConfigSelector);
   const presentationsBlocked = useAppSelector(getPresentationsBlockedSelector);
@@ -95,7 +99,7 @@ function AppRoot() {
     if (view.kind === 'messages') {
       return (
         <>
-          <ClockView />
+          <Dashboard />
           <MessagesView
             messages={view.messages}
             defaultSeconds={data?.displaySettings.presentationDurationSeconds ?? 20}
@@ -106,12 +110,12 @@ function AppRoot() {
     if (view.kind === 'presentation') {
       return (
         <>
-          <ClockView />
+          <Dashboard />
           <PresentationView presentation={view.presentation} />
         </>
       );
     }
-    return <ClockView />;
+    return <Dashboard />;
   }
 
   // idle (no saved ID) or error

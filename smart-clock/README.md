@@ -35,12 +35,25 @@ Output is in `build/`. Deploy the contents to a static HTTPS host. Devices runni
 - **Update interval**: 30 minutes, set in `main.tsx` (`UPDATE_INTERVAL_MS`).
 - **Precache patterns**: Configured in `vite.config.ts` under the `VitePWA` plugin options.
 
+## Routes
+
+Hash-based routing — no server-side rewrites needed, offline-safe via Workbox precache.
+
+| Route | Layout | Consumer |
+|-------|--------|----------|
+| `/` or `#/` (default) | Portrait / tablet stack (3 rows) | `react-container` (Android) |
+| `#/tv` | Landscape / TV two-column (rail + zmanim) | `electron-container` (Windows kiosk) |
+
 ## Key Files
 
 | File | Purpose |
 |------|---------|
 | `vite.config.ts` | PWA plugin config (Workbox, manifest, precache patterns) |
-| `src/main.tsx` | SW registration, periodic update poll |
+| `src/main.tsx` | SW registration, periodic update poll, route → dashboard selection |
+| `src/app/routing/routes.ts` | `parseRoute()`, `AppRoute` type, `TV_HASH` constant |
+| `src/app/routing/useRoute.ts` | `useRoute()` hook — `hashchange` subscription |
 | `src/app/hooks/useDailyRecalc.ts` | Midnight recalculation hook |
-| `src/app/components/clock-view/ClockView.tsx` | Main view, uses `useDailyRecalc` |
+| `src/app/components/clock-view/ClockView.tsx` | Tablet/portrait dashboard |
+| `src/app/components/tv-view/TvClockView.tsx` | Landscape/TV dashboard |
+| `src/app/components/tv-view/TvClockView.scss` | TV layout + scoped leaf overrides |
 | `public/icon.svg` | PWA manifest icon |
