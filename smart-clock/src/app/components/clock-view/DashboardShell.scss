@@ -1,0 +1,18 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   DashboardShell — single source of truth for the portrait composition.
+   Both tablet (.clock-app) and TV (.tv-dashboard) wrap their content in this.
+   container-type: size REQUIRES a definite height on the parent —
+     .clock-app provides 100dvh, .tv-dashboard provides grid row of 100%.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.dashboard-shell {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 0.9fr) minmax(0, 1.6fr);
+  grid-template-columns: 1fr;
+  container-type: size;
+  container-name: dashboard;
+  gap: clamp(12px, 3cqh, 40px);
+}

@@ -4,7 +4,9 @@
   --font-hebrew: 'Heebo', sans-serif;
 
   /* Central UI scale: multiplies every font size. Default ~+20% bump.
-     Acts as the ceiling the JS fit-guard resets to before shrinking to fit. */
+     Acts as the ceiling the JS fit-guard resets to before shrinking to fit.
+     --fit-scale is driven by useFitToScreen; --ui-scale derives from it. */
+  --fit-scale: 1.2;
   --ui-scale: 1.2;
 
   /* ── App Background ── */
@@ -46,6 +48,15 @@
 
   /* ── Dividers ── */
   --divider-gradient: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.2), transparent);
+
+  /* ── Calendar Timeline ── */
+  --cal-tefilla: #60a5fa;
+  --cal-shiur: #34d399;
+  --cal-event: #fb923c;
+  --cal-grid-line: rgba(255, 255, 255, 0.05);
+  --cal-block-bg: rgba(255, 255, 255, 0.025);
+  --cal-now: #34d399;
+  --cal-now-glow: rgba(52, 211, 153, 0.3);
 
   /* ── Legacy OKLCH (kept for potential use) ── */
   --color-emerald-100: oklch(.95 .052 163.051);

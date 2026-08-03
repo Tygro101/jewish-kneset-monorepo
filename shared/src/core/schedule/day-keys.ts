@@ -1,4 +1,4 @@
-import type { DayKey } from '../../store/config/configState';
+import type { DayKey } from './schedule.models';
 
 /** Maps JavaScript's Date.getDay() (0=Sunday … 6=Saturday) to config.json DayKey. */
 const DAY_KEYS: DayKey[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'shabbat'];

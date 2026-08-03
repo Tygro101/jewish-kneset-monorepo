@@ -5,6 +5,12 @@ export interface ScheduleEvent {
   time: string;
   title: string;
   type: 'tefilla' | 'shiur' | 'event';
+  /** CMS-authored end time — wins over all heuristics. */
+  endTime?: string;
+  /** Alternative to endTime: explicit duration in minutes. */
+  durationMinutes?: number;
+  /** Displayed under the title in comfortable/full density. */
+  subtitle?: string;
 }
 
 export interface Presentation {
@@ -41,6 +47,8 @@ export interface TenantConfig {
   displaySettings: {
     mainDashboardDurationSeconds: number;
     presentationDurationSeconds: number;
+    /** How many days the schedule timeline shows. Default: TV=7, tablet=2. Clamped 1–7. */
+    scheduleDaysAhead?: number;
   };
   weeklySchedule: Record<DayKey, ScheduleEvent[]>;
   activePresentations: Presentation[];

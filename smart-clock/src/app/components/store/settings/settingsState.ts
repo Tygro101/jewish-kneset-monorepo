@@ -10,4 +10,6 @@ export interface SettingsState {
     presentationsBlocked: boolean;
     /** When true, text messages (donor recognition, announcements) are not shown in the rotation. */
     messagesBlocked: boolean;
+    /** When true, the schedule calendar view is not shown in the tablet rotation. */
+    scheduleBlocked: boolean;
 }

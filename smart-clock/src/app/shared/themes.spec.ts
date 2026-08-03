@@ -38,6 +38,23 @@ describe('themes', () => {
         }
     });
 
+    it('every family/mode emits all --cal-* variables', () => {
+        const calVars = [
+            '--cal-tefilla', '--cal-shiur', '--cal-event',
+            '--cal-grid-line', '--cal-block-bg', '--cal-now', '--cal-now-glow',
+        ];
+        const root = document.documentElement;
+        for (const fam of THEME_FAMILIES) {
+            for (const mode of ['dark', 'light'] as const) {
+                root.removeAttribute('style');
+                applyTheme(fam.id, mode);
+                for (const v of calVars) {
+                    expect(root.style.getPropertyValue(v), `${fam.id}/${mode} missing ${v}`).not.toBe('');
+                }
+            }
+        }
+    });
+
     it('defaults to blue/dark when nothing is saved', () => {
         expect(loadTheme()).toEqual({ familyId: 'blue', mode: 'dark' });
     });

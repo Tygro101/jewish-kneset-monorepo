@@ -9,6 +9,7 @@ const DEFAULTS: SettingsState = {
     netzCountdownMinutes: 5,
     presentationsBlocked: false,
     messagesBlocked: false,
+    scheduleBlocked: false,
 };
 
 /** Loads settings from localStorage, falling back to DEFAULTS on any problem. */
@@ -35,7 +36,11 @@ export function loadSettings(): SettingsState {
             typeof parsed.messagesBlocked === 'boolean'
                 ? parsed.messagesBlocked
                 : DEFAULTS.messagesBlocked;
-        return { netzCountdownEnabled: enabled, netzCountdownMinutes: minutes, presentationsBlocked, messagesBlocked };
+        const scheduleBlocked =
+            typeof parsed.scheduleBlocked === 'boolean'
+                ? parsed.scheduleBlocked
+                : DEFAULTS.scheduleBlocked;
+        return { netzCountdownEnabled: enabled, netzCountdownMinutes: minutes, presentationsBlocked, messagesBlocked, scheduleBlocked };
     } catch {
         return { ...DEFAULTS };
     }
@@ -75,8 +80,12 @@ export const settingsSlice = createSlice({
             state.messagesBlocked = action.payload;
             persist(state);
         },
+        setScheduleBlocked: (state, action: PayloadAction<boolean>) => {
+            state.scheduleBlocked = action.payload;
+            persist(state);
+        },
     },
 });
 
-export const { setNetzCountdownEnabled, setNetzCountdownMinutes, setPresentationsBlocked, setMessagesBlocked } = settingsSlice.actions;
+export const { setNetzCountdownEnabled, setNetzCountdownMinutes, setPresentationsBlocked, setMessagesBlocked, setScheduleBlocked } = settingsSlice.actions;
 export default settingsSlice.reducer;

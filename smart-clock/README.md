@@ -42,7 +42,39 @@ Hash-based routing — no server-side rewrites needed, offline-safe via Workbox 
 | Route | Layout | Consumer |
 |-------|--------|----------|
 | `/` or `#/` (default) | Portrait / tablet stack (3 rows) | `react-container` (Android) |
-| `#/tv` | Landscape / TV two-column (rail + zmanim) | `electron-container` (Windows kiosk) |
+| `#/tv` | Landscape / TV two-column (dashboard + calendar) | `electron-container` (Windows kiosk) |
+
+## Calendar Timeline
+
+The schedule calendar timeline shows upcoming weekly events from `config.json`. It renders as a multi-day timeline with events positioned as blocks on a vertical time axis.
+
+### config.json additions (CMS)
+
+```jsonc
+{
+  "displaySettings": {
+    "scheduleDaysAhead": 7  // 1–7, defaults: TV=7, tablet=2
+  },
+  "weeklySchedule": {
+    "sunday": [
+      {
+        "time": "06:30",          // required, HH:mm
+        "endTime": "07:45",       // optional — overrides all heuristics
+        "durationMinutes": 75,    // optional — used if endTime absent
+        "title": "שחרית",
+        "subtitle": "תפילת הציבור", // optional — shown in comfortable density
+        "type": "tefilla"         // tefilla | shiur | event
+      }
+    ]
+  }
+}
+```
+
+When `endTime` and `durationMinutes` are both absent, duration is inferred from the event title and day type (Shabbat/Yom Tov awareness).
+
+### Settings
+
+A "לוח זמנים" toggle in the gear menu disables the calendar from the tablet rotation cycle. TV is unaffected (calendar is always visible).
 
 ## Key Files
 

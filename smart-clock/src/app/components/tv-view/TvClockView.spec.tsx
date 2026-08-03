@@ -19,7 +19,7 @@ globalThis.ResizeObserver = class {
   disconnect() {}
 } as unknown as typeof ResizeObserver;
 
-// localStorage mock (required because configSlice reads it at import time)
+// localStorage mock
 const storage: Record<string, string> = {};
 Object.defineProperty(globalThis, 'localStorage', {
   value: {
@@ -45,6 +45,28 @@ function createTestStore(preloadedState?: Parameters<typeof configureStore>[0]['
   });
 }
 
+const CONFIG_WITH_SCHEDULE = {
+  [StateKeys.Config]: {
+    tenantId: 'test',
+    data: {
+      tenant: { id: 'test', displayName: 'Test' },
+      displaySettings: { mainDashboardDurationSeconds: 60, presentationDurationSeconds: 20, scheduleDaysAhead: 7 },
+      weeklySchedule: {
+        sunday: [{ time: '06:30', title: 'שחרית', type: 'tefilla' as const }],
+        monday: [{ time: '06:30', title: 'שחרית', type: 'tefilla' as const }],
+        tuesday: [{ time: '06:30', title: 'שחרית', type: 'tefilla' as const }],
+        wednesday: [{ time: '06:30', title: 'שחרית', type: 'tefilla' as const }],
+        thursday: [{ time: '06:30', title: 'שחרית', type: 'tefilla' as const }],
+        friday: [{ time: '06:30', title: 'שחרית', type: 'tefilla' as const }],
+        shabbat: [{ time: '08:00', title: 'שחרית', type: 'tefilla' as const }],
+      },
+      activePresentations: [] as never[],
+    },
+    status: 'ready' as const,
+    refreshing: false,
+  },
+};
+
 function renderTv(preloadedState?: Parameters<typeof createTestStore>[0]) {
   const store = createTestStore(preloadedState);
   return render(
@@ -64,47 +86,50 @@ describe('TvClockView', () => {
     expect(container.querySelector('.tv-app')).toBeTruthy();
   });
 
-  it('contains the clock block', () => {
+  it('renders data-route="tv" attribute', () => {
     const { container } = renderTv();
-    expect(container.querySelector('.tv-clock-block')).toBeTruthy();
+    expect(container.querySelector('[data-route="tv"]')).toBeTruthy();
   });
 
-  it('contains the date block', () => {
+  it('renders the dashboard column with DashboardShell', () => {
     const { container } = renderTv();
-    expect(container.querySelector('.tv-date-block')).toBeTruthy();
+    const dashboard = container.querySelector('.tv-dashboard');
+    expect(dashboard).toBeTruthy();
+    expect(dashboard!.querySelector('.dashboard-shell')).toBeTruthy();
   });
 
-  it('contains the zmanim container inside tv-main', () => {
+  it('renders header and zmanim inside the dashboard shell', () => {
     const { container } = renderTv();
-    const main = container.querySelector('.tv-main');
-    expect(main).toBeTruthy();
-    expect(main!.querySelector('.tv-zmanim')).toBeTruthy();
+    const shell = container.querySelector('.dashboard-shell');
+    expect(shell!.querySelector('.header-section')).toBeTruthy();
+    expect(shell!.querySelector('.zmanim-section')).toBeTruthy();
   });
 
-  it('contains the titles container inside tv-rail', () => {
-    const { container } = renderTv();
-    const rail = container.querySelector('.tv-rail');
-    expect(rail).toBeTruthy();
-    expect(rail!.querySelector('.tv-titles')).toBeTruthy();
+  it('renders info cards container (side-by-side layout, not stacked)', () => {
+    const { container } = renderTv(CONFIG_WITH_SCHEDULE);
+    // .info-cards exists — its CSS grid-template-columns: 1fr 1fr means side-by-side
+    // (no TV override to stack them into a single column)
+    const infoCards = container.querySelector('.info-cards');
+    expect(infoCards).toBeTruthy();
   });
 
-  it('has the section title "זמני היום"', () => {
+  it('renders "זמני היום" section title', () => {
     renderTv();
     expect(screen.getByText('זמני היום')).toBeTruthy();
   });
 
-  it('renders the settings gear button', () => {
+  it('renders the settings gear button (visible, not hidden)', () => {
     renderTv();
     expect(screen.getByLabelText('הגדרות')).toBeTruthy();
   });
 
-  it('does not render schedule when config has no events', () => {
+  it('always renders the calendar column (even with empty schedule)', () => {
     const { container } = renderTv();
-    expect(container.querySelector('.tv-schedule')).toBeFalsy();
+    expect(container.querySelector('.tv-calendar')).toBeTruthy();
   });
 
-  it('renders the data-route attribute', () => {
-    const { container } = renderTv();
-    expect(container.querySelector('[data-route="tv"]')).toBeTruthy();
+  it('renders calendar with day columns when schedule has events', () => {
+    const { container } = renderTv(CONFIG_WITH_SCHEDULE);
+    expect(container.querySelectorAll('.cal-day').length).toBeGreaterThan(0);
   });
 });

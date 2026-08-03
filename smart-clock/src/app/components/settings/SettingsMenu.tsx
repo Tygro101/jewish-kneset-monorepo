@@ -6,12 +6,14 @@ import {
     getNetzCountdownMinutesSelector,
     getPresentationsBlockedSelector,
     getMessagesBlockedSelector,
+    getScheduleBlockedSelector,
 } from '../store/settings/settingsSelectors';
 import {
     setNetzCountdownEnabled,
     setNetzCountdownMinutes,
     setPresentationsBlocked,
     setMessagesBlocked,
+    setScheduleBlocked,
 } from '../store/settings/settingsSlice';
 import { NETZ_COUNTDOWN_MINUTE_OPTIONS } from '../store/settings/settingsState';
 import './SettingsMenu.scss';
@@ -27,6 +29,7 @@ export const SettingsMenu = () => {
     const countdownMinutes = useAppSelector(getNetzCountdownMinutesSelector);
     const presentationsBlocked = useAppSelector(getPresentationsBlockedSelector);
     const messagesBlocked = useAppSelector(getMessagesBlockedSelector);
+    const scheduleBlocked = useAppSelector(getScheduleBlockedSelector);
 
     // Apply theme whenever the selection changes (also runs once on mount).
     useEffect(() => {
@@ -153,6 +156,19 @@ export const SettingsMenu = () => {
                                     <span className="settings-toggle-thumb" />
                                 </span>
                                 <span className="settings-toggle-label">הודעות (התורם השבועי)</span>
+                            </label>
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-toggle">
+                                <input
+                                    type="checkbox"
+                                    checked={!scheduleBlocked}
+                                    onChange={(e) => dispatch(setScheduleBlocked(!e.target.checked))}
+                                />
+                                <span className="settings-toggle-track">
+                                    <span className="settings-toggle-thumb" />
+                                </span>
+                                <span className="settings-toggle-label">לוח זמנים</span>
                             </label>
                         </div>
 

@@ -11,3 +11,6 @@ export const getPresentationsBlockedSelector = (state: RootState) =>
 
 export const getMessagesBlockedSelector = (state: RootState) =>
     state.settings.messagesBlocked;
+
+export const getScheduleBlockedSelector = (state: RootState) =>
+    state.settings.scheduleBlocked;

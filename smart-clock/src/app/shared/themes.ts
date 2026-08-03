@@ -245,7 +245,7 @@ const VARIANTS: Record<string, { dark: ThemeVariant; light: ThemeVariant }> = {
 };
 
 /** Maps a theme variant onto smart-clock's CSS custom properties. */
-function toCssVars(v: ThemeVariant): Record<string, string> {
+function toCssVars(v: ThemeVariant, mode: ThemeMode): Record<string, string> {
     return {
         '--app-bg': v.bg,
         '--card-bg': v.surface,
@@ -270,6 +270,14 @@ function toCssVars(v: ThemeVariant): Record<string, string> {
         '--text-faint': v.textMuted,
         '--divider-gradient': `linear-gradient(90deg, transparent, ${v.divider}, transparent)`,
         '--panel-bg': v.panelBg,
+        // Calendar timeline
+        '--cal-tefilla': v.timeColor,
+        '--cal-shiur': v.accent,
+        '--cal-event': mode === 'dark' ? '#fb923c' : '#c2410c',
+        '--cal-grid-line': v.border,
+        '--cal-block-bg': mode === 'dark' ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.02)',
+        '--cal-now': v.accent,
+        '--cal-now-glow': v.accentGlow,
     };
 }
 
@@ -279,7 +287,7 @@ const STORAGE_KEY = 'smartclock-theme';
 export function applyTheme(familyId: string, mode: ThemeMode): void {
     const family = VARIANTS[familyId] ?? VARIANTS.blue;
     const variant = mode === 'dark' ? family.dark : family.light;
-    const vars = toCssVars(variant);
+    const vars = toCssVars(variant, mode);
     const root = document.documentElement;
     Object.entries(vars).forEach(([k, val]) => root.style.setProperty(k, val));
     try {

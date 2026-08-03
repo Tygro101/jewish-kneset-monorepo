@@ -46,7 +46,10 @@ The day is divided into 3 sections, each showing ≤6 time cards:
 - `src/app/components/clock-view/ClockView.tsx` — tablet/portrait composition layout
 - `src/app/components/tv-view/TvClockView.tsx` — landscape/TV composition layout (rail + main)
 - `src/app/components/tv-view/TvClockView.scss` — two-column grid + `.tv-app`-scoped leaf overrides
-- `src/app/components/tv-view/hasScheduleToday.ts` — pure predicate for schedule conditional
+- `src/app/components/schedule-calendar/ScheduleCalendar.tsx` — container, reads store, renders ScheduleTimeline
+- `src/app/components/schedule-calendar/ScheduleTimeline.tsx` — presentational, N day columns
+- `src/app/components/schedule-calendar/resolveDaysAhead.ts` — CMS value → clamped daysAhead
+- `src/app/components/schedule-calendar/useScheduleDays.ts` — memoized buildTimelineDays + hasScheduleInRange
 - `src/app/components/clock-view/times/timesSections.ts` — section definitions and selection logic
 - `src/app/components/clock-view/times/timesSections.spec.ts` — section tests
 - `src/app/components/clock-view/times/TimesContainerHooks.ts` — React hook (uses sections, order-independent closest-index)
@@ -65,13 +68,26 @@ The day is divided into 3 sections, each showing ≤6 time cards:
 - `electron-container` appends `#/tv` to the base URL via `resolveTargetUrl()`
 
 ## TV Layout Architecture (TvClockView)
-- Two-column grid: `.tv-rail` (right in RTL, 38%) + `.tv-main` (left, 62%)
-- Rail: clock → dates → divider → titles (stacked) → schedule (conditional)
-- Main: section header → `.tv-zmanim` (TimesContainer, 3×2)
-- **Container queries are load-bearing.** `.tv-titles` declares `container-name: cards`; `.tv-zmanim` declares `container-name: zmanim`. Leaf cq-unit typography resolves against these.
-- Typography adjustments for TV are done only via `.tv-app .leaf-class` selectors in `TvClockView.scss` — never edit existing component SCSS for TV purposes.
+- Two-column grid: `.tv-dashboard` (right in RTL, ~42%) + `.tv-calendar` (left, ~58%)
+- Dashboard column: `DashboardHeader` (clock + dates + divider) + `DashboardBody` (info cards + zmanim 3×2)
+- Calendar column: `ScheduleCalendar` container → `ScheduleTimeline` presentational (N day columns)
+- Calendar is **permanent on TV** — not part of the display rotation
+- `.tv-app--no-calendar` collapses to a single column when `weeklySchedule` is empty
+- **Container queries:** `.tv-calendar` declares `container-type: size; container-name: calendar`; `.info-section` → `cards`; `.zmanim-section` → `zmanim`. Leaf cq-unit typography resolves against these.
+- Typography adjustments for TV are done only via `.tv-app .leaf-class` selectors in `TvClockView.scss` — never edit component SCSS for TV purposes.
 - Fit-guard: `ceil: 1.15, floor: 0.7` (tighter than tablet's `1.2 / 0.75`)
-- Schedule: clipped not scrolled, fade-mask bottom, NOT `data-fit-measure`
+- Calendar timeline: **percentage-positioned** (no px/overflow); excluded from `data-fit-measure`
+
+## Schedule Calendar Timeline
+- **Domain logic:** `shared/src/core/schedule/` — types, time-utils, day-keys, day-context (hebcal), event-durations (prayer keyword rules), timeline-builder (overlap clipping), timeline-window (scale-to-fit %)
+- **Presentational:** `smart-clock/src/app/components/schedule-calendar/` — ScheduleTimeline, DayColumn, HourGrid, EventBlock, TimePill, NowLine (no Redux, no domain math)
+- **Container:** `ScheduleCalendar.tsx` (reads store), `useScheduleDays.ts`, `useNowMinutes.ts`, `resolveDaysAhead.ts`
+- **Theme vars:** `--cal-tefilla`, `--cal-shiur`, `--cal-event`, `--cal-grid-line`, `--cal-block-bg`, `--cal-now`, `--cal-now-glow`
+- **Config additions:** `ScheduleEvent.endTime?`, `ScheduleEvent.durationMinutes?`, `ScheduleEvent.subtitle?`, `displaySettings.scheduleDaysAhead?`
+- **Duration fallbacks:** שחרית 60/120, מנחה 25/35, ערבית 20/40 (Shabbat/YT/ErevShabbat/ErevYT triggers)
+- **Settings:** `scheduleBlocked` toggle removes calendar from tablet rotation; no effect on TV
+- **Density tiers:** 1–3 cols = comfortable (pills+title+subtitle), 4–5 = compact (pills+title), 6–7 = minimal (start pill+title)
+- **Overlap rule:** if A.end > B.start, clip A.end to B.start (`clipped: true`)
 
 ## Important Behaviors
 - **Tachanun suppression:** Hebcal emits "אין אומרים תחנון" on Shabbat/YT/CholHaMoed, but TitlesView.tsx hides it on those days since it's obvious. Shown only on "surprising" no-tachanun days (Rosh Chodesh, Lag BaOmer, etc.)

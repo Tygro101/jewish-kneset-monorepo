@@ -5,16 +5,21 @@ export interface FitToScreenOptions {
   floor?: number;       // smallest allowed scale
   ceil?: number;        // largest allowed scale (the default bump)
   step?: number;        // shrink increment per pass
-  cssVar?: string;      // CSS variable to drive (default --ui-scale)
+  cssVar?: string;      // CSS variable to drive (default --fit-scale)
   selector?: string;    // measured overflow-prone elements
 }
 
 /**
  * On mount, on content change (deps), and on resize:
- * reset --ui-scale to `ceil`, then shrink step-by-step (never below `floor`)
+ * reset --fit-scale to `ceil`, then shrink step-by-step (never below `floor`)
  * until no measured element overflows vertically and the root does not
  * overflow horizontally. Shrink-only => stable, no flicker/oscillation.
  * Suitable for a non-interactive kiosk display (no scrolling).
+ *
+ * Overflow detection uses both scrollHeight/clientHeight AND bounding-rect
+ * comparison (child rect vs parent rect), because CSS size containment
+ * (container-type: size) silences scrollHeight reporting while allowing
+ * children to visually bleed past their parent's bounds.
  */
 export function useFitToScreen(
   rootRef: React.RefObject<HTMLElement | null>,
@@ -25,7 +30,7 @@ export function useFitToScreen(
     floor = 0.75,
     ceil = 1.2,
     step = 0.02,
-    cssVar = '--ui-scale',
+    cssVar = '--fit-scale',
     selector = '[data-fit-measure]',
   } = options;
 
@@ -37,12 +42,23 @@ export function useFitToScreen(
     let canceled = false;
 
     const hasOverflow = (): boolean => {
-      // horizontal overflow of the whole app (e.g. very wide clock on narrow screens)
+      // horizontal overflow of the whole app
       if (isOverflowing(root.scrollWidth, root.clientWidth)) return true;
-      // vertical overflow of any measured section
+
       const nodes = root.querySelectorAll<HTMLElement>(selector);
       for (const el of Array.from(nodes)) {
+        // Classic check: scrollHeight vs clientHeight
         if (isOverflowing(el.scrollHeight, el.clientHeight)) return true;
+
+        // Bounding-rect check: detects children bleeding past a size-contained parent.
+        // If any direct child's bottom edge extends past the element's bottom edge,
+        // content is overflowing visually even if scrollHeight doesn't report it.
+        const parentRect = el.getBoundingClientRect();
+        for (const child of Array.from(el.children) as HTMLElement[]) {
+          const childRect = child.getBoundingClientRect();
+          if (childRect.bottom > parentRect.bottom + 1) return true;
+          if (childRect.right > parentRect.right + 1) return true;
+        }
       }
       return false;
     };

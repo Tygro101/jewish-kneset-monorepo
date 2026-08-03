@@ -2,27 +2,28 @@ import { useRef } from 'react';
 import { useDailyRecalc } from '../../hooks/useDailyRecalc';
 import { useFitToScreen } from '../../hooks/useFitToScreen';
 import { useAppDispatch, useAppSelector } from '../../hooks';
-import { ClockContainer } from '../clock-view/clock/ClockContainer';
-import { TimesContainer } from '../clock-view/times/TimesContainer';
-import { TitlesContainer, getCalendarHeadline } from '../clock-view/titles/TitlesView';
-import { TodaysSchedule } from '../clock-view/schedule/TodaysSchedule';
-import { SettingsMenu } from '../settings/SettingsMenu';
 import { getTimesSelector } from '../store/times/timesSelectors';
 import { getTitlesSelector } from '../store/titles/titlesSelectors';
 import { getConfigDataSelector } from '../store/config/configSelectors';
 import { calculateTimes } from '../store/times/timesSlice';
 import { calculateTitles } from '../store/titles/titlesSlice';
-import { CitiesEnum, IClockTitle } from '@shared/core/services/workers/handlers/models/shared-models';
-import { TitlesKeys } from '@shared/core/services/workers/handlers/models/titles-of-aiom';
-import { hasScheduleToday } from './hasScheduleToday';
+import { CitiesEnum } from '@shared/core/services/workers/handlers/models/shared-models';
+import { SettingsMenu } from '../settings/SettingsMenu';
+import { DashboardShell } from '../clock-view/DashboardShell';
+import { DashboardHeader } from '../clock-view/DashboardHeader';
+import { DashboardBody } from '../clock-view/DashboardBody';
+import { ScheduleCalendar } from '../schedule-calendar/ScheduleCalendar';
+import { resolveDaysAhead } from '../schedule-calendar/resolveDaysAhead';
 import './TvClockView.scss';
 
 /**
  * Landscape ("TV") dashboard — route '#/tv', default view of electron-container.
  *
- * Reuses every leaf component of the tablet dashboard; only the shell and the
- * typography scale differ. Layout: RTL two columns — rail on the right
- * (clock, dates, titles, today's schedule), zmanim grid on the left.
+ * Layout: RTL two columns —
+ *   Right column (col 1, 35%): full portrait dashboard via DashboardShell
+ *   Left column (col 2, 65%): calendar timeline (7 days, always visible)
+ *
+ * Calendar is permanent on TV (not part of the display rotation).
  */
 export const TvClockView = () => {
   const dispatch = useAppDispatch();
@@ -31,70 +32,36 @@ export const TvClockView = () => {
   const config = useAppSelector(getConfigDataSelector);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // Landscape has less vertical slack per band than the tablet stack,
-  // so allow one extra shrink step (floor 0.7 vs 0.75).
-  useFitToScreen(rootRef, [times, titles], { floor: 0.7, ceil: 1.15 });
+  // Landscape has less vertical slack — tighter fit guard.
+  useFitToScreen(rootRef, [times, titles], { floor: 0.7, ceil: 1.15, cssVar: '--fit-scale' });
 
   useDailyRecalc(() => {
     dispatch(calculateTimes({ date: new Date(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
     dispatch(calculateTitles({ date: new Date(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
   });
 
-  const hebrewDate = (titles[TitlesKeys.HebrewDate] as IClockTitle)?.title ?? '';
-  const calendarHeadline = getCalendarHeadline(titles);
-  const gregorianDate = new Date().toLocaleDateString('he-IL', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-  });
-
-  const showSchedule = hasScheduleToday(config);
+  const daysAhead = resolveDaysAhead(config, 'tv');
 
   return (
     <div className="tv-app" ref={rootRef} data-route="tv">
       {/* Ambient glow */}
       <div className="ambient-glow" />
 
-      {/* Settings (theme) gear — bottom-left, dimmed */}
+      {/* Settings gear — inherits tablet position (top-right, full opacity) */}
       <SettingsMenu />
 
-      {/* Main area — zmanim grid (appears on the LEFT in RTL) */}
-      <main className="tv-main">
-        <div className="tv-main-header">
-          <span className="tv-section-title">זמני היום</span>
-          <span className="tv-header-rule" />
-        </div>
-        <div className="tv-zmanim">
-          <TimesContainer times={times} />
-        </div>
-      </main>
-
-      {/* Rail — clock, dates, titles, schedule (appears on the RIGHT in RTL) */}
-      <aside className="tv-rail">
-        <div className="tv-clock-block">
-          <ClockContainer />
-        </div>
-        <div className="tv-date-block">
-          <div className="tv-date-hebrew">{hebrewDate}</div>
-          {calendarHeadline && <div className="tv-date-calendar">{calendarHeadline}</div>}
-          <div className="tv-date-gregorian">{gregorianDate}</div>
-        </div>
-
-        <div className="tv-rail-divider" />
-
-        {/* Prayer / study info cards, stacked vertically */}
-        <div className="tv-titles">
-          <TitlesContainer titles={titles} />
-        </div>
-
-        {/* Today's schedule — only shown when there are events */}
-        {showSchedule && (
-          <>
-            <div className="tv-rail-divider" />
-            <div className="tv-schedule">
-              <TodaysSchedule />
-            </div>
-          </>
-        )}
+      {/* Dashboard column (right in RTL) — 35% */}
+      <aside className="tv-dashboard">
+        <DashboardShell>
+          <DashboardHeader titles={titles} />
+          <DashboardBody titles={titles} times={times} />
+        </DashboardShell>
       </aside>
+
+      {/* Calendar column (left in RTL) — 65%, always visible */}
+      <main className="tv-calendar">
+        <ScheduleCalendar daysAhead={daysAhead} title="לוח זמנים" />
+      </main>
     </div>
   );
 };

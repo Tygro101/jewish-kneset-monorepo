@@ -16,7 +16,9 @@ import { useAppDispatch, useAppSelector } from "./app/hooks"
 import { getConfigSelector } from "./app/components/store/config/configSelectors"
 import { loadConfig } from "./app/components/store/config/configSlice"
 import { useConfigAutoRefresh } from "./app/hooks/useConfigAutoRefresh"
-import { getPresentationsBlockedSelector, getMessagesBlockedSelector } from "./app/components/store/settings/settingsSelectors"
+import { getPresentationsBlockedSelector, getMessagesBlockedSelector, getScheduleBlockedSelector } from "./app/components/store/settings/settingsSelectors"
+import { ScheduleCalendar } from "./app/components/schedule-calendar/ScheduleCalendar"
+import { resolveDaysAhead } from "./app/components/schedule-calendar/resolveDaysAhead"
 
 // Apply the persisted theme (family + dark/light) before the app renders.
 const savedTheme = loadTheme();
@@ -42,6 +44,12 @@ const updateSW = registerSW({
   },
 });
 
+/** True when the tenant config has at least one event in any day of weeklySchedule. */
+function hasAnyWeeklyEvents(data: import('./app/components/store/config/configState').TenantConfig | null): boolean {
+  if (!data?.weeklySchedule) return false;
+  return Object.values(data.weeklySchedule).some((events) => events && events.length > 0);
+}
+
 /**
  * AppRoot — gates the app on tenant config state.
  *
@@ -58,6 +66,7 @@ function AppRoot() {
   const { status, tenantId, data } = useAppSelector(getConfigSelector);
   const presentationsBlocked = useAppSelector(getPresentationsBlockedSelector);
   const messagesBlocked = useAppSelector(getMessagesBlockedSelector);
+  const scheduleBlocked = useAppSelector(getScheduleBlockedSelector);
 
   // Derive a config with blocked sections stripped so the rotation hook ignores them.
   const effectiveConfig = useMemo(() => {
@@ -66,13 +75,13 @@ function AppRoot() {
     return {
       ...data,
       activePresentations: presentationsBlocked ? [] : data.activePresentations,
-      // activeMessages will be used by a future rotation step; strip it now so
-      // the hook never sees messages when blocked.
       ...(messagesBlocked ? { activeMessages: [] } : {}),
     };
   }, [data, presentationsBlocked, messagesBlocked]);
 
-  const view = useDisplayRotation(effectiveConfig);
+  // Schedule is a rotation view on tablet only, and only when not blocked.
+  const includeSchedule = route !== 'tv' && !scheduleBlocked && hasAnyWeeklyEvents(data);
+  const view = useDisplayRotation(effectiveConfig, { includeSchedule });
 
   // Poll config.json every 5 minutes so CMS changes (e.g. a deactivated
   // presentation) reach the display without a reload.
@@ -113,6 +122,18 @@ function AppRoot() {
           <Dashboard />
           <PresentationView presentation={view.presentation} />
         </>
+      );
+    }
+    if (view.kind === 'schedule' && route !== 'tv') {
+      const daysAhead = resolveDaysAhead(data, route);
+      return (
+        <ClockView
+          bodyOverride={
+            <section className="schedule-body-section">
+              <ScheduleCalendar daysAhead={daysAhead} title="לוח זמנים" />
+            </section>
+          }
+        />
       );
     }
     return <Dashboard />;

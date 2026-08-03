@@ -3,6 +3,7 @@ import type { Presentation, DisplayMessage, TenantConfig } from '../../store/con
 
 export type DisplayView =
   | { kind: 'dashboard' }
+  | { kind: 'schedule' }
   | { kind: 'presentation'; presentation: Presentation }
   | { kind: 'messages'; messages: DisplayMessage[] };
 
@@ -52,10 +53,15 @@ export function resolveSlideDurationMs(
   return resolveDurationMs(presentation.durationSeconds, defaultSeconds);
 }
 
+export interface DisplayRotationOptions {
+  /** When true, the schedule calendar is inserted as a rotation step after the dashboard. */
+  includeSchedule?: boolean;
+}
+
 /**
  * Cycles between the main dashboard view and each active presentation.
  *
- * Sequence: dashboard (N seconds) → presentation[0] (M seconds) → … → last → dashboard → …
+ * Sequence: dashboard (N seconds) → schedule (optional) → presentation[0] (M seconds) → … → last → dashboard → …
  *
  * Config changes are absorbed without restarting the cycle: the latest config is
  * kept in a ref and read at every step boundary, so
@@ -68,13 +74,17 @@ export function resolveSlideDurationMs(
  * so a shrinking list can never produce an out-of-range lookup.
  *
  * @param config The tenant config (null = not loaded yet, stays on dashboard).
+ * @param options Optional configuration for the rotation behaviour.
  */
-export function useDisplayRotation(config: TenantConfig | null): DisplayView {
+export function useDisplayRotation(config: TenantConfig | null, options: DisplayRotationOptions = {}): DisplayView {
   const [view, setView] = useState<DisplayView>({ kind: 'dashboard' });
 
   // Latest config, readable from inside timer callbacks without re-running the effect.
   const configRef = useRef<TenantConfig | null>(config);
   configRef.current = config;
+
+  const includeScheduleRef = useRef(options.includeSchedule ?? false);
+  includeScheduleRef.current = options.includeSchedule ?? false;
 
   // Position in the cycle: 0 = dashboard, 1..N = the Nth presentation of the
   // list as it stood when the step began.
@@ -92,16 +102,22 @@ export function useDisplayRotation(config: TenantConfig | null): DisplayView {
     function viewForStep(step: number): DisplayView {
       const presentations = configRef.current?.activePresentations ?? [];
       const messages = configRef.current?.activeMessages ?? [];
+      const hasSchedule = includeScheduleRef.current;
 
       if (step === 0) return { kind: 'dashboard' };
 
-      if (step <= presentations.length) {
-        const presentation = presentations[step - 1];
+      // Step 1 is the schedule view when enabled
+      const scheduleOffset = hasSchedule ? 1 : 0;
+      if (hasSchedule && step === 1) return { kind: 'schedule' };
+
+      const presStep = step - 1 - scheduleOffset;
+      if (presStep >= 0 && presStep < presentations.length) {
+        const presentation = presentations[presStep];
         if (!presentation) return { kind: 'dashboard' };
         return { kind: 'presentation', presentation };
       }
 
-      if (messages.length > 0 && step === presentations.length + 1) {
+      if (messages.length > 0 && step === 1 + scheduleOffset + presentations.length) {
         return { kind: 'messages', messages };
       }
 
@@ -110,17 +126,21 @@ export function useDisplayRotation(config: TenantConfig | null): DisplayView {
 
     /**
      * Duration of a step, resolved against the *current* config.
-     *
-     * A presentation step prefers the slide's own `durationSeconds`; both the
-     * slide and the global default are read from the ref at the step boundary,
-     * exactly like the presentations list above.
      */
     function durationMsForStep(step: number): number {
       const settings = configRef.current?.displaySettings;
       const presentations = configRef.current?.activePresentations ?? [];
       const messages = configRef.current?.activeMessages ?? [];
+      const hasSchedule = includeScheduleRef.current;
 
       if (step === 0) {
+        return seconds(settings?.mainDashboardDurationSeconds, DEFAULT_DASHBOARD_SECONDS) * 1000;
+      }
+
+      const scheduleOffset = hasSchedule ? 1 : 0;
+
+      // Schedule step uses dashboard duration
+      if (hasSchedule && step === 1) {
         return seconds(settings?.mainDashboardDurationSeconds, DEFAULT_DASHBOARD_SECONDS) * 1000;
       }
 
@@ -129,13 +149,14 @@ export function useDisplayRotation(config: TenantConfig | null): DisplayView {
         DEFAULT_PRESENTATION_SECONDS,
       );
 
-      if (step <= presentations.length) {
-        const currentPresentation = presentations[step - 1];
+      const presStep = step - 1 - scheduleOffset;
+      if (presStep >= 0 && presStep < presentations.length) {
+        const currentPresentation = presentations[presStep];
         if (!currentPresentation) return presentationDurationSeconds * 1000;
         return resolveSlideDurationMs(currentPresentation, presentationDurationSeconds);
       }
 
-      if (messages.length > 0 && step === presentations.length + 1) {
+      if (messages.length > 0 && step === 1 + scheduleOffset + presentations.length) {
         return messages.reduce(
           (total, message) =>
             total + resolveDurationMs(message.durationSeconds, presentationDurationSeconds),
@@ -146,11 +167,12 @@ export function useDisplayRotation(config: TenantConfig | null): DisplayView {
       return presentationDurationSeconds * 1000;
     }
 
-    /** Total steps against the current config: dashboard + presentations + messages. */
+    /** Total steps against the current config. */
     function totalSteps(): number {
       const presentations = configRef.current?.activePresentations?.length ?? 0;
       const hasMessages = (configRef.current?.activeMessages?.length ?? 0) > 0;
-      return 1 + presentations + (hasMessages ? 1 : 0);
+      const hasSchedule = includeScheduleRef.current;
+      return 1 + (hasSchedule ? 1 : 0) + presentations + (hasMessages ? 1 : 0);
     }
 
     function scheduleNext() {
