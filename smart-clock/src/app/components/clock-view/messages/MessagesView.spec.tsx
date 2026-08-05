@@ -6,6 +6,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { DisplayMessage } from '../../store/config/configState';
 import { MessagesView } from './MessagesView';
 
+// ResizeObserver is not available in jsdom
+globalThis.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as unknown as typeof ResizeObserver;
+
 function makeMessage(overrides: Partial<DisplayMessage> = {}): DisplayMessage {
   return {
     type: 'donor',
@@ -74,5 +81,59 @@ describe('MessagesView', () => {
     render(<MessagesView messages={[msg]} defaultSeconds={20} />);
     // Falls back to announcement label
     expect(screen.getByText('הודעה')).toBeInTheDocument();
+  });
+
+  // ── New assertions for the in-layout rewrite ──
+
+  it('.messages-names carries size-md for a 22-char title', () => {
+    const { container } = render(
+      <MessagesView messages={[makeMessage({ title: 'הילולת אור החיים הקדוש' })]} defaultSeconds={20} />,
+    );
+    const namesBlock = container.querySelector('.messages-names');
+    expect(namesBlock!.classList.contains('size-md')).toBe(true);
+  });
+
+  it('.messages-names carries size-xl for a short title', () => {
+    const { container } = render(
+      <MessagesView messages={[makeMessage({ title: 'מזל טוב' })]} defaultSeconds={20} />,
+    );
+    const namesBlock = container.querySelector('.messages-names');
+    expect(namesBlock!.classList.contains('size-xl')).toBe(true);
+  });
+
+  it('.messages-footer absent with 1 message', () => {
+    const { container } = render(
+      <MessagesView messages={[makeMessage()]} defaultSeconds={20} />,
+    );
+    expect(container.querySelector('.messages-footer')).toBeNull();
+  });
+
+  it('.messages-footer present with 2 messages and has exactly 1 active dot', () => {
+    const { container } = render(
+      <MessagesView messages={[makeMessage(), makeMessage({ title: 'שני' })]} defaultSeconds={20} />,
+    );
+    const footer = container.querySelector('.messages-footer');
+    expect(footer).toBeTruthy();
+    const activeDots = container.querySelectorAll('.messages-dot.is-active');
+    expect(activeDots).toHaveLength(1);
+  });
+
+  it('root .messages-view has no fixed/absolute positioning', () => {
+    const { container } = render(
+      <MessagesView messages={[makeMessage()]} defaultSeconds={20} />,
+    );
+    const root = container.querySelector('.messages-view') as HTMLElement;
+    expect(root).toBeTruthy();
+    // Inline style should not contain position
+    expect(root.style.position).toBe('');
+  });
+
+  it('.messages-dots and .messages-counter are both inside .messages-footer', () => {
+    const { container } = render(
+      <MessagesView messages={[makeMessage(), makeMessage({ title: 'ב' })]} defaultSeconds={20} />,
+    );
+    const footer = container.querySelector('.messages-footer')!;
+    expect(footer.querySelector('.messages-dots')).toBeTruthy();
+    expect(footer.querySelector('.messages-counter')).toBeTruthy();
   });
 });

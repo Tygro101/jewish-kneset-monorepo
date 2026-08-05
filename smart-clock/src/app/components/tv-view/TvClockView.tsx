@@ -14,10 +14,20 @@ import { DashboardHeader } from '../clock-view/DashboardHeader';
 import { DashboardBody } from '../clock-view/DashboardBody';
 import { ScheduleCalendar } from '../schedule-calendar/ScheduleCalendar';
 import { resolveDaysAhead } from '../schedule-calendar/resolveDaysAhead';
+import { now } from '../../debug/clock';
 import './TvClockView.scss';
 
+export interface TvClockViewProps {
+  /**
+   * When provided, replaces the calendar column (left, 65%).
+   * Used by the messages rotation step so the dashboard column — and the
+   * clock in it — stays visible.
+   */
+  calendarOverride?: React.ReactNode;
+}
+
 /**
- * Landscape ("TV") dashboard — route '#/tv', default view of electron-container.
+ * Landscape (“TV”) dashboard — route '#/tv', default view of electron-container.
  *
  * Layout: RTL two columns —
  *   Right column (col 1, 35%): full portrait dashboard via DashboardShell
@@ -25,7 +35,7 @@ import './TvClockView.scss';
  *
  * Calendar is permanent on TV (not part of the display rotation).
  */
-export const TvClockView = () => {
+export const TvClockView = ({ calendarOverride }: TvClockViewProps = {}) => {
   const dispatch = useAppDispatch();
   const times = useAppSelector(getTimesSelector);
   const titles = useAppSelector(getTitlesSelector);
@@ -36,8 +46,8 @@ export const TvClockView = () => {
   useFitToScreen(rootRef, [times, titles], { floor: 0.7, ceil: 1.15, cssVar: '--fit-scale' });
 
   useDailyRecalc(() => {
-    dispatch(calculateTimes({ date: new Date(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
-    dispatch(calculateTitles({ date: new Date(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
+    dispatch(calculateTimes({ date: now(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
+    dispatch(calculateTitles({ date: now(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
   });
 
   const daysAhead = resolveDaysAhead(config, 'tv');
@@ -60,7 +70,7 @@ export const TvClockView = () => {
 
       {/* Calendar column (left in RTL) — 65%, always visible */}
       <main className="tv-calendar">
-        <ScheduleCalendar daysAhead={daysAhead} title="לוח זמנים" />
+        {calendarOverride ?? <ScheduleCalendar daysAhead={daysAhead} title="לוח זמנים" />}
       </main>
     </div>
   );

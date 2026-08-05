@@ -26,6 +26,17 @@
 
 }
 
+/* Remove tablet padding from zmanim section on TV */
+.tv-app .zmanim-section {
+  padding-inline: 0;
+  padding-block-end: 0;
+}
+
+/* Remove tablet padding from info section on TV */
+.tv-app .info-section {
+  padding-inline: 0;
+}
+
 /* ── Calendar column (left in RTL) ── */
 .tv-calendar {
   grid-column: 2;

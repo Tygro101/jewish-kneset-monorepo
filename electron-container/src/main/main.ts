@@ -12,6 +12,7 @@ import {
   resolveTargetUrl,
 } from './config';
 import { ConnectivityMonitor } from './connectivity';
+import { windowIconPath } from './icon';
 import { nextRetryDelay, shouldRetryLoadFailure } from './load-retry';
 import { isAllowedNavigation, type OriginLockOptions } from './origin-lock';
 import { startKeepAwake, stopKeepAwake } from './power';
@@ -139,6 +140,7 @@ function createWindow(): BrowserWindow {
     backgroundColor: '#000000',
     autoHideMenuBar: true,
     title: 'Smart Clock',
+    icon: windowIconPath(app.getAppPath()),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

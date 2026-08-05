@@ -2,6 +2,7 @@ import { ClockContainer } from './clock/ClockContainer';
 import { IClockTitle } from '@shared/core/services/workers/handlers/models/shared-models';
 import { TitlesKeys } from '@shared/core/services/workers/handlers/models/titles-of-aiom';
 import { getCalendarHeadline } from './titles/TitlesView';
+import { now } from '../../debug/clock';
 import type { TitlesState } from '../store/titles/titlesState';
 
 interface DashboardHeaderProps {
@@ -15,7 +16,7 @@ interface DashboardHeaderProps {
 export const DashboardHeader = ({ titles }: DashboardHeaderProps) => {
   const hebrewDate = (titles[TitlesKeys.HebrewDate] as IClockTitle)?.title ?? '';
   const calendarHeadline = getCalendarHeadline(titles);
-  const gregorianDate = new Date().toLocaleDateString('he-IL', {
+  const gregorianDate = now().toLocaleDateString('he-IL', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',

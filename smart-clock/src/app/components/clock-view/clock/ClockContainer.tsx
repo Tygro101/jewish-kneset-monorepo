@@ -7,10 +7,11 @@ import {
 } from "../../store/settings/settingsSelectors";
 import { TimesKeys } from "@shared/core/services/workers/handlers/constants/times.keys";
 import { getNetzCountdown, formatCountdown } from "./netzCountdown";
+import { now } from '../../../debug/clock';
 import './ClockContainer.scss';
 
 export const ClockContainer = () => {
-    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentDate, setCurrentDate] = useState(now());
 
     const times = useAppSelector(getTimesSelector);
     const enabled = useAppSelector(getNetzCountdownEnabledSelector);
@@ -18,7 +19,7 @@ export const ClockContainer = () => {
 
     useEffect(() => {
         const handle = setInterval(() => {
-            setCurrentDate(new Date());
+            setCurrentDate(now());
         }, 1000);
         return () => clearInterval(handle);
     }, []);

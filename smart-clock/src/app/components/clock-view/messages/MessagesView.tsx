@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { DisplayMessage, MessageType } from '../../store/config/configState';
 import { resolveDurationMs } from '../presentation/useDisplayRotation';
+import { nameSizeTier } from './nameSizeTier';
+import { useFitToBox } from '../../../hooks/useFitToBox';
 import './MessagesView.scss';
 
 const FADE_MS = 350;
@@ -29,9 +31,15 @@ interface Props {
 export const MessagesView = ({ messages, defaultSeconds }: Props) => {
   const [index, setIndex] = useState(0);
   const [fading, setFading] = useState(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   const safeIndex = messages.length === 0 ? 0 : Math.min(index, messages.length - 1);
   const current = messages[safeIndex];
+
+  const names = current ? current.title.split('\n').map((n) => n.trim()).filter(Boolean) : [];
+  const tier = nameSizeTier(names);
+
+  useFitToBox(bodyRef, [safeIndex, current, tier]);
 
   useEffect(() => {
     if (messages.length <= 1) return;
@@ -53,7 +61,6 @@ export const MessagesView = ({ messages, defaultSeconds }: Props) => {
 
   const accent = MESSAGE_TYPE_COLORS[current.type] ?? FALLBACK_COLOR;
   const label = MESSAGE_TYPE_LABELS[current.type] ?? MESSAGE_TYPE_LABELS.announcement;
-  const names = current.title.split('\n').map((n) => n.trim()).filter(Boolean);
 
   return (
     <div className="messages-view">
@@ -64,13 +71,13 @@ export const MessagesView = ({ messages, defaultSeconds }: Props) => {
         <div className="messages-stripe messages-stripe-top" />
         <div className="messages-glow" aria-hidden="true" />
 
-        <div className="messages-body">
+        <div className="messages-body" ref={bodyRef}>
           <div className="messages-badge">
             <span className="messages-badge-dot" />
             <span className="messages-badge-label">{label}</span>
           </div>
 
-          <div className="messages-names">
+          <div className={`messages-names size-${tier}`}>
             {names.map((name, i) => (
               <div
                 key={i}
@@ -90,7 +97,7 @@ export const MessagesView = ({ messages, defaultSeconds }: Props) => {
       </div>
 
       {messages.length > 1 && (
-        <>
+        <div className="messages-footer">
           <div className="messages-dots" aria-hidden="true">
             {messages.map((_, i) => (
               <span key={i} className={`messages-dot ${i === safeIndex ? 'is-active' : ''}`} />
@@ -99,7 +106,7 @@ export const MessagesView = ({ messages, defaultSeconds }: Props) => {
           <div className="messages-counter">
             {safeIndex + 1} / {messages.length}
           </div>
-        </>
+        </div>
       )}
     </div>
   );

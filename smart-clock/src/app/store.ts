@@ -4,6 +4,7 @@ import timeReducer from './components/store/times/timesSlice';
 import titlesReducer from './components/store/titles/titlesSlice';
 import configReducer from './components/store/config/configSlice';
 import settingsReducer from './components/store/settings/settingsSlice';
+import debugReducer from './components/store/debug/debugSlice';
 import { StateKeys } from "./store.models";
 
 
@@ -14,6 +15,7 @@ export const store = configureStore({
     [StateKeys.Titles]: titlesReducer,
     [StateKeys.Config]: configReducer,
     [StateKeys.Settings]: settingsReducer,
+    [StateKeys.Debug]: debugReducer,
   },
 })
 

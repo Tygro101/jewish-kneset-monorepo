@@ -1,46 +1,70 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   MessagesView — in-layout panel. NOT a fullscreen overlay any more.
+
+   Hosts (both declare `container-type: size`):
+     • tablet → `.messages-body-section`  — rows 2..-1 of `.dashboard-shell`,
+                i.e. it replaces the info cards + "זמני היום"; the clock stays.
+     • TV     → `.tv-calendar`            — replaces the schedule column;
+                the whole dashboard column (clock included) stays.
+
+   SIZING CONTRACT — read before editing:
+     • NO vw / vh / dvh / dvw anywhere.
+     • font sizes → calc(var(--ui-scale) * var(--msg-fit, 1) * clamp(min, N cqw, max))
+     • block gaps → clamp(min, N cqh, max)   • inline → clamp(min, N cqw, max)
+     • `cq*` units are intentionally UNNAMED so they bind to whichever host
+       wraps the panel (`messages` on tablet, `calendar` on TV).
+     • `--ui-scale` is the global fit-guard output. `--msg-fit` is the OPTIONAL
+       panel-local guard from Task 7 and defaults to 1.
+
+   LAYERING: z-index 1 = the same tier as `.header-section` / `.info-section`.
+   ══════════════════════════════════════════════════════════════════════════ */
+
 .messages-view {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(12px, 2dvh, 24px);
-  padding: clamp(16px, 4vh, 48px) clamp(16px, 4vw, 64px);
-  background: var(--app-bg, #080d18);
+  gap: clamp(6px, 1.5cqh, 18px);
+
+  background: transparent;
+  overflow: hidden;
   direction: rtl;
   font-family: var(--font-hebrew);
 }
 
+/* ── Slide surface ── */
 .messages-slide {
   position: relative;
+  flex: 1 1 auto;
   width: 100%;
-  max-width: 1100px;
-  flex: 1;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: clamp(12px, 1.6vw, 20px);
-  border: 1px solid color-mix(in srgb, var(--accent) 14%, transparent);
-  background: rgba(255, 255, 255, 0.02);
+
+  border-radius: var(--card-radius);
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent);
+  background: var(--card-bg);
+
   opacity: 1;
   transition: opacity 350ms ease;
   animation: messages-float-up 500ms ease;
 }
 
-.messages-slide.is-fading {
-  opacity: 0;
-}
+.messages-slide.is-fading { opacity: 0; }
 
 @keyframes messages-float-up {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.messages-stripe {
-  flex: none;
-}
+.messages-stripe { flex: none; }
 
 .messages-stripe-top {
   height: 3px;
@@ -68,115 +92,157 @@
   pointer-events: none;
   background: radial-gradient(
     circle,
-    color-mix(in srgb, var(--accent) 7%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 8%, transparent) 0%,
     transparent 65%
   );
 }
 
+/* ── Content column ── */
 .messages-body {
   position: relative;
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0;
-  padding: clamp(20px, 4dvh, 44px) clamp(24px, 5vw, 56px);
+  padding: clamp(10px, 4cqh, 44px) clamp(12px, 3.5cqw, 52px);
   text-align: center;
+  overflow: hidden;
 }
 
+/* ── Type badge ── */
 .messages-badge {
+  flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: clamp(4px, 0.6dvh, 7px) clamp(10px, 1.2vw, 16px);
-  margin-bottom: clamp(14px, 3dvh, 30px);
+  gap: clamp(5px, 0.8cqw, 12px);
+  padding: clamp(4px, 0.8cqh, 10px) clamp(10px, 1.6cqw, 22px);
+  margin-bottom: clamp(10px, 2.6cqh, 30px);
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 .messages-badge-dot {
-  width: 6px;
-  height: 6px;
+  flex: none;
+  width: clamp(6px, 0.9cqw, 12px);
+  height: clamp(6px, 0.9cqw, 12px);
   border-radius: 50%;
   background: var(--accent);
 }
 
 .messages-badge-label {
-  font-size: clamp(11px, 1.2vw, 15px);
+  font-size: calc(var(--ui-scale) * var(--msg-fit, 1) * clamp(12px, 2.1cqw, 30px));
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--accent);
+  white-space: nowrap;
 }
 
+/* ── Name block ── */
 .messages-names {
+  flex: 0 1 auto;
+  min-height: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: clamp(6px, 1dvh, 12px);
-  margin-bottom: clamp(12px, 2.6dvh, 26px);
-  width: 100%;
+  align-items: center;
+  gap: clamp(2px, 0.8cqh, 14px);
+  margin-bottom: clamp(10px, 2.4cqh, 28px);
 }
+
+/* Tiers from nameSizeTier() */
+.messages-names.size-xl { --messages-name-size: clamp(34px, 15cqw, 170px); }
+.messages-names.size-lg { --messages-name-size: clamp(30px, 12cqw, 136px); }
+.messages-names.size-md { --messages-name-size: clamp(26px, 9cqw, 108px); }
+.messages-names.size-sm { --messages-name-size: clamp(22px, 6.5cqw, 78px); }
 
 .messages-name {
-  font-size: clamp(26px, 4.4vw, 56px);
+  width: 100%;
+  min-width: 0;
+  font-size: calc(var(--ui-scale) * var(--msg-fit, 1) * var(--messages-name-size, clamp(26px, 9cqw, 108px)));
   font-weight: 800;
-  line-height: 1.15;
-  background-image: linear-gradient(
-    135deg,
-    var(--text-primary, #e2e8f0),
-    color-mix(in srgb, var(--accent) 80%, transparent)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  line-height: 1.08;
+
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+
+  color: var(--text-primary);
 }
 
-.messages-name.is-multi {
-  font-size: clamp(20px, 3.2vw, 40px);
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .messages-name {
+    background-image: linear-gradient(
+      135deg,
+      var(--text-primary),
+      color-mix(in srgb, var(--accent) 80%, var(--text-primary))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }
+
+.messages-name.is-multi { line-height: 1.15; }
 
 .messages-divider {
-  width: clamp(36px, 4vw, 56px);
-  height: 1.5px;
-  margin-bottom: clamp(12px, 2.2dvh, 22px);
+  flex: none;
+  width: clamp(40px, 6cqw, 90px);
+  height: 2px;
+  margin-bottom: clamp(10px, 2.2cqh, 26px);
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
 }
 
+/* ── Body text ── */
 .messages-text {
-  max-width: 46ch;
-  font-size: clamp(14px, 1.7vw, 24px);
+  flex: 0 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: min(56ch, 100%);
+  margin-inline: auto;
+  font-size: calc(var(--ui-scale) * var(--msg-fit, 1) * clamp(14px, 2.8cqw, 42px));
   font-weight: 400;
-  line-height: 1.7;
-  color: var(--text-secondary, #cbd5e1);
+  line-height: 1.45;
+  color: var(--text-secondary);
   white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* ── Footer: progress dots + counter ── */
+.messages-footer {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1.6cqw, 20px);
 }
 
 .messages-dots {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 7px;
-  flex: none;
+  gap: clamp(5px, 0.7cqw, 10px);
 }
 
 .messages-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 4px;
-  background: var(--card-border, rgba(255, 255, 255, 0.05));
-  transition: all 300ms ease;
+  width: clamp(6px, 0.8cqw, 11px);
+  height: clamp(6px, 0.8cqw, 11px);
+  border-radius: 999px;
+  background: var(--card-border);
+  transition: width 300ms ease, background-color 300ms ease;
 }
 
 .messages-dot.is-active {
-  width: 22px;
-  background: var(--accent-emerald, #34d399);
+  width: clamp(18px, 2.4cqw, 34px);
+  background: var(--accent);
 }
 
 .messages-counter {
-  flex: none;
-  font-size: clamp(10px, 1vw, 13px);
+  font-size: calc(var(--ui-scale) * var(--msg-fit, 1) * clamp(10px, 1.3cqw, 20px));
   font-weight: 300;
   letter-spacing: 0.06em;
-  color: var(--text-dim, #64748b);
+  color: var(--text-dim);
+  direction: ltr;
 }

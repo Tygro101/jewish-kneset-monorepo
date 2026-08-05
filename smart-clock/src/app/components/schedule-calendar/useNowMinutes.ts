@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { now } from '../../debug/clock';
 
 /** Returns minutes from midnight, updated every 30 seconds. Re-syncs on visibility restore. */
 export function useNowMinutes(): number {
@@ -24,6 +25,6 @@ export function useNowMinutes(): number {
 }
 
 function minutesFromMidnight(): number {
-  const now = new Date();
-  return now.getHours() * 60 + now.getMinutes();
+  const n = now();
+  return n.getHours() * 60 + n.getMinutes();
 }

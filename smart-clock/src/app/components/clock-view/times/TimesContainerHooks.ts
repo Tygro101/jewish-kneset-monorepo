@@ -3,6 +3,7 @@ import { TimeState } from "../../store/times/timesState";
 import { TimesKeys } from "@shared/core/services/workers/handlers/constants/times.keys";
 import { TypedObjectMap } from "@shared/models/core";
 import { buildSections, getActiveSection } from "./timesSections";
+import { now } from '../../../debug/clock';
 
 export type MapProp = Map<string, { key: string, format: string }>;
 export type MultiMapProp = Map<string, MapProp>;
@@ -26,9 +27,9 @@ const MARKED_TIME_GRACE_MS = MARKED_TIME_GRACE_MINUTES * 60 * 1000;
 export const getClosestKeyIndex = (
     times: TimeState,
     relevantKeys: TimesMap,
-    now: Date = new Date(),
+    now_: Date = now(),
 ): number => {
-    const cutoffMs = now.getTime() - MARKED_TIME_GRACE_MS;
+    const cutoffMs = now_.getTime() - MARKED_TIME_GRACE_MS;
 
     let bestFutureIdx = -1;
     let bestFutureMs = Infinity;
@@ -66,11 +67,11 @@ export const useTimesContainerLogic = (times: TimeState) => {
     useEffect(() => {
         const compute = () => {
             try {
-                const now = new Date();
-                const sections = buildSections(times, now);
-                const active = getActiveSection(times, sections, now);
+                const current = now();
+                const sections = buildSections(times, current);
+                const active = getActiveSection(times, sections, current);
                 setRelevantKeys(active.times);
-                setClosestIndex(getClosestKeyIndex(times, active.times, now));
+                setClosestIndex(getClosestKeyIndex(times, active.times, current));
             } catch (e) {
                 setRelevantKeys([]);
                 setClosestIndex(-1);
