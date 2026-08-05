@@ -29,6 +29,18 @@ describe('icon packaging', () => {
     expect(pkg.build.win.icon).toBe('build/icon.ico');
   });
 
+  it('does not disable executable resource editing (would drop the exe icon)', () => {
+    // With signAndEditExecutable: false electron-builder skips rcedit, so the
+    // exe keeps Electron's default atom icon and the NSIS shortcut shows it.
+    expect(pkg.build.win.signAndEditExecutable).not.toBe(false);
+  });
+
+  it('nsis reuses the same ico for installer/uninstaller', () => {
+    expect(pkg.build.nsis.installerIcon).toBe('build/icon.ico');
+    expect(pkg.build.nsis.uninstallerIcon).toBe('build/icon.ico');
+    expect(pkg.build.nsis.installerHeaderIcon).toBe('build/icon.ico');
+  });
+
   it('static/icon.ico exists on disk', () => {
     expect(fs.existsSync(path.join(projectRoot, 'static', 'icon.ico'))).toBe(true);
   });
