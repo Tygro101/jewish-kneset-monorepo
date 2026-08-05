@@ -2,7 +2,7 @@ import { clampDaysAhead } from '@shared/core/schedule/timeline-builder';
 import type { TenantConfig } from '../store/config/configState';
 import type { AppRoute } from '../../routing/routes';
 
-const TV_DEFAULT = 7;
+const TV_DEFAULT = 6;
 const TABLET_DEFAULT = 2;
 
 /**

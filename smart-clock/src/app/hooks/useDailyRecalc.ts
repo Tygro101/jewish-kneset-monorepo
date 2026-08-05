@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'react';
+import { now } from '../debug/clock';
 
 /**
  * Returns the number of milliseconds from `now` until the next local midnight (00:00:00.000).
  */
 function msUntilMidnight(): number {
-  const now = new Date();
-  const midnight = new Date(now);
+  const current = now();
+  const midnight = new Date(current);
   midnight.setHours(24, 0, 0, 0); // next day 00:00:00
-  return midnight.getTime() - now.getTime();
+  return midnight.getTime() - current.getTime();
 }
 
 /**

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { buildTimelineDays } from '@shared/core/schedule/timeline-builder';
 import type { TenantConfig } from '../store/config/configState';
 import type { TimelineDay } from '@shared/core/schedule/schedule.models';
+import { now } from '../../debug/clock';
 
 /**
  * Builds the timeline days from the tenant config's weeklySchedule.
@@ -14,7 +15,7 @@ export function useScheduleDays(
   dayStamp: string,
 ): TimelineDay[] {
   return useMemo(
-    () => buildTimelineDays(config?.weeklySchedule ?? {}, daysAhead),
+    () => buildTimelineDays(config?.weeklySchedule ?? {}, daysAhead, now()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [config?.weeklySchedule, daysAhead, dayStamp],
   );

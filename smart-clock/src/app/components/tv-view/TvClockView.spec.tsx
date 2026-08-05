@@ -132,4 +132,31 @@ describe('TvClockView', () => {
     const { container } = renderTv(CONFIG_WITH_SCHEDULE);
     expect(container.querySelectorAll('.cal-day').length).toBeGreaterThan(0);
   });
+
+  it('with no calendarOverride and schedule data, .cal-day still renders', () => {
+    const { container } = renderTv(CONFIG_WITH_SCHEDULE);
+    expect(container.querySelectorAll('.cal-day').length).toBeGreaterThan(0);
+  });
+
+  it('with calendarOverride, override renders inside .tv-calendar and .cal-day is absent', () => {
+    const store = createTestStore(CONFIG_WITH_SCHEDULE);
+    const { container } = render(
+      <Provider store={store}>
+        <TvClockView calendarOverride={<div data-testid="override" />} />
+      </Provider>,
+    );
+    const tvCal = container.querySelector('.tv-calendar');
+    expect(tvCal!.querySelector('[data-testid="override"]')).toBeTruthy();
+    expect(container.querySelector('.cal-day')).toBeNull();
+  });
+
+  it('with calendarOverride, the clock block still renders', () => {
+    const store = createTestStore(CONFIG_WITH_SCHEDULE);
+    const { container } = render(
+      <Provider store={store}>
+        <TvClockView calendarOverride={<div />} />
+      </Provider>,
+    );
+    expect(container.querySelector('.tv-dashboard .dashboard-shell .header-section')).toBeTruthy();
+  });
 });

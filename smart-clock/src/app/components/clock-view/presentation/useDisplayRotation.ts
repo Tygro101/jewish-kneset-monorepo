@@ -56,6 +56,8 @@ export function resolveSlideDurationMs(
 export interface DisplayRotationOptions {
   /** When true, the schedule calendar is inserted as a rotation step after the dashboard. */
   includeSchedule?: boolean;
+  /** When true, the rotation timer is suspended at its current step (does not reset position). */
+  paused?: boolean;
 }
 
 /**
@@ -86,6 +88,9 @@ export function useDisplayRotation(config: TenantConfig | null, options: Display
   const includeScheduleRef = useRef(options.includeSchedule ?? false);
   includeScheduleRef.current = options.includeSchedule ?? false;
 
+  const pausedRef = useRef(options.paused ?? false);
+  pausedRef.current = options.paused ?? false;
+
   // Position in the cycle: 0 = dashboard, 1..N = the Nth presentation of the
   // list as it stood when the step began.
   const stepRef = useRef(0);
@@ -94,6 +99,9 @@ export function useDisplayRotation(config: TenantConfig | null, options: Display
   // Restart the loop only when config appears/disappears entirely; ordinary
   // content changes are picked up from the ref at the next step boundary.
   const hasConfig = config !== null;
+
+  // Store scheduleNext in a ref so the pause effect can call it.
+  const scheduleNextRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -176,6 +184,7 @@ export function useDisplayRotation(config: TenantConfig | null, options: Display
     }
 
     function scheduleNext() {
+      if (pausedRef.current) return; // Don't schedule when paused
       const delay = durationMsForStep(stepRef.current);
       timerRef.current = setTimeout(() => {
         if (cancelled) return;
@@ -186,19 +195,45 @@ export function useDisplayRotation(config: TenantConfig | null, options: Display
       }, delay);
     }
 
+    scheduleNextRef.current = scheduleNext;
+
     // Every (re)start of the loop begins at the dashboard.
     stepRef.current = 0;
     setView({ kind: 'dashboard' });
-    scheduleNext();
+    if (!pausedRef.current) {
+      scheduleNext();
+    }
 
     return () => {
       cancelled = true;
+      scheduleNextRef.current = null;
       if (timerRef.current !== null) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
     };
   }, [hasConfig]);
+
+  // --- Pause/resume effect (does NOT reset position) ---
+  const paused = options.paused ?? false;
+  const pauseInitRef = useRef(true);
+  useEffect(() => {
+    // Skip the initial mount — the main hasConfig effect handles startup.
+    if (pauseInitRef.current) {
+      pauseInitRef.current = false;
+      return;
+    }
+    if (paused) {
+      // Clear any pending timer to freeze in place.
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    } else {
+      // Resume from the current step.
+      scheduleNextRef.current?.();
+    }
+  }, [paused]);
 
   return view;
 }

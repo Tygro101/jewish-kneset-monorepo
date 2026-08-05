@@ -75,6 +75,7 @@
 
 /* ── Info Section (cards band) ── */
 .info-section {
+    padding-inline: clamp(8px, 1.5cqw, 20px);
     position: relative;
     z-index: 1;
     container-type: size;
@@ -86,6 +87,8 @@
 
 /* ── Zmanim Section ── */
 .zmanim-section {
+    padding-inline: clamp(8px, 1.5cqw, 20px);
+    padding-block-end: clamp(8px, 1.5cqh, 20px);
     position: relative;
     z-index: 1;
     container-type: size;
@@ -120,4 +123,17 @@
     min-height: 0;
     container-type: size;
     container-name: calendar;
+}
+
+/* ── Messages body (replaces info+zmanim when messages rotation is active) ── */
+.messages-body-section {
+    position: relative;
+    z-index: 1;
+    grid-row: 2 / -1;
+    grid-column: 1 / -1;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+    container-type: size;
+    container-name: messages;
 }

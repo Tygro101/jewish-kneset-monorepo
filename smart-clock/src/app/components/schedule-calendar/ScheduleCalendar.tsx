@@ -7,6 +7,7 @@ import { resolveDaysAhead } from './resolveDaysAhead';
 import { useNowMinutes } from './useNowMinutes';
 import { useScheduleDays } from './useScheduleDays';
 import { ScheduleTimeline } from './ScheduleTimeline';
+import { now } from '../../debug/clock';
 
 export interface ScheduleCalendarProps {
   /** Override the CMS/route-based daysAhead (used by TV to force 7). */
@@ -29,7 +30,7 @@ export const ScheduleCalendar = ({ daysAhead: daysAheadProp, title, className }:
   const effectiveDays = daysAheadProp ?? resolveDaysAhead(config, route);
 
   // Day stamp: forces useMemo recalc at midnight
-  const dayStamp = new Date().toISOString().slice(0, 10);
+  const dayStamp = now().toISOString().slice(0, 10);
 
   const days = useScheduleDays(config, effectiveDays, dayStamp);
 

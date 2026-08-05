@@ -14,6 +14,7 @@ import {
 import { differenceInMinutes } from "date-fns";
 import { IsEnabled, MapProp } from "../TimesContainerHooks";
 import { MorningMapKey } from "./constants";
+import { now } from '../../../../debug/clock';
 
 export const MorningSets = new Map();
 
@@ -24,7 +25,7 @@ const defaultFormat = 'k:m';
 const generateMorningSets = (): { map: MapProp; isEnabled: IsEnabled } => {
     const isEnabled = (zmanim: TypedObjectMap<Date>): boolean => {
         const netz = zmanim[NetzKey];
-        const diffInMinutes = differenceInMinutes(netz, new Date());
+        const diffInMinutes = differenceInMinutes(netz, now());
         return diffInMinutes >= morningTrashHold;
     };
     const map: MapProp = new Map();
@@ -40,7 +41,7 @@ const generateMorningSets = (): { map: MapProp; isEnabled: IsEnabled } => {
 const generateNoonSets = (): { map: MapProp; isEnabled: IsEnabled } => {
     const isEnabled = (zmanim: TypedObjectMap<Date>): boolean => {
         const gra = zmanim[SofBirkotKeriatShemaGraKey];
-        const diffInMinutes = differenceInMinutes(gra, new Date());
+        const diffInMinutes = differenceInMinutes(gra, now());
         return diffInMinutes >= noonTrashHold;
     };
     const map: MapProp = new Map();

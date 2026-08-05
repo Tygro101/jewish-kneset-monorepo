@@ -8,6 +8,7 @@ import { EntrancePage } from "./app/components/entrance/EntrancePage"
 import { PresentationView } from "./app/components/clock-view/presentation/PresentationView"
 import { MessagesView } from "./app/components/clock-view/messages/MessagesView"
 import { useDisplayRotation } from "./app/components/clock-view/presentation/useDisplayRotation"
+import { resolveDebugView } from "./app/components/clock-view/presentation/resolveDebugView"
 import { useRoute } from "./app/routing/useRoute"
 import { TvClockView } from "./app/components/tv-view/TvClockView"
 import { applyTheme, loadTheme } from "./app/shared/themes"
@@ -17,8 +18,10 @@ import { getConfigSelector } from "./app/components/store/config/configSelectors
 import { loadConfig } from "./app/components/store/config/configSlice"
 import { useConfigAutoRefresh } from "./app/hooks/useConfigAutoRefresh"
 import { getPresentationsBlockedSelector, getMessagesBlockedSelector, getScheduleBlockedSelector } from "./app/components/store/settings/settingsSelectors"
+import { getDebugViewOverride, getDebugRotationFrozen } from "./app/components/store/debug/debugSelectors"
 import { ScheduleCalendar } from "./app/components/schedule-calendar/ScheduleCalendar"
 import { resolveDaysAhead } from "./app/components/schedule-calendar/resolveDaysAhead"
+import { DebugPanel } from "./app/components/debug/DebugPanel"
 
 // Apply the persisted theme (family + dark/light) before the app renders.
 const savedTheme = loadTheme();
@@ -67,6 +70,8 @@ function AppRoot() {
   const presentationsBlocked = useAppSelector(getPresentationsBlockedSelector);
   const messagesBlocked = useAppSelector(getMessagesBlockedSelector);
   const scheduleBlocked = useAppSelector(getScheduleBlockedSelector);
+  const debugViewOverride = useAppSelector(getDebugViewOverride);
+  const debugRotationFrozen = useAppSelector(getDebugRotationFrozen);
 
   // Derive a config with blocked sections stripped so the rotation hook ignores them.
   const effectiveConfig = useMemo(() => {
@@ -81,7 +86,10 @@ function AppRoot() {
 
   // Schedule is a rotation view on tablet only, and only when not blocked.
   const includeSchedule = route !== 'tv' && !scheduleBlocked && hasAnyWeeklyEvents(data);
-  const view = useDisplayRotation(effectiveConfig, { includeSchedule });
+  const rotationView = useDisplayRotation(effectiveConfig, { includeSchedule, paused: debugRotationFrozen });
+
+  // Debug override takes precedence over the rotation cycle.
+  const view = resolveDebugView(debugViewOverride, data) ?? rotationView;
 
   // Poll config.json every 5 minutes so CMS changes (e.g. a deactivated
   // presentation) reach the display without a reload.
@@ -106,14 +114,21 @@ function AppRoot() {
     // The rotation hook hands us the presentation object itself, so a config
     // refresh that shrinks the list can never produce an out-of-range lookup.
     if (view.kind === 'messages') {
-      return (
-        <>
-          <Dashboard />
-          <MessagesView
-            messages={view.messages}
-            defaultSeconds={data?.displaySettings.presentationDurationSeconds ?? 20}
-          />
-        </>
+      const messagesNode = (
+        <MessagesView
+          messages={view.messages}
+          defaultSeconds={data?.displaySettings.presentationDurationSeconds ?? 20}
+        />
+      );
+
+      return route === 'tv' ? (
+        <TvClockView calendarOverride={messagesNode} />
+      ) : (
+        <ClockView
+          bodyOverride={
+            <section className="messages-body-section">{messagesNode}</section>
+          }
+        />
       );
     }
     if (view.kind === 'presentation') {
@@ -146,5 +161,6 @@ function AppRoot() {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <AppRoot />
+    <DebugPanel />
   </Provider>
 )

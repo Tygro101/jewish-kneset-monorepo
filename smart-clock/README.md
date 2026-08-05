@@ -88,5 +88,54 @@ A "לוח זמנים" toggle in the gear menu disables the calendar from the tab
 | `src/app/components/clock-view/ClockView.tsx` | Tablet/portrait dashboard |
 | `src/app/components/tv-view/TvClockView.tsx` | Landscape/TV dashboard |
 | `src/app/components/tv-view/TvClockView.scss` | TV layout + scoped leaf overrides |
+| `src/app/debug/debugFlag.ts` | Debug mode activation (URL flag parser) |
+| `src/app/debug/clock.ts` | Clock seam — `now()` with offset support |
+| `src/app/components/debug/DebugPanel.tsx` | Developer panel UI |
 | `public/icon.svg` | PWA manifest icon |
+
+## Developer Mode
+
+A developer/debug mode gives developers the ability to change the clock time, force specific views, and refresh configuration instantly — without waiting for the real clock or the 5-minute config poll.
+
+### Activation
+
+Add `debug=true` to the URL query:
+
+```
+http://localhost:3001/#/?debug=true        (tablet)
+http://localhost:3001/#/tv?debug=true       (TV)
+```
+
+When the flag is absent, all debug features are completely inert — no badge, no panel, no stored offset is read.
+
+### Debug Panel (Ctrl+Shift+D)
+
+A fixed orange **DEBUG** badge appears in the top-left corner. Clicking it (or pressing `Ctrl+Shift+D`) opens a floating panel with three sections:
+
+#### Clock Time
+- **datetime-local input** — pick any date/time
+- **Apply & Reload** — persists the time offset in `localStorage` then reloads the page. All time-dependent computations (zmanim, titles, schedule, netz countdown) will reflect the new time.
+- **±1h / ±1d nudge buttons** — quick offsets relative to the current shifted time
+- **Reset** — clears the offset and returns to real time
+
+The clock keeps ticking from the chosen point (it's an offset, not a freeze). The offset is stored under the key `smartclock-debug` in `localStorage` and is only read when the debug flag is present.
+
+#### Config
+- **Refresh Config** — dispatches `refreshConfig()` immediately (normally polled every 5 min)
+- **Hard Reload** — full page reload
+
+#### Views
+- **Dashboard / Schedule / Messages** buttons — jump to any view instantly
+- **Presentation dropdown** — select a specific `activePresentations` slide by index/title
+- **Freeze rotation** toggle — pauses the display rotation timer without resetting position
+- **Clear Override** — returns to the normal rotation cycle
+
+### localStorage key
+
+```json
+// smartclock-debug
+{ "offsetMs": -3600000 }
+```
+
+The key is ignored (and never read) unless `debug=true` is in the URL. A stale key left behind from a previous debugging session has zero effect on production kiosks.
 

@@ -11,6 +11,7 @@ import { SettingsMenu } from '../settings/SettingsMenu';
 import { DashboardShell } from './DashboardShell';
 import { DashboardHeader } from './DashboardHeader';
 import { DashboardBody } from './DashboardBody';
+import { now } from '../../debug/clock';
 import './ClockView.scss';
 
 export interface ClockViewProps {
@@ -27,8 +28,8 @@ export const ClockView = ({ bodyOverride }: ClockViewProps = {}) => {
     useFitToScreen(rootRef, [times, titles], { cssVar: '--fit-scale' });
 
     useDailyRecalc(() => {
-        dispatch(calculateTimes({ date: new Date(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
-        dispatch(calculateTitles({ date: new Date(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
+        dispatch(calculateTimes({ date: now(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
+        dispatch(calculateTitles({ date: now(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
     });
 
     return (

@@ -3,4 +3,5 @@ export enum StateKeys {
     Times = 'times',
     Config = 'config',
     Settings = 'settings',
+    Debug = 'debug',
 }
