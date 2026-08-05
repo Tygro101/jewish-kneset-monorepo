@@ -1,7 +1,7 @@
 {
   "name": "electron-container",
   "productName": "Smart Clock",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Windows kiosk container for the Smart Clock PWA",
   "private": true,
   "license": "MIT",
@@ -15,8 +15,9 @@
     "type-check": "tsc -p tsconfig.json --noEmit",
     "verify": "npm run type-check && npm run test",
     "icon": "node scripts/make-icon.mjs",
-    "pack:dir": "npm run build && electron-builder --dir",
-    "dist:win": "npm run build && electron-builder --win nsis",
+    "ensure-wincodesign": "node scripts/ensure-wincodesign.mjs",
+    "pack:dir": "npm run ensure-wincodesign && npm run build && electron-builder --dir",
+    "dist:win": "npm run ensure-wincodesign && npm run build && electron-builder --win nsis",
     "install:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-local.ps1"
   },
   "devDependencies": {
@@ -50,8 +51,7 @@
         }
       ],
       "icon": "build/icon.ico",
-      "artifactName": "SmartClockSetup-${version}.${ext}",
-      "signAndEditExecutable": false
+      "artifactName": "SmartClockSetup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
