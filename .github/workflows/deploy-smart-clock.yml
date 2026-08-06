@@ -1,3 +1,4 @@
+# Deploys the smart-clock PWA to GitHub Pages
 name: Deploy Smart Clock to GitHub Pages
 
 on:
