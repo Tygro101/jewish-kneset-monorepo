@@ -1,16 +1,19 @@
-import { clampDaysAhead } from '@shared/core/schedule/timeline-builder';
+import { resolveDaysAheadFor } from '@shared/core/schedule/days-ahead';
 import type { TenantConfig } from '../store/config/configState';
 import type { AppRoute } from '../../routing/routes';
 
-const TV_DEFAULT = 6;
-const TABLET_DEFAULT = 2;
-
 /**
- * Resolves the effective daysAhead value.
- * CMS value (displaySettings.scheduleDaysAhead) takes priority when valid;
- * otherwise falls back to 7 for TV, 2 for tablet.
+ * Resolves the effective daysAhead (= number of calendar columns) for a route.
+ *
+ * Precedence: CMS number → on-screen (device) setting → code default (TV 6, tablet 2).
+ * Always clamped to 1–7 on TV and 1–3 on tablet.
+ *
+ * `deviceDaysAhead` comes from the settings slice; see useDeviceDaysAhead().
  */
-export function resolveDaysAhead(config: TenantConfig | null, route: AppRoute): number {
-  const fallback = route === 'tv' ? TV_DEFAULT : TABLET_DEFAULT;
-  return clampDaysAhead(config?.displaySettings?.scheduleDaysAhead, fallback);
+export function resolveDaysAhead(
+  config: TenantConfig | null,
+  route: AppRoute,
+  deviceDaysAhead?: number,
+): number {
+  return resolveDaysAheadFor(config?.displaySettings?.scheduleDaysAhead, deviceDaysAhead, route);
 }

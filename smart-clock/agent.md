@@ -81,11 +81,12 @@ The day is divided into 3 sections, each showing ≤6 time cards:
 ## Schedule Calendar Timeline
 - **Domain logic:** `shared/src/core/schedule/` — types, time-utils, day-keys, day-context (hebcal), event-durations (prayer keyword rules), timeline-builder (overlap clipping), timeline-window (scale-to-fit %)
 - **Presentational:** `smart-clock/src/app/components/schedule-calendar/` — ScheduleTimeline, DayColumn, HourGrid, EventBlock, TimePill, NowLine (no Redux, no domain math)
-- **Container:** `ScheduleCalendar.tsx` (reads store), `useScheduleDays.ts`, `useNowMinutes.ts`, `resolveDaysAhead.ts`
+- **Container:** `ScheduleCalendar.tsx` (reads store), `useScheduleDays.ts`, `useNowMinutes.ts`, `resolveDaysAhead.ts`, `useDeviceDaysAhead.ts`
 - **Theme vars:** `--cal-tefilla`, `--cal-shiur`, `--cal-event`, `--cal-grid-line`, `--cal-block-bg`, `--cal-now`, `--cal-now-glow`
-- **Config additions:** `ScheduleEvent.endTime?`, `ScheduleEvent.durationMinutes?`, `ScheduleEvent.subtitle?`, `displaySettings.scheduleDaysAhead?`
+- **Config additions:** `ScheduleEvent.endTime?`, `ScheduleEvent.durationMinutes?`, `ScheduleEvent.subtitle?`, `displaySettings.scheduleDaysAhead?` (`{ tv: 1–7 | 'screen', tablet: 1–3 | 'screen' }`; legacy plain number still read)
 - **Duration fallbacks:** שחרית 60/120, מנחה 25/35, ערבית 20/40 (Shabbat/YT/ErevShabbat/ErevYT triggers)
 - **Settings:** `scheduleBlocked` toggle removes calendar from tablet rotation; no effect on TV
+- **Days-ahead precedence:** CMS number → on-screen setting (`settings.scheduleDaysAheadTv/Tablet`, localStorage) → code default (TV 6, tablet 2); clamped in `shared/core/schedule/days-ahead.ts`
 - **Density tiers:** 1–3 cols = comfortable (pills+title+subtitle), 4–5 = compact (pills+title), 6–7 = minimal (start pill+title)
 - **Overlap rule:** if A.end > B.start, clip A.end to B.start (`clipped: true`)
 

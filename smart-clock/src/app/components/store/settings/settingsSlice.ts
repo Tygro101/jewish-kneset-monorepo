@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { StateKeys } from '../../../store.models';
 import { NETZ_COUNTDOWN_MINUTE_OPTIONS, SettingsState } from './settingsState';
+import { clampDaysAhead } from '@shared/core/schedule/timeline-builder';
+import { DAYS_AHEAD_LIMITS, type DaysAheadTarget } from '@shared/core/schedule/days-ahead';
 
 const STORAGE_KEY = 'smartclock-settings';
 
@@ -10,6 +12,8 @@ const DEFAULTS: SettingsState = {
     presentationsBlocked: false,
     messagesBlocked: false,
     scheduleBlocked: false,
+    scheduleDaysAheadTv: DAYS_AHEAD_LIMITS.tv.default,
+    scheduleDaysAheadTablet: DAYS_AHEAD_LIMITS.tablet.default,
 };
 
 /** Loads settings from localStorage, falling back to DEFAULTS on any problem. */
@@ -40,7 +44,25 @@ export function loadSettings(): SettingsState {
             typeof parsed.scheduleBlocked === 'boolean'
                 ? parsed.scheduleBlocked
                 : DEFAULTS.scheduleBlocked;
-        return { netzCountdownEnabled: enabled, netzCountdownMinutes: minutes, presentationsBlocked, messagesBlocked, scheduleBlocked };
+        const scheduleDaysAheadTv = clampDaysAhead(
+            parsed.scheduleDaysAheadTv,
+            DEFAULTS.scheduleDaysAheadTv,
+            DAYS_AHEAD_LIMITS.tv.max,
+        );
+        const scheduleDaysAheadTablet = clampDaysAhead(
+            parsed.scheduleDaysAheadTablet,
+            DEFAULTS.scheduleDaysAheadTablet,
+            DAYS_AHEAD_LIMITS.tablet.max,
+        );
+        return {
+            netzCountdownEnabled: enabled,
+            netzCountdownMinutes: minutes,
+            presentationsBlocked,
+            messagesBlocked,
+            scheduleBlocked,
+            scheduleDaysAheadTv,
+            scheduleDaysAheadTablet,
+        };
     } catch {
         return { ...DEFAULTS };
     }
@@ -84,8 +106,19 @@ export const settingsSlice = createSlice({
             state.scheduleBlocked = action.payload;
             persist(state);
         },
+        setScheduleDaysAhead: (
+            state,
+            action: PayloadAction<{ target: DaysAheadTarget; days: number }>,
+        ) => {
+            const { target, days } = action.payload;
+            const limits = DAYS_AHEAD_LIMITS[target];
+            const value = clampDaysAhead(days, limits.default, limits.max);
+            if (target === 'tv') state.scheduleDaysAheadTv = value;
+            else state.scheduleDaysAheadTablet = value;
+            persist(state);
+        },
     },
 });
 
-export const { setNetzCountdownEnabled, setNetzCountdownMinutes, setPresentationsBlocked, setMessagesBlocked, setScheduleBlocked } = settingsSlice.actions;
+export const { setNetzCountdownEnabled, setNetzCountdownMinutes, setPresentationsBlocked, setMessagesBlocked, setScheduleBlocked, setScheduleDaysAhead } = settingsSlice.actions;
 export default settingsSlice.reducer;

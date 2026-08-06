@@ -37,3 +37,15 @@ export {
   hourMarks,
 } from './timeline-window';
 
+
+
+export {
+  SCREEN_CONFIG,
+  DAYS_AHEAD_LIMITS,
+  maxDaysAheadFor,
+  defaultDaysAheadFor,
+  daysAheadOptions,
+  readCmsDaysAhead,
+  resolveDaysAheadFor,
+} from './days-ahead';
+export type { DaysAheadTarget, ScheduleDaysAheadValue, ScheduleDaysAheadSetting } from './days-ahead';

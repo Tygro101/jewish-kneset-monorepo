@@ -1,6 +1,8 @@
 /** Day keys matching the structure in config.json weeklySchedule. */
 export type DayKey = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'shabbat';
 
+import type { ScheduleDaysAheadSetting } from '@shared/core/schedule/days-ahead';
+
 export interface ScheduleEvent {
   time: string;
   title: string;
@@ -47,8 +49,12 @@ export interface TenantConfig {
   displaySettings: {
     mainDashboardDurationSeconds: number;
     presentationDurationSeconds: number;
-    /** How many days the schedule timeline shows. Default: TV=7, tablet=2. Clamped 1–7. */
-    scheduleDaysAhead?: number;
+    /**
+     * Calendar columns per screen: { tv: 1–7 | 'screen', tablet: 1–3 | 'screen' }.
+     * 'screen' (or a missing value) defers to the device's on-screen setting.
+     * A plain number is the legacy form and applies to both screens.
+     */
+    scheduleDaysAhead?: number | ScheduleDaysAheadSetting;
   };
   weeklySchedule: Record<DayKey, ScheduleEvent[]>;
   activePresentations: Presentation[];

@@ -38,10 +38,17 @@ export function buildDayEvents(raw: ScheduleEvent[], ctx: DayContext, idPrefix =
   return parsed;
 }
 
-/** Clamps a user/CMS value to a valid range. */
-export function clampDaysAhead(value: unknown, fallback: number): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
-  return Math.min(MAX_DAYS_AHEAD, Math.max(MIN_DAYS_AHEAD, Math.round(value)));
+/**
+ * Clamps a user/CMS value to a valid range.
+ * `max` lets a caller impose a tighter per-screen cap (e.g. 3 on tablet);
+ * it is itself clamped to MIN_DAYS_AHEAD…MAX_DAYS_AHEAD.
+ * The fallback is clamped too, so a TV default can never leak onto a tablet.
+ */
+export function clampDaysAhead(value: unknown, fallback: number, max: number = MAX_DAYS_AHEAD): number {
+  const upper = Math.min(MAX_DAYS_AHEAD, Math.max(MIN_DAYS_AHEAD, Math.round(max)));
+  const fit = (n: number) => Math.min(upper, Math.max(MIN_DAYS_AHEAD, Math.round(n)));
+  if (typeof value !== 'number' || !Number.isFinite(value)) return fit(fallback);
+  return fit(value);
 }
 
 /** Builds the full timeline data for N days starting from `from`. */

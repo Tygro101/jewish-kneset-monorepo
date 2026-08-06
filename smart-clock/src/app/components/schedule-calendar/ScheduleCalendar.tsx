@@ -4,6 +4,7 @@ import { useRoute } from '../../routing/useRoute';
 import { computeWindow } from '@shared/core/schedule/timeline-window';
 import { densityForColumns } from './density';
 import { resolveDaysAhead } from './resolveDaysAhead';
+import { useDeviceDaysAhead } from './useDeviceDaysAhead';
 import { useNowMinutes } from './useNowMinutes';
 import { useScheduleDays } from './useScheduleDays';
 import { ScheduleTimeline } from './ScheduleTimeline';
@@ -27,7 +28,8 @@ export const ScheduleCalendar = ({ daysAhead: daysAheadProp, title, className }:
   const route = useRoute();
   const nowMin = useNowMinutes();
 
-  const effectiveDays = daysAheadProp ?? resolveDaysAhead(config, route);
+  const deviceDaysAhead = useDeviceDaysAhead(route);
+  const effectiveDays = daysAheadProp ?? resolveDaysAhead(config, route, deviceDaysAhead);
 
   // Day stamp: forces useMemo recalc at midnight
   const dayStamp = now().toISOString().slice(0, 10);

@@ -53,7 +53,10 @@ The schedule calendar timeline shows upcoming weekly events from `config.json`. 
 ```jsonc
 {
   "displaySettings": {
-    "scheduleDaysAhead": 7  // 1–7, defaults: TV=7, tablet=2
+    // Calendar columns per screen. 'screen' = use that screen's own settings menu.
+    // TV accepts 1–7, tablet accepts 1–3. Code defaults: TV=6, tablet=2.
+    // A plain number (legacy) applies to both screens.
+    "scheduleDaysAhead": { "tv": 6, "tablet": 2 }
   },
   "weeklySchedule": {
     "sunday": [

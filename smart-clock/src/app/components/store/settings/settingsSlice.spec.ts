@@ -19,6 +19,7 @@ Object.defineProperty(globalThis, 'localStorage', { value: mockStorage, writable
 import reducer, {
     setNetzCountdownEnabled,
     setNetzCountdownMinutes,
+    setScheduleDaysAhead,
     loadSettings,
 } from './settingsSlice';
 
@@ -75,21 +76,62 @@ describe('settingsSlice', () => {
     describe('loadSettings', () => {
         it('falls back to defaults on invalid JSON', () => {
             store['smartclock-settings'] = '{not valid';
-            expect(loadSettings()).toEqual({ netzCountdownEnabled: false, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false });
+            expect(loadSettings()).toEqual({ netzCountdownEnabled: false, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false, scheduleDaysAheadTv: 6, scheduleDaysAheadTablet: 2 });
         });
 
         it('falls back to defaults when key is missing', () => {
-            expect(loadSettings()).toEqual({ netzCountdownEnabled: false, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false });
+            expect(loadSettings()).toEqual({ netzCountdownEnabled: false, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false, scheduleDaysAheadTv: 6, scheduleDaysAheadTablet: 2 });
         });
 
         it('reads persisted values', () => {
             store['smartclock-settings'] = JSON.stringify({ netzCountdownEnabled: true, netzCountdownMinutes: 3 });
-            expect(loadSettings()).toEqual({ netzCountdownEnabled: true, netzCountdownMinutes: 3, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false });
+            expect(loadSettings()).toEqual({ netzCountdownEnabled: true, netzCountdownMinutes: 3, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false, scheduleDaysAheadTv: 6, scheduleDaysAheadTablet: 2 });
         });
 
         it('ignores invalid minutes in storage', () => {
             store['smartclock-settings'] = JSON.stringify({ netzCountdownEnabled: true, netzCountdownMinutes: 99 });
-            expect(loadSettings()).toEqual({ netzCountdownEnabled: true, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false });
+            expect(loadSettings()).toEqual({ netzCountdownEnabled: true, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false, scheduleDaysAheadTv: 6, scheduleDaysAheadTablet: 2 });
+        });
+    });
+
+    describe('scheduleDaysAhead', () => {
+        it('defaults the device day counts to TV 6 / tablet 2', () => {
+            const state = loadSettings();
+            expect(state.scheduleDaysAheadTv).toBe(6);
+            expect(state.scheduleDaysAheadTablet).toBe(2);
+        });
+
+        it('setScheduleDaysAhead stores and clamps per target', () => {
+            let state = reducer(loadSettings(), setScheduleDaysAhead({ target: 'tv', days: 4 }));
+            expect(state.scheduleDaysAheadTv).toBe(4);
+
+            state = reducer(state, setScheduleDaysAhead({ target: 'tablet', days: 7 }));
+            expect(state.scheduleDaysAheadTablet).toBe(3); // tablet cap
+
+            state = reducer(state, setScheduleDaysAhead({ target: 'tablet', days: 0 }));
+            expect(state.scheduleDaysAheadTablet).toBe(1); // floor
+        });
+
+        it('reads persisted day counts from localStorage', () => {
+            store['smartclock-settings'] = JSON.stringify({
+                netzCountdownEnabled: false,
+                netzCountdownMinutes: 5,
+                scheduleDaysAheadTv: 4,
+                scheduleDaysAheadTablet: 1,
+            });
+            const state = loadSettings();
+            expect(state.scheduleDaysAheadTv).toBe(4);
+            expect(state.scheduleDaysAheadTablet).toBe(1);
+        });
+
+        it('clamps out-of-range persisted values', () => {
+            store['smartclock-settings'] = JSON.stringify({
+                scheduleDaysAheadTv: 99,
+                scheduleDaysAheadTablet: 10,
+            });
+            const state = loadSettings();
+            expect(state.scheduleDaysAheadTv).toBe(7);
+            expect(state.scheduleDaysAheadTablet).toBe(3);
         });
     });
 });

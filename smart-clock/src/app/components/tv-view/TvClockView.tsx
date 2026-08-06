@@ -14,6 +14,7 @@ import { DashboardHeader } from '../clock-view/DashboardHeader';
 import { DashboardBody } from '../clock-view/DashboardBody';
 import { ScheduleCalendar } from '../schedule-calendar/ScheduleCalendar';
 import { resolveDaysAhead } from '../schedule-calendar/resolveDaysAhead';
+import { useDeviceDaysAhead } from '../schedule-calendar/useDeviceDaysAhead';
 import { now } from '../../debug/clock';
 import './TvClockView.scss';
 
@@ -50,7 +51,8 @@ export const TvClockView = ({ calendarOverride }: TvClockViewProps = {}) => {
     dispatch(calculateTitles({ date: now(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
   });
 
-  const daysAhead = resolveDaysAhead(config, 'tv');
+  const deviceDaysAhead = useDeviceDaysAhead('tv');
+  const daysAhead = resolveDaysAhead(config, 'tv', deviceDaysAhead);
 
   return (
     <div className="tv-app" ref={rootRef} data-route="tv">

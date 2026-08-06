@@ -14,3 +14,10 @@ export const getMessagesBlockedSelector = (state: RootState) =>
 
 export const getScheduleBlockedSelector = (state: RootState) =>
     state.settings.scheduleBlocked;
+
+
+export const getScheduleDaysAheadTvSelector = (state: RootState) =>
+    state.settings.scheduleDaysAheadTv;
+
+export const getScheduleDaysAheadTabletSelector = (state: RootState) =>
+    state.settings.scheduleDaysAheadTablet;

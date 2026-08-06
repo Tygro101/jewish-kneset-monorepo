@@ -12,4 +12,8 @@ export interface SettingsState {
     messagesBlocked: boolean;
     /** When true, the schedule calendar view is not shown in the tablet rotation. */
     scheduleBlocked: boolean;
+    /** On-screen (device-local) day count for the TV layout. Used when the CMS says "screen". */
+    scheduleDaysAheadTv: number;
+    /** On-screen (device-local) day count for the tablet layout. Used when the CMS says "screen". */
+    scheduleDaysAheadTablet: number;
 }

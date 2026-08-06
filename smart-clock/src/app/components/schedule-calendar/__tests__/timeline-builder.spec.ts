@@ -145,6 +145,15 @@ describe('timeline-builder', () => {
       expect(clampDaysAhead(NaN, 3)).toBe(3);
       expect(clampDaysAhead(Infinity, 3)).toBe(3);
     });
+
+    it('honours a tighter max argument', () => {
+      expect(clampDaysAhead(7, 2, 3)).toBe(3);
+      expect(clampDaysAhead(2, 2, 3)).toBe(2);
+    });
+
+    it('clamps the fallback to the tighter max too', () => {
+      expect(clampDaysAhead(undefined, 6, 3)).toBe(3);
+    });
   });
 
   describe('buildTimelineDays', () => {

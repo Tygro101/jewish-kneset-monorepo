@@ -21,6 +21,7 @@ import { getPresentationsBlockedSelector, getMessagesBlockedSelector, getSchedul
 import { getDebugViewOverride, getDebugRotationFrozen } from "./app/components/store/debug/debugSelectors"
 import { ScheduleCalendar } from "./app/components/schedule-calendar/ScheduleCalendar"
 import { resolveDaysAhead } from "./app/components/schedule-calendar/resolveDaysAhead"
+import { useDeviceDaysAhead } from "./app/components/schedule-calendar/useDeviceDaysAhead"
 import { DebugPanel } from "./app/components/debug/DebugPanel"
 
 // Apply the persisted theme (family + dark/light) before the app renders.
@@ -72,6 +73,7 @@ function AppRoot() {
   const scheduleBlocked = useAppSelector(getScheduleBlockedSelector);
   const debugViewOverride = useAppSelector(getDebugViewOverride);
   const debugRotationFrozen = useAppSelector(getDebugRotationFrozen);
+  const deviceDaysAhead = useDeviceDaysAhead(route);
 
   // Derive a config with blocked sections stripped so the rotation hook ignores them.
   const effectiveConfig = useMemo(() => {
@@ -140,7 +142,7 @@ function AppRoot() {
       );
     }
     if (view.kind === 'schedule' && route !== 'tv') {
-      const daysAhead = resolveDaysAhead(data, route);
+      const daysAhead = resolveDaysAhead(data, route, deviceDaysAhead);
       return (
         <ClockView
           bodyOverride={
