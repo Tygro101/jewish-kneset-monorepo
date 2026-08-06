@@ -1,12 +1,40 @@
+/* ─── Corner container ──────────────────────────────────────────────── */
+/*
+ * Z-INDEX STACKING ORDER (smart-clock):
+ *   1      — content layers (header, info, zmanim, messages)
+ *   10     — schedule NowLine
+ *   100    — PresentationView overlay
+ *   150    — .settings (gear + hotspot) — above presentations so it can be
+ *            tapped/hovered even mid-presentation
+ *   200    — .settings-overlay (dialog backdrop + dialog)
+ *   99998  — DebugPanel backdrop
+ *   99999  — DebugPanel
+ */
 .settings {
     position: fixed;
-    top: clamp(12px, 2dvh, 24px);
-    right: clamp(12px, 2vw, 24px);
-    z-index: 100;
+    top: 0;
+    right: 0;
+    width: clamp(72px, 9vmin, 132px);
+    height: clamp(72px, 9vmin, 132px);
+    /* Above PresentationView (z-index 100) so the revealed gear is tappable
+       even mid-presentation. Below DebugPanel (99999). */
+    z-index: 150;
     direction: rtl;
+    pointer-events: none; /* only children are interactive */
 }
 
+/* ─── Invisible hotspot — fills the corner box ────────────────────── */
+.settings-hotspot {
+    position: absolute;
+    inset: 0;
+    pointer-events: auto;
+}
+
+/* ─── Gear button ──────────────────────────────────────────────────── */
 .settings-gear {
+    position: absolute;
+    top: clamp(12px, 2dvh, 24px);
+    right: clamp(12px, 2vw, 24px);
     width: 44px;
     height: 44px;
     border-radius: 50%;
@@ -17,8 +45,17 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s, background 0.35s;
+    transition: border-color 0.2s, color 0.2s, background 0.35s, opacity 0.3s;
     outline: none;
+
+    /* Hidden by default */
+    opacity: 0;
+    pointer-events: none;
+
+    .settings.is-revealed & {
+        opacity: 1;
+        pointer-events: auto;
+    }
 
     &:hover {
         color: var(--accent-emerald);
@@ -26,7 +63,7 @@
     }
 }
 
-/* Dialog overlay */
+/* ─── Dialog overlay ───────────────────────────────────────────────── */
 .settings-overlay {
     position: fixed;
     inset: 0;
@@ -36,6 +73,7 @@
     justify-content: center;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
+    pointer-events: auto;
 }
 
 .settings-dialog {
@@ -282,4 +320,11 @@
     border-radius: 50%;
     flex-shrink: 0;
     background: var(--swatch);
+}
+
+
+.settings-hint {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    padding: 0 4px 4px;
 }

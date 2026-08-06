@@ -118,9 +118,14 @@ describe('TvClockView', () => {
     expect(screen.getByText('זמני היום')).toBeTruthy();
   });
 
-  it('renders the settings gear button (visible, not hidden)', () => {
+  it('renders the settings gear hidden behind a hotspot', () => {
     renderTv();
-    expect(screen.getByLabelText('הגדרות')).toBeTruthy();
+    const gear = screen.getByLabelText('הגדרות');
+    expect(gear).toBeTruthy();
+    // Gear is hidden by default (not revealed)
+    expect(gear.getAttribute('aria-hidden')).toBe('true');
+    // The hotspot is present for hover-reveal
+    expect(screen.getByTestId('settings-hotspot')).toBeTruthy();
   });
 
   it('always renders the calendar column (even with empty schedule)', () => {

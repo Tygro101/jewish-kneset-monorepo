@@ -14,8 +14,16 @@ import {
     setPresentationsBlocked,
     setMessagesBlocked,
     setScheduleBlocked,
+    setScheduleDaysAhead,
 } from '../store/settings/settingsSlice';
 import { NETZ_COUNTDOWN_MINUTE_OPTIONS } from '../store/settings/settingsState';
+import { useRoute } from '../../routing/useRoute';
+import { getConfigDataSelector } from '../store/config/configSelectors';
+import { daysAheadOptions, readCmsDaysAhead, SCREEN_CONFIG } from '@shared/core/schedule/days-ahead';
+import { useDeviceDaysAhead } from '../schedule-calendar/useDeviceDaysAhead';
+import { resolveDaysAhead } from '../schedule-calendar/resolveDaysAhead';
+import { useGearReveal } from './useGearReveal';
+import { revealTriggerFor } from './gearReveal';
 import './SettingsMenu.scss';
 
 export const SettingsMenu = () => {
@@ -31,6 +39,19 @@ export const SettingsMenu = () => {
     const messagesBlocked = useAppSelector(getMessagesBlockedSelector);
     const scheduleBlocked = useAppSelector(getScheduleBlockedSelector);
 
+    const route = useRoute();
+    const config = useAppSelector(getConfigDataSelector);
+    const deviceDaysAhead = useDeviceDaysAhead(route);
+    // Shown in the dropdown: the value actually in effect, already clamped for this screen.
+    const effectiveDaysAhead = resolveDaysAhead(config, route, deviceDaysAhead);
+    // A CMS number overrides the screen, so the control is read-only in that case.
+    const daysAheadLockedByCms =
+        readCmsDaysAhead(config?.displaySettings?.scheduleDaysAhead, route) !== SCREEN_CONFIG;
+
+    // Gear visibility — hidden by default, revealed by hotspot or 3-finger gesture.
+    const { visible: gearVisible, reveal } = useGearReveal({ route, paused: open });
+    const trigger = revealTriggerFor(route);
+
     // Apply theme whenever the selection changes (also runs once on mount).
     useEffect(() => {
         applyTheme(familyId, mode);
@@ -45,12 +66,27 @@ export const SettingsMenu = () => {
         return () => document.removeEventListener('keydown', onKey);
     }, [open]);
 
+    /** Open the settings dialog (only when gear is visible). */
+    function openDialog() {
+        if (gearVisible) setOpen(true);
+    }
+
     return (
-        <div className="settings">
+        <div className={`settings ${gearVisible ? 'is-revealed' : ''}`}>
+            {/* Invisible corner hotspot — reveals the gear on hover (TV) or tap (tablet). */}
+            <div
+                className="settings-hotspot"
+                data-testid="settings-hotspot"
+                onMouseEnter={trigger === 'hover' ? reveal : undefined}
+                onPointerDown={trigger === 'tap' ? reveal : undefined}
+            />
+
             <button
                 className="settings-gear"
                 aria-label="הגדרות"
-                onClick={() => setOpen(true)}
+                aria-hidden={!gearVisible}
+                tabIndex={gearVisible ? 0 : -1}
+                onClick={openDialog}
             >
                 <GearIcon />
             </button>
@@ -171,6 +207,30 @@ export const SettingsMenu = () => {
                                 <span className="settings-toggle-label">לוח זמנים</span>
                             </label>
                         </div>
+
+                        <div className="settings-divider" />
+
+                        {/* Schedule day count (this screen) */}
+                        <div className="settings-section-label">ימים בלוח הזמנים</div>
+                        <div className="settings-row">
+                            <span className="settings-toggle-label">מספר ימים</span>
+                            <select
+                                className="settings-minutes"
+                                aria-label="מספר ימים בלוח הזמנים"
+                                value={effectiveDaysAhead}
+                                disabled={daysAheadLockedByCms}
+                                onChange={(e) =>
+                                    dispatch(setScheduleDaysAhead({ target: route, days: Number(e.target.value) }))
+                                }
+                            >
+                                {daysAheadOptions(route).map((d) => (
+                                    <option key={d} value={d}>{d} ימים</option>
+                                ))}
+                            </select>
+                        </div>
+                        {daysAheadLockedByCms && (
+                            <div className="settings-hint">נקבע במערכת הניהול (CMS)</div>
+                        )}
 
                         <div className="settings-divider" />
 
