@@ -97,7 +97,7 @@ export default defineConfig({
   },
   build: {
     outDir: "build",
-    sourcemap: true,
+    sourcemap: false,
     rollupOptions: {
       input: resolve(__dirname, 'index.html'),
     }
