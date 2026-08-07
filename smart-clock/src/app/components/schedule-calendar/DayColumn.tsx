@@ -35,16 +35,25 @@ export const DayColumn = ({ day, window: w, nowMin, density }: DayColumnProps) =
       <div className="cal-day-body">
         <HourGrid window={w} />
         <div className="cal-track">
-          {day.events.map((ev) => {
+          {day.events.map((ev, i) => {
             const topPct = fractionOf(ev.startMin, w) * 100;
-            const heightPct = ((ev.endMin - ev.startMin) / span) * 100;
             const duration = ev.endMin - ev.startMin;
+            const heightPct = (duration / span) * 100;
+            // timeline-builder sorts by start and clips each end to the next
+            // start, so the next event's start is the exact ceiling this block
+            // may grow to. Falls back to the window end for the last event.
+            const nextStartMin = day.events[i + 1]?.startMin ?? w.endMin;
+            const maxHeightPct = Math.max(
+              heightPct,
+              Math.min(((nextStartMin - ev.startMin) / span) * 100, 100 - topPct),
+            );
             return (
               <EventBlock
                 key={ev.id}
                 event={ev}
                 topPct={topPct}
                 heightPct={heightPct}
+                maxHeightPct={maxHeightPct}
                 variant={blockVariantFor(duration, density)}
                 isPast={day.isToday && nowMin != null && ev.endMin < nowMin}
                 isCurrent={day.isToday && nowMin != null && ev.startMin <= nowMin && ev.endMin > nowMin}

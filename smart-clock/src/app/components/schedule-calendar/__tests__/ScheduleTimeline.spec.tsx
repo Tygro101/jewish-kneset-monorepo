@@ -4,7 +4,7 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { ScheduleTimeline } from '../ScheduleTimeline';
-import { densityForColumns, blockVariantFor } from '../density';
+import { densityForColumns, blockVariantFor, pillsInlineFor } from '../density';
 import type { TimelineDay, TimelineWindow } from '@shared/core/schedule/schedule.models';
 
 const WINDOW: TimelineWindow = { startMin: 360, endMin: 1320 };
@@ -64,6 +64,18 @@ describe('density', () => {
 
     it('comfortable density with medium duration (<45) returns standard', () => {
       expect(blockVariantFor(30, 'comfortable')).toBe('standard');
+    });
+  });
+
+  describe('pillsInlineFor', () => {
+    it('blocks under 45 minutes inline their pills', () => {
+      expect(pillsInlineFor(25)).toBe(true);
+      expect(pillsInlineFor(44)).toBe(true);
+    });
+
+    it('blocks of 45 minutes or more keep pills stacked', () => {
+      expect(pillsInlineFor(45)).toBe(false);
+      expect(pillsInlineFor(120)).toBe(false);
     });
   });
 });
@@ -197,16 +209,51 @@ describe('ScheduleTimeline', () => {
     expect(hourLines.length).toBe(17);
   });
 
-  it('positions event block via inline style', () => {
-    // שחרית: 390–450, window 360–1320 (span=960)
-    // topPct = (390-360)/960 * 100 = 3.125%
-    // heightPct = 60/960 * 100 = 6.25%
+  it('sizes event block via min-height/max-height, not a fixed height', () => {
+    // שחרית: 390–450, window 360–1320 (span=960), only event in the day
+    // topPct       = (390-360)/960 * 100 = 3.125%
+    // minHeight    = 60/960 * 100        = 6.25%
+    // maxHeight    = (1320-390)/960 *100 = 96.875%  (grows to window end)
     const days = [makeDay({ events: [{ id: 'e0', title: 'שחרית', type: 'tefilla', startMin: 390, endMin: 450, clipped: false }] })];
     const { container } = render(
       <ScheduleTimeline days={days} window={WINDOW} nowMin={null} density="comfortable" />,
     );
     const block = container.querySelector('.cal-block') as HTMLElement;
     expect(block.style.top).toBe('3.125%');
-    expect(block.style.height).toBe('6.25%');
+    expect(block.style.height).toBe('');
+    expect(block.style.minHeight).toBe('6.25%');
+    expect(block.style.maxHeight).toBe('96.875%');
+  });
+
+  it('caps max-height at the next event start so blocks cannot overlap', () => {
+    // e0 780–804 (24min → min 2.5%), e1 starts 828 → max (828-780)/960 = 5%
+    const days = [makeDay({ events: [
+      { id: 'e0', title: 'מנחה', type: 'tefilla', startMin: 780, endMin: 804, clipped: false },
+      { id: 'e1', title: 'ערבית', type: 'tefilla', startMin: 828, endMin: 888, clipped: false },
+    ] })];
+    const { container } = render(
+      <ScheduleTimeline days={days} window={WINDOW} nowMin={null} density="comfortable" />,
+    );
+    const first = container.querySelectorAll('.cal-block')[0] as HTMLElement;
+    expect(first.style.minHeight).toBe('2.5%');
+    expect(first.style.maxHeight).toBe('5%');
+  });
+
+  it('adds cal-block--pills-inline to short two-pill blocks', () => {
+    // 30 minutes → standard variant (end pill shown) and under the 45min threshold
+    const days = [makeDay({ events: [{ id: 'e0', title: 'מנחה', type: 'tefilla', startMin: 780, endMin: 810, clipped: false }] })];
+    const { container } = render(
+      <ScheduleTimeline days={days} window={WINDOW} nowMin={null} density="comfortable" />,
+    );
+    expect(container.querySelectorAll('.cal-pill')).toHaveLength(2);
+    expect(container.querySelector('.cal-block')?.classList.contains('cal-block--pills-inline')).toBe(true);
+  });
+
+  it('keeps pills stacked on long blocks', () => {
+    const days = [makeDay({ events: [{ id: 'e0', title: 'שחרית', type: 'tefilla', startMin: 390, endMin: 450, clipped: false }] })];
+    const { container } = render(
+      <ScheduleTimeline days={days} window={WINDOW} nowMin={null} density="comfortable" />,
+    );
+    expect(container.querySelector('.cal-block')?.classList.contains('cal-block--pills-inline')).toBe(false);
   });
 });

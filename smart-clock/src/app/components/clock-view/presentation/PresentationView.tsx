@@ -26,12 +26,10 @@ export const PresentationView = ({ presentation }: Props) => {
   if (!sanitizedPath) return null;
 
   const fileUrl = `${tenantBaseUrl(tenantId)}${sanitizedPath}`;
+  const title = presentation.title?.trim();
 
   return (
     <div className="presentation-view">
-      <div className="presentation-title-bar">
-        <span className="presentation-title">{presentation.title}</span>
-      </div>
       <div className="presentation-content">
         {presentation.type === 'image' ? (
           <img
@@ -48,6 +46,11 @@ export const PresentationView = ({ presentation }: Props) => {
           />
         )}
       </div>
+      {title && (
+        <div className="presentation-title-bar">
+          <span className="presentation-title">{title}</span>
+        </div>
+      )}
     </div>
   );
 };

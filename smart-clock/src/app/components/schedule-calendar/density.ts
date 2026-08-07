@@ -16,3 +16,12 @@ export function blockVariantFor(durationMin: number, density: CalendarDensity): 
   if (density === 'compact' || durationMin < 45) return 'standard';
   return 'full';
 }
+
+/**
+ * Short blocks lay their start/end pills side by side so the pair costs one
+ * text line instead of two. Keeps both times visible when the block is capped
+ * by the next event's start.
+ */
+export function pillsInlineFor(durationMin: number): boolean {
+  return durationMin < 45;
+}

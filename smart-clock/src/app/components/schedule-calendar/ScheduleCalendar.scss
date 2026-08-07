@@ -151,7 +151,6 @@
   position: absolute;
   left: 0;
   right: 0;
-  min-height: 2.2em;
   border-radius: clamp(6px, 0.6cqw, 12px);
   border: 1.5px solid color-mix(in srgb, var(--cat-color) 40%, transparent);
   background: var(--cal-block-bg);
@@ -185,6 +184,14 @@
   gap: 2px;
   align-items: flex-start;
   flex-shrink: 0;
+}
+
+/* Short blocks: pills side by side — one line instead of two, so both times
+   stay visible when max-height caps the block against the next event. */
+.cal-block--pills-inline .cal-block-pills {
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(3px, 0.3cqw, 6px);
 }
 
 .cal-pill {
