@@ -50,8 +50,8 @@ const titleGroupMap: Partial<Record<DisplayTitleKey, TitleMapping>> = {
     [TitlesKeys.ChanukahCandles]: { group: 'calendar', label: 'חנוכה', order: 80 },
     [TitlesKeys.Tzum]: { group: 'calendar', label: 'צום', order: 90 },
     [TomorrowTitlesKeys.Tzum]: { group: 'calendar', label: 'צום מחר', order: 91 },
+    [TitlesKeys.ShabbatMevarchim]: { group: 'calendar', label: 'שבת מברכים', order: 95 },
     [TitlesKeys.Molad]: { group: 'calendar', label: 'מולד', order: 100 },
-    [TitlesKeys.ShabbatMevarchim]: { group: 'calendar', label: 'שבת מברכים', order: 110 },
     [TitlesKeys.MevarchimChodesh]: { group: 'calendar', label: 'מברכים חודש', order: 120 },
 };
 

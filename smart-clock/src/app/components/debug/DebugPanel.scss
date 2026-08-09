@@ -203,3 +203,14 @@
   border-top: 1px solid #333;
   margin: 12px 0;
 }
+
+/* Landscape / TV: the panel is fixed-position and sits outside the --fit-scale
+   transform, so it is not scaled with the dashboard. Tighten it so it fits on
+   short viewports (e.g. 1920×1080 with browser chrome). */
+@media (orientation: landscape) and (max-height: 900px) {
+  .debug-panel {
+    max-height: 92vh;
+    padding: 12px;
+    font-size: 11px;
+  }
+}

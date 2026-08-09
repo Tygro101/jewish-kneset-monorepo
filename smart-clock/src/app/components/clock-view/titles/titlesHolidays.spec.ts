@@ -149,7 +149,7 @@ describe('Orthodox holiday titles — what the shul display shows', () => {
             expect(titles[TitlesKeys.SefiratHaOmer]?.title).toMatch(/ט׳ בעומר/);
             expect(titles[TitlesKeys.PirkeiAvot]?.title).toContain('פרקי אבות');
             expect(titles[TitlesKeys.ShabbatMevarchim]).toBeTruthy();
-            expect(titles[TitlesKeys.MevarchimChodesh]).toBeTruthy();
+            expect(titles[TitlesKeys.Molad]).toBeTruthy();
             expect(titles[TitlesKeys.YaalehVeYavo]).toBeUndefined();
         });
     });

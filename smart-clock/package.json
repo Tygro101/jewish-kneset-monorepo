@@ -16,8 +16,8 @@
     "type-check": "tsc"
   },
   "dependencies": {
-    "@hebcal/core": "^6.6.0",
-    "@hebcal/learning": "^6.9.5",
+    "@hebcal/core": "^6.9.2",
+    "@hebcal/learning": "^6.9.8",
     "@reduxjs/toolkit": "^2.12.0",
     "@types/suncalc": "^1.9.2",
     "date-fns": "^4.4.0",

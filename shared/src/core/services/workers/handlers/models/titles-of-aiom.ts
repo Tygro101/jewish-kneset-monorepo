@@ -86,6 +86,7 @@ export class TitlesAiom {
             start: this.date,
             end: this.date,
         });
+
         const tomorrowCalendar = HebrewCalendar.calendar({
             ...DefaultOptions,
             start: addDays(this.date, 1),
@@ -108,15 +109,13 @@ export class TitlesAiom {
             if (item.mask & flags.MINOR_FAST || item.mask & flags.MAJOR_FAST) {
                 this.setTitle(TitlesKeys.Tzum, item.renderBrief('he-x-NoNikud'));
             }
+            if (item.mask & flags.SHABBAT_MEVARCHIM) {
+                this.setTitle(TitlesKeys.ShabbatMevarchim, this.stripNikud(item.renderBrief('he-x-NoNikud')));
+            }
             if (item.mask & flags.MOLAD) {
                 this.setTitle(TitlesKeys.Molad, item.renderBrief('he-x-NoNikud'));
             }
-            if (item.mask & flags.SHABBAT_MEVARCHIM) {
-                this.setTitle(TitlesKeys.ShabbatMevarchim, item.renderBrief('he-x-NoNikud'));
-                if (item instanceof MevarchimChodeshEvent) {
-                    this.setTitle(TitlesKeys.MevarchimChodesh, this.formatMevarchim(item));
-                }
-            }
+
             if (item.mask & flags.OMER_COUNT) {
                 this.setTitle(TitlesKeys.SefiratHaOmer, item.render('he-x-NoNikud'));
             }
@@ -289,29 +288,8 @@ export class TitlesAiom {
         return 'ברכת הלבנה בערב';
     }
 
-    private formatMevarchim(event: MevarchimChodeshEvent): string {
-        const stripNikud = (value: string) => value.replace(/[\u0591-\u05C7]/g, '');
-        const rendered = stripNikud(event.renderBrief('he-x-NoNikud'));
-        const memo = event.memo;
-        if (!memo) {
-            return rendered;
-        }
-
-        const weekdays: Record<string, string> = {
-            Sunday: 'ראשון',
-            Monday: 'שני',
-            Tuesday: 'שלישי',
-            Wednesday: 'רביעי',
-            Thursday: 'חמישי',
-            Friday: 'שישי',
-            Saturday: 'שבת',
-        };
-        const translatedMemo = stripNikud(memo
-            .replace(/^Molad\s+[^:]+:\s*/, `מולד ${getMonthName(event.monthName)}: `)
-            .replace(/\b(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)\b/g, (day) => weekdays[day])
-            .replace(/\band\b/g, 'ו-')
-            .replace(/\bchalakim\b/g, 'חלקים'));
-        return `${rendered} — ${translatedMemo}`;
+    private stripNikud(value: string): string {
+        return value.replace(/[\u0591-\u05C7]/g, '');
     }
 
     private getAlHaNissimTitle(events: ReturnType<typeof HebrewCalendar.calendar>): string {

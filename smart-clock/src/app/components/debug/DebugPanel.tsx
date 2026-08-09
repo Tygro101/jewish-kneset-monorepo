@@ -6,6 +6,9 @@ import { getConfigDataSelector } from '../store/config/configSelectors';
 import { getConfigSelector } from '../store/config/configSelectors';
 import { refreshConfig } from '../store/config/configSlice';
 import { now, getOffsetMs, setOffsetMs, clearOffset, computeOffsetFromTarget } from '../../debug/clock';
+import { useRoute } from '../../routing/useRoute';
+import { buildRouteHash } from '../../debug/routeHash';
+import type { AppRoute } from '../../routing/routes';
 import './DebugPanel.scss';
 
 /**
@@ -61,6 +64,11 @@ function PanelContent({ onClose }: { onClose: () => void }) {
   const viewOverride = useAppSelector(getDebugViewOverride);
   const rotationFrozen = useAppSelector(getDebugRotationFrozen);
   const offsetMs = useAppSelector(getDebugOffsetMs);
+  const route = useRoute();
+
+  const handleRoute = (target: AppRoute) => {
+    window.location.hash = buildRouteHash(target, window.location.search, window.location.hash);
+  };
 
   // --- Time section ---
   const [timeInput, setTimeInput] = useState(() => toLocalISOString(now()));
@@ -161,6 +169,28 @@ function PanelContent({ onClose }: { onClose: () => void }) {
 
       <hr className="debug-divider" />
 
+      {/* ── Route ── */}
+      <div className="debug-section">
+        <div className="debug-section-label">Route</div>
+        <div className="debug-row">
+          <button
+            className={`debug-btn ${route === 'tablet' ? 'debug-btn--active' : ''}`}
+            onClick={() => handleRoute('tablet')}
+          >
+            Tablet
+          </button>
+          <button
+            className={`debug-btn ${route === 'tv' ? 'debug-btn--active' : ''}`}
+            onClick={() => handleRoute('tv')}
+          >
+            TV
+          </button>
+        </div>
+        <div className="debug-info">Current route: {route}</div>
+      </div>
+
+      <hr className="debug-divider" />
+
       {/* ── Views ── */}
       <div className="debug-section">
         <div className="debug-section-label">View Override</div>
@@ -216,7 +246,7 @@ function PanelContent({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         <div className="debug-info">
-          Override: {viewOverride ? describeOverride(viewOverride) : 'none'} | Rotation: {rotationFrozen ? 'paused' : 'active'}
+          Override: {viewOverride ? describeOverride(viewOverride) : 'none'} | Rotation: {rotationFrozen ? 'paused' : 'active'} | Route: {route}
         </div>
       </div>
     </>

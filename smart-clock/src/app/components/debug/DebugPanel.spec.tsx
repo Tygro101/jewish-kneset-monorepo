@@ -126,4 +126,26 @@ describe('DebugPanel', () => {
     expect(screen.getByText('Refresh Config')).toBeTruthy();
     expect(screen.getByText('Hard Reload')).toBeTruthy();
   });
+
+  it('shows the route section with Tablet and TV buttons', () => {
+    renderPanel(true);
+    fireEvent.click(screen.getByText('DEBUG'));
+    expect(screen.getByText('Tablet')).toBeTruthy();
+    expect(screen.getByText('TV')).toBeTruthy();
+  });
+
+  it('switches the location hash to #/tv when TV is clicked', () => {
+    renderPanel(true);
+    fireEvent.click(screen.getByText('DEBUG'));
+    fireEvent.click(screen.getByText('TV'));
+    expect(window.location.hash).toBe('#/tv');
+  });
+
+  it('switches back to the tablet route', () => {
+    renderPanel(true);
+    fireEvent.click(screen.getByText('DEBUG'));
+    fireEvent.click(screen.getByText('TV'));
+    fireEvent.click(screen.getByText('Tablet'));
+    expect(window.location.hash).toBe('#/');
+  });
 });

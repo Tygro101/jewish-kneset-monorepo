@@ -60,11 +60,15 @@ describe('TitlesAiom', () => {
 
     it('surfaces Shabbat Mevarchim with the announced month and molad', () => {
         const titles = titleFor(23, 'Kislev');
-        const mevarchim = titles[TitlesKeys.MevarchimChodesh]?.title ?? '';
 
+        // Mevarchim title shows the announced month
+        const mevarchim = titles[TitlesKeys.ShabbatMevarchim]?.title ?? '';
         expect(mevarchim).toContain('מברכים חודש טבת');
-        expect(mevarchim).toContain('מולד');
-        expect(mevarchim).toContain('חלקים');
+
+        // Molad is a separate title with time details
+        const molad = titles[TitlesKeys.Molad]?.title ?? '';
+        expect(molad).toContain('מולד');
+        expect(molad).toContain('חלקים');
     });
 
     it('allows individual title keys to be disabled', () => {
