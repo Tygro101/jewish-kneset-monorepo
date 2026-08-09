@@ -17,9 +17,12 @@ interface TitleMapping {
     group: GroupId;
     label: string;
     order: number;
+    /** Pinned items are never truncated from the display and always sort first. */
+    pinned?: boolean;
 }
 
 const titleGroupMap: Partial<Record<DisplayTitleKey, TitleMapping>> = {
+    // ─── Prayer group ───
     [TitlesKeys.Tachanun]: { group: 'prayer', label: 'תחנון', order: 10 },
     [TitlesKeys.MashivAruach]: { group: 'prayer', label: 'גשמים', order: 20 },
     [TitlesKeys.MoridAtal]: { group: 'prayer', label: 'גשמים', order: 20 },
@@ -30,9 +33,10 @@ const titleGroupMap: Partial<Record<DisplayTitleKey, TitleMapping>> = {
     [TitlesKeys.Hallel]: { group: 'prayer', label: 'הלל', order: 60 },
     [TitlesKeys.Aneinu]: { group: 'prayer', label: 'עננו', order: 70 },
     [TitlesKeys.Nachem]: { group: 'prayer', label: 'נחם', order: 80 },
-    [TitlesKeys.SefiratHaOmer]: { group: 'prayer', label: 'ספירת העומר', order: 90 },
+    [TitlesKeys.SefiratHaOmer]: { group: 'prayer', label: 'ספירת העומר', order: 90, pinned: true },
     [TitlesKeys.BirkatLevana]: { group: 'prayer', label: 'הלבנה', order: 100 },
 
+    // ─── Study group ───
     [TitlesKeys.DafYomi]: { group: 'study', label: 'בבלי', order: 10 },
     [TitlesKeys.YerushalmiYomi]: { group: 'study', label: 'ירושלמי', order: 20 },
     [TitlesKeys.MishnaYomi]: { group: 'study', label: 'משנה', order: 30 },
@@ -40,16 +44,19 @@ const titleGroupMap: Partial<Record<DisplayTitleKey, TitleMapping>> = {
     [TitlesKeys.KitzurShulchanAruch]: { group: 'study', label: 'קיצור', order: 50 },
     [TitlesKeys.PirkeiAvot]: { group: 'study', label: 'אבות', order: 60 },
 
+    // ─── Calendar group ───
+    // Order prioritises the day's identity (chag/erev/fast) so it's never truncated.
+    [TitlesKeys.ErevChag]: { group: 'calendar', label: 'ערב חג', order: 1, pinned: true },
+    [TitlesKeys.Hag]: { group: 'calendar', label: 'חג', order: 2, pinned: true },
+    [TitlesKeys.CholHamoed]: { group: 'calendar', label: 'חול המועד', order: 3, pinned: true },
+    [TitlesKeys.ChanukahCandles]: { group: 'calendar', label: 'חנוכה', order: 4, pinned: true },
+    [TitlesKeys.MinorHoliday]: { group: 'calendar', label: 'מועד קטן', order: 5, pinned: true },
+    [TitlesKeys.Tzum]: { group: 'calendar', label: 'צום', order: 7, pinned: true },
+    [TomorrowTitlesKeys.Tzum]: { group: 'calendar', label: 'צום מחר', order: 8 },
     [TitlesKeys.RoshChodesh]: { group: 'calendar', label: 'ראש חודש', order: 10 },
     [TitlesKeys.Parsha]: { group: 'calendar', label: 'פרשה', order: 20 },
     [TitlesKeys.SpecialShabbat]: { group: 'calendar', label: 'שבת מיוחדת', order: 30 },
-    [TitlesKeys.MinorHoliday]: { group: 'calendar', label: 'מועד קטן', order: 40 },
-    [TitlesKeys.YomYerushalayim]: { group: 'calendar', label: 'יום ירושלים', order: 50 },
-    [TitlesKeys.Hag]: { group: 'calendar', label: 'חג', order: 60 },
-    [TitlesKeys.CholHamoed]: { group: 'calendar', label: 'חול המועד', order: 70 },
-    [TitlesKeys.ChanukahCandles]: { group: 'calendar', label: 'חנוכה', order: 80 },
-    [TitlesKeys.Tzum]: { group: 'calendar', label: 'צום', order: 90 },
-    [TomorrowTitlesKeys.Tzum]: { group: 'calendar', label: 'צום מחר', order: 91 },
+    [TitlesKeys.YomYerushalayim]: { group: 'calendar', label: 'יום ירושלים', order: 40 },
     [TitlesKeys.ShabbatMevarchim]: { group: 'calendar', label: 'שבת מברכים', order: 95 },
     [TitlesKeys.Molad]: { group: 'calendar', label: 'מולד', order: 100 },
     [TitlesKeys.MevarchimChodesh]: { group: 'calendar', label: 'מברכים חודש', order: 120 },
@@ -66,41 +73,77 @@ const excludeKeys: Partial<Record<string, boolean>> = {
     [TitlesKeys.HebrewDate]: true,
 };
 
-/** Maximum number of rows shown per card. */
+/** Maximum number of rows shown per card (pinned items don't count toward this). */
 const MAX_TITLES_PER_GROUP = 4;
 
-/** Maximum number of calendar items joined into the header headline. */
-const MAX_CALENDAR_ITEMS = 4;
+/** Maximum number of calendar items joined into the header headline (pinned items guaranteed). */
+const MAX_CALENDAR_ITEMS = 6;
+
+interface SortableItem {
+    value: string;
+    label: string;
+    order: number;
+    streak: number;
+    pinned: boolean;
+}
+
+/**
+ * Sorts items: pinned first, then by streak ascending, then by order ascending.
+ */
+function sortItems(items: SortableItem[]): SortableItem[] {
+    return items.sort(
+        (a, b) =>
+            Number(b.pinned) - Number(a.pinned) ||
+            a.streak - b.streak ||
+            a.order - b.order,
+    );
+}
+
+/**
+ * Truncates a sorted list: all pinned items are kept, then fills remaining
+ * slots up to `max` with non-pinned items in their current order.
+ */
+function truncateItems(sorted: SortableItem[], max: number): SortableItem[] {
+    const pinned = sorted.filter((i) => i.pinned);
+    const rest = sorted.filter((i) => !i.pinned);
+    const remaining = Math.max(0, max - pinned.length);
+    return [...pinned, ...rest.slice(0, remaining)];
+}
 
 /**
  * Returns the day's calendar/festival headline (holiday, parsha, rosh chodesh, …)
- * as a single string, ordered by novelty then importance, joined with " · ".
+ * as a single string, ordered by importance then novelty, joined with " · ".
  * Rendered under the date in the header — not as a card.
+ * Pinned items (chag, erev, tzum, etc.) are always included and never cut.
  */
 export function getCalendarHeadline(titles: TypedObjectMap<IClockTitle>): string {
-    const items: { value: string; order: number; streak: number }[] = [];
+    const items: SortableItem[] = [];
+    const seen = new Set<string>();
     Object.keys(titles ?? {}).forEach((key) => {
         if (excludeKeys[key]) return;
         const mapping = titleGroupMap[key as DisplayTitleKey];
         if (!mapping || mapping.group !== 'calendar') return;
         const titleObj = titles[key];
         if (!titleObj?.title) return;
+        // De-duplicate identical text (e.g. ModernHoliday + YomYerushalayim same text)
+        if (seen.has(titleObj.title)) return;
+        seen.add(titleObj.title);
         items.push({
             value: titleObj.title,
+            label: mapping.label,
             order: mapping.order,
             streak: titleObj.streak ?? 99,
+            pinned: mapping.pinned ?? false,
         });
     });
-    return items
-        .sort((a, b) => a.streak - b.streak || a.order - b.order)
-        .slice(0, MAX_CALENDAR_ITEMS)
+    return truncateItems(sortItems(items), MAX_CALENDAR_ITEMS)
         .map((i) => i.value)
         .join(' · ');
 }
 
 export const TitlesContainer = (props: TitlesProps) => {
     const { titles } = props;
-    const grouped: Record<GroupId, { label: string; value: string; order: number; streak: number }[]> = {
+    const grouped: Record<GroupId, SortableItem[]> = {
         prayer: [],
         study: [],
         calendar: [],
@@ -128,15 +171,14 @@ export const TitlesContainer = (props: TitlesProps) => {
             order: mapping.order,
             // Missing streak (e.g. ranking disabled) is treated as "old" so it never jumps to the top.
             streak: titleObj.streak ?? 99,
+            pinned: mapping.pinned ?? false,
         });
     });
 
     return (
         <div className="info-cards" data-fit-measure>
             {groups.map((group) => {
-                const items = grouped[group.id]
-                    .sort((a, b) => a.streak - b.streak || a.order - b.order)
-                    .slice(0, MAX_TITLES_PER_GROUP);
+                const items = truncateItems(sortItems(grouped[group.id]), MAX_TITLES_PER_GROUP);
                 if (!items.length) return null;
 
                 return (

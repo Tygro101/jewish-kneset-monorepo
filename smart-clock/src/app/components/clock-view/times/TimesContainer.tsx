@@ -31,7 +31,7 @@ export const TimesContainer = (props: TimesProps) => {
                 const isCurrent = idx === closestIndex;
                 const hebrewName = timeData.generalName || timeData.name;
                 const mainTime = format(new Date(timeData.date), 'H:mm');
-
+                const seconds = format(new Date(timeData.date), 'ss');
                 // Additions (e.g., Gra times shown as secondary)
                 const additionTimes = (item.additions ?? [])
                     .filter((key) => !!props.times[key as unknown as string]?.date)
@@ -45,7 +45,7 @@ export const TimesContainer = (props: TimesProps) => {
                         {isCurrent && <div className="zman-glow" />}
                         <div className="zman-name">{hebrewName}</div>
                         <div className="zman-time" dir="ltr">
-                            <span className="zman-time-main">{mainTime}</span>
+                            <span className="zman-time-main">{mainTime}<span className="zman-time-seconds">:{seconds}</span></span>
                             {additionTimes.map((t, i) => (
                                 <span key={i} className="zman-time-addition">{t}</span>
                             ))}

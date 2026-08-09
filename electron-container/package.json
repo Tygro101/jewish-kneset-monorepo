@@ -1,7 +1,7 @@
 {
   "name": "electron-container",
   "productName": "Smart Clock",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Windows kiosk container for the Smart Clock PWA",
   "private": true,
   "license": "MIT",

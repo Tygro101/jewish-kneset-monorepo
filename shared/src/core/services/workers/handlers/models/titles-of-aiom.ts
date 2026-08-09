@@ -6,6 +6,7 @@ import {
     MevarchimChodeshEvent,
     flags,
     gematriya,
+    holidayDesc,
 } from "@hebcal/core";
 import { CitiesEnum, IClockTitle } from "./shared-models";
 import { DefaultOptions } from "../constants/calendar.options";
@@ -31,6 +32,7 @@ export enum TitlesKeys {
     MinorHoliday = 'minor-holiday',
     YomYerushalayim = 'yom-yerushalayim',
     Hag = 'hag',
+    ErevChag = 'erev-chag',
     CholHamoed = 'chol-hamoed',
     ChanukahCandles = 'chanukah-candles',
     Tzum = 'tzum',
@@ -98,7 +100,13 @@ export class TitlesAiom {
                 this.setTitle(TitlesKeys.HebrewDate, item.render('he-x-NoNikud'));
             }
             if ((item.mask & flags.CHAG) && item instanceof HolidayEvent) {
-                this.setTitle(TitlesKeys.Hag, item.renderBrief('he-x-NoNikud'));
+                // RoshHashanaEvent.render() appends the Hebrew year as Latin digits ("ראש השנה 5786").
+                // Strip the trailing number so it stays consistent with gematria rendering.
+                const text = item.renderBrief('he-x-NoNikud').replace(/\s+\d{4}$/, '');
+                this.setTitle(TitlesKeys.Hag, text);
+            }
+            if ((item.mask & flags.EREV) && item instanceof HolidayEvent) {
+                this.setTitle(TitlesKeys.ErevChag, item.renderBrief('he-x-NoNikud'));
             }
             if (item.mask & flags.CHOL_HAMOED) {
                 this.setTitle(TitlesKeys.CholHamoed, item.renderBrief('he-x-NoNikud'));
@@ -106,16 +114,19 @@ export class TitlesAiom {
             if (item.mask & flags.CHANUKAH_CANDLES) {
                 this.setTitle(TitlesKeys.ChanukahCandles, item.renderBrief('he-x-NoNikud'));
             }
-            if (item.mask & flags.MINOR_FAST || item.mask & flags.MAJOR_FAST) {
+            if ((item.mask & flags.MINOR_FAST || item.mask & flags.MAJOR_FAST) && !(item.mask & flags.CHAG)) {
+                // Skip Tzum when CHAG is also set (e.g. Yom Kippur is both CHAG and MAJOR_FAST).
                 this.setTitle(TitlesKeys.Tzum, item.renderBrief('he-x-NoNikud'));
             }
             if (item.mask & flags.SHABBAT_MEVARCHIM) {
                 this.setTitle(TitlesKeys.ShabbatMevarchim, this.stripNikud(item.renderBrief('he-x-NoNikud')));
+                if (item instanceof MevarchimChodeshEvent) {
+                    this.setTitle(TitlesKeys.MevarchimChodesh, this.formatMevarchim(item));
+                }
             }
             if (item.mask & flags.MOLAD) {
                 this.setTitle(TitlesKeys.Molad, item.renderBrief('he-x-NoNikud'));
             }
-
             if (item.mask & flags.OMER_COUNT) {
                 this.setTitle(TitlesKeys.SefiratHaOmer, item.render('he-x-NoNikud'));
             }
@@ -131,8 +142,10 @@ export class TitlesAiom {
             if ((item.mask & flags.MINOR_HOLIDAY) && !(item.mask & flags.CHANUKAH_CANDLES)) {
                 this.setTitle(TitlesKeys.MinorHoliday, item.renderBrief('he-x-NoNikud'));
             }
-            if ((item.mask & flags.MODERN_HOLIDAY) && item.getDesc() === 'Yom Yerushalayim') {
-                this.setTitle(TitlesKeys.YomYerushalayim, item.renderBrief('he-x-NoNikud'));
+            if ((item.mask & flags.MODERN_HOLIDAY) && item instanceof HolidayEvent) {
+                if (item.getDesc() === holidayDesc.YOM_YERUSHALAYIM) {
+                    this.setTitle(TitlesKeys.YomYerushalayim, item.renderBrief('he-x-NoNikud'));
+                }
             }
         });
 
@@ -203,7 +216,7 @@ export class TitlesAiom {
             this.setTitle(TitlesKeys.Aneinu, TitlesTexts.Aneinu);
         }
 
-        if (todayCalendar.some((item) => item.getDesc() === "Tish'a B'Av")) {
+        if (todayCalendar.some((item) => item.getDesc() === holidayDesc.TISHA_BAV)) {
             this.setTitle(TitlesKeys.Nachem, TitlesTexts.Nachem);
         }
 
@@ -292,40 +305,57 @@ export class TitlesAiom {
         return value.replace(/[\u0591-\u05C7]/g, '');
     }
 
+    private formatMevarchim(event: MevarchimChodeshEvent): string {
+        const rendered = this.stripNikud(event.renderBrief('he-x-NoNikud'));
+        const memo = event.memo;
+        if (!memo) {
+            return rendered;
+        }
+
+        const weekdays: Record<string, string> = {
+            Sunday: 'ראשון',
+            Monday: 'שני',
+            Tuesday: 'שלישי',
+            Wednesday: 'רביעי',
+            Thursday: 'חמישי',
+            Friday: 'שישי',
+            Saturday: 'שבת',
+        };
+        const translatedMemo = this.stripNikud(memo
+            .replace(/^Molad\s+[^:]+:\s*/, `מולד ${getMonthName(event.monthName)}: `)
+            .replace(/\b(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)\b/g, (day) => weekdays[day])
+            .replace(/\band\b/g, 'ו-')
+            .replace(/\bchalakim\b/g, 'חלקים'));
+        return `${rendered} — ${translatedMemo}`;
+    }
+
     private getAlHaNissimTitle(events: ReturnType<typeof HebrewCalendar.calendar>): string {
         if (events.some((item) => (item.mask & flags.CHANUKAH_CANDLES) !== 0)) {
             return TitlesTexts.AlHaNissimChanukah;
         }
+        // Use basename() to match Purim / Erev Purim / Shushan Purim under one name.
+        // Exclude Purim Katan using the holidayDesc constant.
         const isPurim = events.some((item) => {
-            const desc = item.getDesc();
-            return desc.includes('Purim') && !desc.includes('Katan');
+            if (!(item instanceof HolidayEvent)) return false;
+            const base = item.basename();
+            return base === 'Purim' || item.getDesc() === holidayDesc.SHUSHAN_PURIM;
         });
         return isPurim ? TitlesTexts.AlHaNissimPurim : '';
     }
 
     private getHallelTitle(events: ReturnType<typeof HebrewCalendar.calendar>): string {
-        const month = this.hDate.getMonthName();
-        const day = this.hDate.getDate();
-        const isChanukah = events.some((item) => (item.mask & flags.CHANUKAH_CANDLES) !== 0);
+        // Use hebcal's built-in hallel logic (returns 0=none, 1=half, 2=whole).
+        let level = HebrewCalendar.hallel(this.hDate, true);
 
-        // Edot Mizrach/Israel: full Hallel on Chanukah, first day of Pesach,
-        // Shavuot, and Sukkot through Shemini Atzeret.
-        if (
-            isChanukah ||
-            (month === 'Nisan' && day === 15) ||
-            (month === 'Sivan' && day === 6) ||
-            (month === 'Tishrei' && day >= 15 && day <= 22)
-        ) {
-            return TitlesTexts.HallelFull;
+        // hebcal's hallel_() recognizes descs starting with 'Sukkot'/'Chanukah'/'Shavuot' but
+        // 'Shmini Atzeret' does NOT start with 'Sukkot', so hebcal returns 0 for 22 Tishrei.
+        // Override: Shmini Atzeret has whole Hallel in Israel.
+        if (level === 0 && events.some((item) => item instanceof HolidayEvent && item.getDesc() === holidayDesc.SHMINI_ATZERET)) {
+            level = 2;
         }
 
-        // Half Hallel is said on Rosh Chodesh and the remaining days of Pesach.
-        if (
-            events.some((item) => (item.mask & flags.ROSH_CHODESH) !== 0) ||
-            (month === 'Nisan' && day >= 16 && day <= 21)
-        ) {
-            return TitlesTexts.HallelHalf;
-        }
+        if (level === 2) return TitlesTexts.HallelFull;
+        if (level === 1) return TitlesTexts.HallelHalf;
         return '';
     }
 

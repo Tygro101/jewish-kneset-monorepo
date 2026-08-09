@@ -1,9 +1,10 @@
-import { HDate } from '@hebcal/core';
+import { HDate, HebrewCalendar, flags } from '@hebcal/core';
 import { describe, expect, it } from 'vitest';
 import {
     TitlesAiom,
     TitlesKeys,
 } from '@shared/core/services/workers/handlers/models/titles-of-aiom';
+import { DefaultOptions } from '@shared/core/services/workers/handlers/constants/calendar.options';
 
 const titleFor = (day: number, month: string, year = 5786) =>
     new TitlesAiom({ date: new HDate(day, month, year).greg() }).calculateTitles();
@@ -37,6 +38,7 @@ describe('Orthodox holiday titles — what the shul display shows', () => {
             const titles = titleFor(5, 'Sivan');
 
             expect(titles[TitlesKeys.SefiratHaOmer]?.title).toContain('מ״ט');
+            expect(titles[TitlesKeys.ErevChag]?.title).toContain('שבועות');
             expect(titles[TitlesKeys.Tachanun]?.title).toBe('אין אומרים תחנון');
         });
 
@@ -55,10 +57,12 @@ describe('Orthodox holiday titles — what the shul display shows', () => {
     // ROSH HASHANA (joined 2-day Chag)
     // ═══════════════════════════════════════════════════════
     describe('Rosh Hashana (joined days)', () => {
-        it('Day 1 (1 Tishrei) — Chag, Ya\'aleh VeYavo, Morid HaTal still', () => {
+        it('Day 1 (1 Tishrei) — Chag without Latin year, Ya\'aleh VeYavo, Morid HaTal still', () => {
             const titles = titleFor(1, 'Tishrei');
 
             expect(titles[TitlesKeys.Hag]?.title).toContain('ראש השנה');
+            // Must not contain Latin digits (e.g. "5786")
+            expect(titles[TitlesKeys.Hag]?.title).not.toMatch(/\d/);
             expect(titles[TitlesKeys.YaalehVeYavo]?.title).toBe('יעלה ויבוא');
             expect(titles[TitlesKeys.Tachanun]?.title).toBe('אין אומרים תחנון');
             expect(titles[TitlesKeys.MoridAtal]?.title).toBe('מוריד הטל');
@@ -70,6 +74,60 @@ describe('Orthodox holiday titles — what the shul display shows', () => {
             expect(titles[TitlesKeys.Hag]?.title).toContain('ראש השנה');
             expect(titles[TitlesKeys.YaalehVeYavo]?.title).toBe('יעלה ויבוא');
             expect(titles[TitlesKeys.Tachanun]?.title).toBe('אין אומרים תחנון');
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════
+    // EREV DAYS (previously invisible)
+    // ═══════════════════════════════════════════════════════
+    describe('Erev days', () => {
+        it('Erev Rosh Hashana (29 Elul) — shows ErevChag', () => {
+            const titles = titleFor(29, 'Elul');
+            expect(titles[TitlesKeys.ErevChag]?.title).toContain('ראש השנה');
+        });
+
+        it('Erev Yom Kippur (9 Tishrei) — shows ErevChag', () => {
+            const titles = titleFor(9, 'Tishrei');
+            expect(titles[TitlesKeys.ErevChag]?.title).toContain('יום כיפור');
+        });
+
+        it('Erev Sukkot (14 Tishrei) — shows ErevChag', () => {
+            const titles = titleFor(14, 'Tishrei');
+            expect(titles[TitlesKeys.ErevChag]?.title).toContain('סוכות');
+        });
+
+        it('Erev Pesach (14 Nisan) — shows ErevChag AND Tzum (Ta\'anit Bechorot)', () => {
+            const titles = titleFor(14, 'Nisan');
+            expect(titles[TitlesKeys.ErevChag]?.title).toContain('פסח');
+            expect(titles[TitlesKeys.Tzum]?.title).toContain('תענית בכורות');
+        });
+
+        it('Erev Shavuot (5 Sivan) — shows ErevChag', () => {
+            const titles = titleFor(5, 'Sivan');
+            expect(titles[TitlesKeys.ErevChag]?.title).toContain('שבועות');
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════
+    // YOM KIPPUR — CHAG wins over fast, no duplicate Tzum
+    // ═══════════════════════════════════════════════════════
+    describe('Yom Kippur', () => {
+        it('10 Tishrei — appears as Hag, NOT as Tzum (no duplicate)', () => {
+            const titles = titleFor(10, 'Tishrei');
+            expect(titles[TitlesKeys.Hag]?.title).toContain('יום כיפור');
+            // Tzum should NOT be set because the CHAG flag takes priority
+            expect(titles[TitlesKeys.Tzum]).toBeUndefined();
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════
+    // YOM YERUSHALAYIM
+    // ═══════════════════════════════════════════════════════
+    describe('Yom Yerushalayim', () => {
+        it('28 Iyyar — YomYerushalayim + full Hallel', () => {
+            const titles = titleFor(28, 'Iyyar');
+            expect(titles[TitlesKeys.YomYerushalayim]?.title).toContain('ירושלים');
+            expect(titles[TitlesKeys.Hallel]?.title).toBe('הלל שלם');
         });
     });
 
@@ -110,10 +168,11 @@ describe('Orthodox holiday titles — what the shul display shows', () => {
     // PESACH — Erev, Day 1, Last Day
     // ═══════════════════════════════════════════════════════
     describe('Pesach', () => {
-        it('Erev Pesach (14 Nisan) — fast of firstborn, Aneinu, no tachanun', () => {
+        it('Erev Pesach (14 Nisan) — fast of firstborn, Aneinu, no tachanun, ErevChag', () => {
             const titles = titleFor(14, 'Nisan');
 
             expect(titles[TitlesKeys.Tzum]?.title).toContain('תענית בכורות');
+            expect(titles[TitlesKeys.ErevChag]?.title).toContain('פסח');
             expect(titles[TitlesKeys.Aneinu]?.title).toBe('אומרים עננו במנחה');
             expect(titles[TitlesKeys.Tachanun]?.title).toBe('אין אומרים תחנון');
         });
@@ -149,7 +208,7 @@ describe('Orthodox holiday titles — what the shul display shows', () => {
             expect(titles[TitlesKeys.SefiratHaOmer]?.title).toMatch(/ט׳ בעומר/);
             expect(titles[TitlesKeys.PirkeiAvot]?.title).toContain('פרקי אבות');
             expect(titles[TitlesKeys.ShabbatMevarchim]).toBeTruthy();
-            expect(titles[TitlesKeys.Molad]).toBeTruthy();
+            expect(titles[TitlesKeys.MevarchimChodesh]).toBeTruthy();
             expect(titles[TitlesKeys.YaalehVeYavo]).toBeUndefined();
         });
     });
@@ -176,6 +235,73 @@ describe('Orthodox holiday titles — what the shul display shows', () => {
 
             expect(omer).not.toMatch(/\d/);
             expect(omer).toContain('ט׳');
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════
+    // FULL-YEAR SWEEP — guarantee no holiday disappears
+    // ═══════════════════════════════════════════════════════
+    describe('Full-year sweep — every special day produces a title', () => {
+        it('every day with a holiday/fast/erev flag generates at least one visible title', () => {
+            // Use the same calendar options as calculateTitles() so we only test
+            // days that our system actually sees (excludes BeHaB, YKK, modern holidays).
+            const RELEVANT_FLAGS =
+                flags.CHAG |
+                flags.CHOL_HAMOED |
+                flags.MINOR_HOLIDAY |
+                flags.EREV |
+                flags.MAJOR_FAST |
+                flags.MINOR_FAST |
+                flags.CHANUKAH_CANDLES;
+
+            const EXPECTED_KEYS: string[] = [
+                TitlesKeys.Hag,
+                TitlesKeys.ErevChag,
+                TitlesKeys.CholHamoed,
+                TitlesKeys.MinorHoliday,
+                TitlesKeys.ChanukahCandles,
+                TitlesKeys.Tzum,
+            ];
+
+            const failures: string[] = [];
+            const startHd = new HDate(1, 'Tishrei', 5786);
+            const endHd = new HDate(29, 'Elul', 5786);
+
+            // Generate the full year's events with our DefaultOptions (disable candlelighting
+            // which requires a location that may not resolve in test)
+            const allEvents = HebrewCalendar.calendar({
+                ...DefaultOptions,
+                candlelighting: false,
+                location: undefined,
+                start: startHd.greg(),
+                end: endHd.greg(),
+            } as Parameters<typeof HebrewCalendar.calendar>[0]);
+
+            // Group events by day (abs day number)
+            const eventsByDay = new Map<number, typeof allEvents>();
+            for (const ev of allEvents) {
+                const abs = ev.getDate().abs();
+                if (!eventsByDay.has(abs)) eventsByDay.set(abs, []);
+                eventsByDay.get(abs)!.push(ev);
+            }
+
+            for (const [abs, dayEvents] of eventsByDay) {
+                const hasRelevant = dayEvents.some((ev) => (ev.getFlags() & RELEVANT_FLAGS) !== 0);
+                if (!hasRelevant) continue;
+
+                const hd = new HDate(abs);
+                const titles = new TitlesAiom({ date: hd.greg(), withRanking: false }).calculateTitles();
+                const hasTitle = EXPECTED_KEYS.some((k) => !!titles[k as keyof typeof titles]?.title);
+                if (!hasTitle) {
+                    const descs = dayEvents
+                        .filter((e) => (e.getFlags() & RELEVANT_FLAGS) !== 0)
+                        .map((e) => e.getDesc())
+                        .join(', ');
+                    failures.push(`${hd.toString()} (${descs})`);
+                }
+            }
+
+            expect(failures, `Days missing a holiday title:\n${failures.join('\n')}`).toHaveLength(0);
         });
     });
 });

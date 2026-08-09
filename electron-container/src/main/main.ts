@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, globalShortcut, net, session } from 'electron';
+import { app, BrowserWindow, Menu, globalShortcut, net, powerMonitor, session } from 'electron';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -15,7 +15,7 @@ import { ConnectivityMonitor } from './connectivity';
 import { windowIconPath } from './icon';
 import { nextRetryDelay, shouldRetryLoadFailure } from './load-retry';
 import { isAllowedNavigation, type OriginLockOptions } from './origin-lock';
-import { startKeepAwake, stopKeepAwake } from './power';
+import { isKeepAwakeActive, reArmKeepAwake, startKeepAwake, stopKeepAwake } from './power';
 import { buildShortcutTable } from './shortcuts';
 
 const TARGET_URL = resolveTargetUrl(app.isPackaged);
@@ -130,6 +130,27 @@ function registerShortcuts(win: BrowserWindow): void {
   }
 }
 
+/** Permissions the kiosk is allowed to hold. Everything else is denied. */
+const ALLOWED_PERMISSIONS = new Set(['fullscreen', 'screen-wake-lock']);
+
+/**
+ * Re-establishes the display-sleep blocker after OS power transitions.
+ * Windows can silently drop the request across resume / session change, and
+ * without this the screen starts sleeping again with no visible error.
+ */
+function registerPowerEvents(): void {
+  const reArm = () => reArmKeepAwake();
+
+  powerMonitor.on('resume', () => { console.log('[Power] resume — re-arming keep-awake.'); reArm(); });
+  powerMonitor.on('unlock-screen', () => { console.log('[Power] unlock-screen — re-arming keep-awake.'); reArm(); });
+  powerMonitor.on('on-ac', () => { console.log('[Power] on-ac — re-arming keep-awake.'); reArm(); });
+  powerMonitor.on('on-battery', () => { console.log('[Power] on-battery — re-arming keep-awake.'); reArm(); });
+
+  // Log-only: we do not fight the OS here, we just want it in the field logs.
+  powerMonitor.on('suspend', () => console.warn('[Power] System suspend.'));
+  powerMonitor.on('lock-screen', () => console.warn('[Power] Screen locked.'));
+}
+
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1920,
@@ -215,12 +236,22 @@ if (!app.requestSingleInstanceLock()) {
     Menu.setApplicationMenu(null);
     app.userAgentFallback = buildUserAgent(app.userAgentFallback);
 
-    // Kiosk needs no device permissions; allow only fullscreen requests.
+    // Kiosk needs no device permissions. Deliberate two-item allowlist:
+    // `fullscreen` for the kiosk layout and `screen-wake-lock` so the PWA can
+    // hold its own wake lock as defence in depth. Camera / mic / geolocation /
+    // notifications stay denied.
     session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) => {
-      callback(permission === 'fullscreen');
+      callback(ALLOWED_PERMISSIONS.has(permission));
     });
+    // Chromium routes the Wake Lock API through a permission *check*, not a
+    // request, so both handlers must agree or the lock silently fails.
+    session.defaultSession.setPermissionCheckHandler((_wc, permission) =>
+      ALLOWED_PERMISSIONS.has(permission),
+    );
 
     startKeepAwake();
+    console.log('[KeepAwake] Active after startup:', isKeepAwakeActive());
+    registerPowerEvents();
     mainWindow = createWindow();
     registerShortcuts(mainWindow);
 
@@ -242,6 +273,7 @@ if (!app.requestSingleInstanceLock()) {
     clearRetryTimer();
     monitor?.stop();
     stopKeepAwake();
+    powerMonitor.removeAllListeners();
     globalShortcut.unregisterAll();
   });
 

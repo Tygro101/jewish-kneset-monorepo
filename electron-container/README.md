@@ -30,8 +30,16 @@ smart-clock service worker.
   auto-update; reinstall to update the shell.
 - **Origin lock**: navigation is restricted to the target origin *and* path
   prefix, `about:blank`, and the bundled offline page. `window.open` is denied.
-- **Kiosk**: fullscreen, frameless, no menu, `powerSaveBlocker` prevents display
-  sleep, `backgroundThrottling` disabled, single-instance lock.
+- **Kiosk**: fullscreen, frameless, no menu, `backgroundThrottling` disabled,
+  single-instance lock.
+- **Always-on display**: `powerSaveBlocker('prevent-display-sleep')` plus a 60 s
+  watchdog (`src/main/keep-awake.ts`) that re-establishes the blocker if the OS
+  drops it, plus `powerMonitor` re-arming on `resume` / `unlock-screen` /
+  AC-DC changes. The PWA additionally holds its own Screen Wake Lock
+  (`smart-clock/src/app/hooks/useScreenWakeLock.ts`), which is why
+  `screen-wake-lock` is on the permission allowlist.
+  **Out of scope:** a TV's own "auto power off after N hours of no remote input"
+  and HDMI-CEC standby are TV-side settings that no software can override.
 - **Auto-launch**: the installer writes
   `HKLM\Software\Microsoft\Windows\CurrentVersion\Run\SmartClock`, so the kiosk
   starts at logon for **any** user on the machine. Uninstall removes it.
@@ -58,6 +66,12 @@ Run on the target PC after `npm run install:local`, and record results here.
 - [ ] Launch with no network and an empty cache: Hebrew fallback page with
       countdown, then auto-recovery once the network returns
 - [ ] Display does not sleep after the Windows sleep timeout
+- [ ] `powercfg /requests` shows a `DISPLAY:` request naming Smart Clock while running
+- [ ] Sleep the PC and resume: log shows `[Power] resume — re-arming keep-awake`,
+      display still never sleeps
+- [ ] Lock and unlock the session: log shows the re-arm, display still never sleeps
+- [ ] Leave running 24 h: no `[KeepAwake] Blocker was NOT active` lines, or if there
+      are, the display still stayed on (proves the watchdog worked)
 - [ ] Reboot: kiosk starts automatically at logon
 - [ ] Uninstall: Run key removed, app no longer autostarts
 
@@ -90,7 +104,8 @@ src/main/
   origin-lock.ts   — isAllowedNavigation() predicate
   load-retry.ts    — nextRetryDelay() backoff, shouldRetryLoadFailure()
   connectivity.ts  — ConnectivityMonitor class (poll + debounce + onReconnect)
-  power.ts         — powerSaveBlocker start/stop
+  power.ts         — Electron wiring for KeepAwakeGuard (start/reArm/stop)
+  keep-awake.ts    — KeepAwakeGuard class (blocker + watchdog, pure, no Electron import)
   shortcuts.ts     — buildShortcutTable() (pure, no Electron import)
 static/
   offline.html     — Hebrew fallback page with retry countdown
@@ -101,5 +116,5 @@ tests/
   *.test.ts        — vitest unit tests for all pure logic modules
 ```
 
-All pure logic modules (config, origin-lock, load-retry, connectivity, shortcuts)
-have zero Electron imports and are tested with `vitest` in plain Node.
+All pure logic modules (config, origin-lock, load-retry, connectivity, shortcuts,
+keep-awake) have zero Electron imports and are tested with `vitest` in plain Node.

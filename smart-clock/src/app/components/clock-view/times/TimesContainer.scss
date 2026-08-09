@@ -70,6 +70,12 @@
     font-size: calc(var(--ui-scale) * clamp(28px, min(6cqw, 20cqh), 96px));
     color: var(--zman-blue);
     line-height: 1.1;
+    .zman-time-seconds{
+        font-family: var(--font-clock);
+        font-weight: 600;
+        font-size: calc(var(--ui-scale) * clamp(16px, min(3.5cqw, 8cqh), 40px));
+        opacity: 0.5;
+    }
 }
 
 .zman-time-addition {

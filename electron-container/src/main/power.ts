@@ -1,18 +1,36 @@
 import { powerSaveBlocker } from 'electron';
+import { KeepAwakeGuard } from './keep-awake';
 
-let blockerId: number | null = null;
+let guard: KeepAwakeGuard | null = null;
 
-/** Electron equivalent of expo-keep-awake: keeps the TV/monitor awake. */
-export function startKeepAwake(): number {
-  if (blockerId !== null && powerSaveBlocker.isStarted(blockerId)) return blockerId;
-  blockerId = powerSaveBlocker.start('prevent-display-sleep');
-  console.log('[KeepAwake] powerSaveBlocker started, id =', blockerId);
-  return blockerId;
+function getGuard(): KeepAwakeGuard {
+  if (!guard) {
+    guard = new KeepAwakeGuard({
+      blocker: powerSaveBlocker,
+      logger: (message) => console.log(message),
+    });
+  }
+  return guard;
+}
+
+/**
+ * Electron equivalent of expo-keep-awake: keeps the TV/monitor awake.
+ * Idempotent, and arms a watchdog that re-establishes the blocker if the OS drops it.
+ */
+export function startKeepAwake(): number | null {
+  return getGuard().start();
+}
+
+/** Forces a fresh blocker. Call after OS power events (resume, unlock, AC change). */
+export function reArmKeepAwake(): number | null {
+  return getGuard().reArm();
 }
 
 export function stopKeepAwake(): void {
-  if (blockerId === null) return;
-  if (powerSaveBlocker.isStarted(blockerId)) powerSaveBlocker.stop(blockerId);
-  console.log('[KeepAwake] powerSaveBlocker stopped');
-  blockerId = null;
+  guard?.stop();
+}
+
+/** True when a live display-sleep blocker is held. Used for startup logging. */
+export function isKeepAwakeActive(): boolean {
+  return guard?.isActive() ?? false;
 }

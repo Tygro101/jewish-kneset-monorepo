@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "./app/hooks"
 import { getConfigSelector } from "./app/components/store/config/configSelectors"
 import { loadConfig } from "./app/components/store/config/configSlice"
 import { useConfigAutoRefresh } from "./app/hooks/useConfigAutoRefresh"
+import { useScreenWakeLock } from "./app/hooks/useScreenWakeLock"
 import {
   getPresentationsBlockedSelector,
   getMessagesBlockedSelector,
@@ -73,6 +74,9 @@ function AppRoot() {
   // Poll config.json every 5 minutes so CMS changes (e.g. a deactivated
   // presentation) reach the display without a reload.
   useConfigAutoRefresh();
+
+  // Always-on wall display: hold a Screen Wake Lock so the screen never blanks.
+  useScreenWakeLock();
 
   useEffect(() => {
     if (tenantId && status === 'idle') {
