@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   fallbackDurationMinutes,
+  hasExplicitEnd,
   resolveEndMin,
   PRAYER_DURATION_RULES,
   DEFAULT_DURATIONS,
@@ -213,3 +214,38 @@ describe('event-durations', () => {
     });
   });
 });
+
+
+  describe('hasExplicitEnd', () => {
+    it('returns true when endTime is valid and after start', () => {
+      expect(hasExplicitEnd({ endTime: '09:30' }, 480)).toBe(true);
+    });
+
+    it('returns true when durationMinutes is positive', () => {
+      expect(hasExplicitEnd({ durationMinutes: 45 }, 480)).toBe(true);
+    });
+
+    it('returns false when neither endTime nor durationMinutes is provided', () => {
+      expect(hasExplicitEnd({}, 480)).toBe(false);
+    });
+
+    it('returns false when endTime is earlier than start', () => {
+      expect(hasExplicitEnd({ endTime: '07:00' }, 480)).toBe(false);
+    });
+
+    it('returns false when endTime is invalid', () => {
+      expect(hasExplicitEnd({ endTime: 'abc' }, 480)).toBe(false);
+    });
+
+    it('returns false when durationMinutes is zero', () => {
+      expect(hasExplicitEnd({ durationMinutes: 0 }, 480)).toBe(false);
+    });
+
+    it('returns false when durationMinutes is negative', () => {
+      expect(hasExplicitEnd({ durationMinutes: -10 }, 480)).toBe(false);
+    });
+
+    it('endTime wins even if durationMinutes is also provided', () => {
+      expect(hasExplicitEnd({ endTime: '09:30', durationMinutes: 15 }, 480)).toBe(true);
+    });
+  });

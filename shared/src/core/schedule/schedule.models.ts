@@ -104,6 +104,8 @@ export interface TimelineEvent {
   endMin: number;
   /** true when endMin was clipped because the next event starts earlier. */
   clipped: boolean;
+  /** true when endMin was derived from an explicit CMS endTime or durationMinutes. */
+  hasExplicitEnd: boolean;
 }
 
 /** One day column of a timeline. */

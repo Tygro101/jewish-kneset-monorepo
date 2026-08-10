@@ -1,7 +1,7 @@
 import { addDays } from 'date-fns';
 import { DAY_LABELS, dayKeyFor } from './day-keys';
 import { createDayContextResolver } from './day-context';
-import { resolveEndMin } from './event-durations';
+import { hasExplicitEnd, resolveEndMin } from './event-durations';
 import { isEventVisibleOn } from './event-scope';
 import { resolveStartMin, type AnchorMinutes } from './dynamic-time';
 import { anchorMinutesFor, DEFAULT_CITY } from './zmanim-anchors';
@@ -74,6 +74,7 @@ export function buildDayEvents(
         startMin,
         endMin: resolveEndMin(ev, startMin, ctx),
         clipped: false,
+        hasExplicitEnd: hasExplicitEnd(ev, startMin),
       } as TimelineEvent;
     })
     .filter((e): e is TimelineEvent => e !== null)

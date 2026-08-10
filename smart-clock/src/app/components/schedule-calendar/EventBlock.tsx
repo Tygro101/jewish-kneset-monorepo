@@ -28,7 +28,7 @@ export const EventBlock = ({
   isCurrent,
   density,
 }: EventBlockProps) => {
-  const showEndPill = density !== 'minimal' && variant !== 'tight';
+  const showEndPill = density !== 'minimal' && variant !== 'tight' && event.hasExplicitEnd;
   const inlinePills = showEndPill && pillsInlineFor(event.endMin - event.startMin);
 
   const cls = [

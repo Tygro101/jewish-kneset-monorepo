@@ -59,5 +59,14 @@ describe('schedule scope on the timeline', () => {
     };
     const [day] = buildTimelineDays(withEnd, 1, PLAIN_WEEKDAY);
     expect(day.events[0].endMin).toBe(7 * 60 + 15);
+    expect(day.events[0].hasExplicitEnd).toBe(true);
+  });
+
+  it('events without explicit end have hasExplicitEnd = false', () => {
+    const noEnd: Partial<Record<DayKey, ScheduleEvent[]>> = {
+      monday: [{ time: '06:30', title: 'שחרית', type: 'tefilla' }],
+    };
+    const [day] = buildTimelineDays(noEnd, 1, PLAIN_WEEKDAY);
+    expect(day.events[0].hasExplicitEnd).toBe(false);
   });
 });

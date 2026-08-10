@@ -35,6 +35,17 @@ export function fallbackDurationMinutes(
 }
 
 /**
+ * Returns true when the CMS supplied an explicit endTime or durationMinutes,
+ * meaning the end time should be displayed to the user.
+ */
+export function hasExplicitEnd(event: Pick<ScheduleEvent, 'endTime' | 'durationMinutes'>, startMin: number): boolean {
+  const explicitEnd = parseHHmm(event.endTime);
+  if (explicitEnd !== null && explicitEnd > startMin) return true;
+  if (typeof event.durationMinutes === 'number' && event.durationMinutes > 0) return true;
+  return false;
+}
+
+/**
  * Resolves the end minute for an event.
  * Precedence: endTime > durationMinutes > prayer keyword rule > per-type default.
  */

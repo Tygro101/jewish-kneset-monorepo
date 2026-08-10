@@ -24,6 +24,7 @@ export {
   DEFAULT_DURATIONS,
   PRAYER_DURATION_RULES,
   fallbackDurationMinutes,
+  hasExplicitEnd,
   resolveEndMin,
 } from './event-durations';
 export type { PrayerDurationRule } from './event-durations';
