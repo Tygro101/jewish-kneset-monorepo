@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useDailyRecalc } from '../../hooks/useDailyRecalc';
 import { useFitToScreen } from '../../hooks/useFitToScreen';
 import { useAppDispatch, useAppSelector } from '../../hooks';
@@ -7,7 +7,7 @@ import { getTitlesSelector } from '../store/titles/titlesSelectors';
 import { getConfigDataSelector } from '../store/config/configSelectors';
 import { calculateTimes } from '../store/times/timesSlice';
 import { calculateTitles } from '../store/titles/titlesSlice';
-import { CitiesEnum } from '@shared/core/services/workers/handlers/models/shared-models';
+import { resolveCity } from '@shared/core/schedule/zmanim-anchors';
 import { SettingsMenu } from '../settings/SettingsMenu';
 import { DashboardShell } from '../clock-view/DashboardShell';
 import { DashboardHeader } from '../clock-view/DashboardHeader';
@@ -42,14 +42,25 @@ export const TvClockView = ({ calendarOverride }: TvClockViewProps = {}) => {
   const titles = useAppSelector(getTitlesSelector);
   const config = useAppSelector(getConfigDataSelector);
   const rootRef = useRef<HTMLDivElement>(null);
+  const city = resolveCity(config?.tenant?.location);
 
   // Landscape has less vertical slack — tighter fit guard.
   useFitToScreen(rootRef, [times, titles], { floor: 0.7, ceil: 1.15, cssVar: '--fit-scale' });
 
   useDailyRecalc(() => {
-    dispatch(calculateTimes({ date: now(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
-    dispatch(calculateTitles({ date: now(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
+    dispatch(calculateTimes({ date: now(), location: city }));
+    dispatch(calculateTitles({ date: now(), location: city }));
   });
+
+  // Recalc when the city changes after config loads.
+  const lastCity = useRef<string | null>(null);
+  useEffect(() => {
+    if (lastCity.current !== null && lastCity.current !== city) {
+      dispatch(calculateTimes({ date: now(), location: city }));
+      dispatch(calculateTitles({ date: now(), location: city }));
+    }
+    lastCity.current = city;
+  }, [dispatch, city]);
 
   const deviceDaysAhead = useDeviceDaysAhead('tv');
   const daysAhead = resolveDaysAhead(config, 'tv', deviceDaysAhead);

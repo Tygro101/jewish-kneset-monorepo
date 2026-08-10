@@ -1,10 +1,11 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useDailyRecalc } from '../../hooks/useDailyRecalc';
 import { useFitToScreen } from '../../hooks/useFitToScreen';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { getTimesSelector } from '../store/times/timesSelectors';
+import { getConfigDataSelector } from '../store/config/configSelectors';
 import { calculateTimes } from '../store/times/timesSlice';
-import { CitiesEnum } from '@shared/core/services/workers/handlers/models/shared-models';
+import { resolveCity } from '@shared/core/schedule/zmanim-anchors';
 import { calculateTitles } from '../store/titles/titlesSlice';
 import { getTitlesSelector } from '../store/titles/titlesSelectors';
 import { SettingsMenu } from '../settings/SettingsMenu';
@@ -23,14 +24,26 @@ export const ClockView = ({ bodyOverride }: ClockViewProps = {}) => {
     const dispatch = useAppDispatch();
     const times = useAppSelector(getTimesSelector);
     const titles = useAppSelector(getTitlesSelector);
+    const config = useAppSelector(getConfigDataSelector);
     const rootRef = useRef<HTMLDivElement>(null);
+    const city = resolveCity(config?.tenant?.location);
 
     useFitToScreen(rootRef, [times, titles], { cssVar: '--fit-scale' });
 
     useDailyRecalc(() => {
-        dispatch(calculateTimes({ date: now(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
-        dispatch(calculateTitles({ date: now(), location: CitiesEnum.NETIVOT_NEVA_SHARON }));
+        dispatch(calculateTimes({ date: now(), location: city }));
+        dispatch(calculateTitles({ date: now(), location: city }));
     });
+
+    // Recalc when the city changes after config loads.
+    const lastCity = useRef<string | null>(null);
+    useEffect(() => {
+        if (lastCity.current !== null && lastCity.current !== city) {
+            dispatch(calculateTimes({ date: now(), location: city }));
+            dispatch(calculateTitles({ date: now(), location: city }));
+        }
+        lastCity.current = city;
+    }, [dispatch, city]);
 
     return (
         <div className="clock-app" ref={rootRef}>

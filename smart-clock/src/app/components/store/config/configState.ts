@@ -13,6 +13,11 @@ export interface ScheduleEvent {
   durationMinutes?: number;
   /** Displayed under the title in comfortable/full density. */
   subtitle?: string;
+  /**
+   * When false the event is chol-only and is hidden on Shabbat and Yom Tov.
+   * Absent is treated as true.
+   */
+  showOnShabbatAndYomTov?: boolean;
 }
 
 export interface Presentation {
@@ -45,7 +50,15 @@ export interface DisplayMessage {
 }
 
 export interface TenantConfig {
-  tenant: { id: string; displayName: string };
+  tenant: {
+    id: string;
+    displayName: string;
+    /**
+     * Tenant city as a CitiesEnum value (Hebrew), used for all zmanim.
+     * Absent or unrecognised falls back to DEFAULT_CITY.
+     */
+    location?: string;
+  };
   displaySettings: {
     mainDashboardDurationSeconds: number;
     presentationDurationSeconds: number;

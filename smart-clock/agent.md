@@ -95,3 +95,36 @@ The day is divided into 3 sections, each showing ≤6 time cards:
 - **NerotShabat:** Only calculated (and emitted to state) when hebcal's `LIGHT_CANDLES` flag is set
 - **TzetShabat:** Only calculated when `LIGHT_CANDLES_TZEIS` flag is set
 - **TzetTzumKatan:** Only calculated on `MINOR_FAST` or `MAJOR_FAST` days
+
+## Hebrew Calendar & Jewish Date Data — Use @hebcal/core exclusively
+
+ALL Hebrew calendar logic, Jewish date computations, and holiday/event data MUST come
+from the `@hebcal/core` library (and its companion `@hebcal/learning`). Never reimplement
+halachic rules, holiday lists, or date arithmetic by hand.
+
+### What hebcal provides (use these, do not reinvent):
+- `HebrewCalendar.calendar(options)` — generate events for a date range
+- `HebrewCalendar.hallel(hdate, il)` — returns 0/1/2 (none/half/whole)
+- `HebrewCalendar.tachanun(hdate, il)` — returns `{shacharit, mincha, allCongs}`
+- `HebrewCalendar.getHolidaysOnDate(hdate, il)` — holiday events for a single day
+- `HebrewCalendar.eruvTavshilin(date, il)` — boolean
+- `HolidayEvent.basename()` — strips Erev/day-numbers/qualifiers from event names
+- `holidayDesc` constants — stable English keys for every holiday (use instead of string literals)
+- `flags.*` — bitmask constants (CHAG, EREV, CHOL_HAMOED, MINOR_HOLIDAY, MINOR_FAST, MAJOR_FAST, CHANUKAH_CANDLES, MODERN_HOLIDAY, ROSH_CHODESH, OMER_COUNT, SHABBAT_MEVARCHIM, MOLAD, PARSHA_HASHAVUA, SPECIAL_SHABBAT, etc.)
+- `event.renderBrief('he-x-NoNikud')` — Hebrew text without nikud (for display)
+- `event.render('he-x-NoNikud')` — full Hebrew rendering
+- `gematriya(n)` — number to Hebrew gematria string
+- `HDate` — Hebrew date construction and conversion
+- `DailyLearning.lookup(name, hdate, il)` — Daf Yomi, Mishna Yomi, Rambam, etc.
+- `isAveilut(hdate)` — mourning period detection
+- `isAssurBemlacha(date, location, useElevation)` — Shabbat/YomTov melacha check
+- `isFastDay(hdate, il)` — fast day detection
+
+### Rules:
+1. Never hard-code holiday names in Hebrew or English — use `holidayDesc.*` constants or match via `flags.*` bitmasks
+2. Never write month/day arithmetic to determine if "today is X holiday" — use `getHolidaysOnDate()` or check event flags from `calendar()`
+3. Never hand-write Hallel/Tachanun logic — use the built-in methods
+4. For Hebrew rendering, always use the `'he-x-NoNikud'` locale (nikud-stripped Hebrew)
+5. Numbers that appear in titles (Omer count, Mishna chapter numbers) must use `gematriya()`, never Arabic digits
+6. Calendar options: always use `il: true` (Israel schedule) from `DefaultOptions` in `shared/src/core/services/workers/handlers/constants/calendar.options.ts`
+7. If hebcal has a known gap (e.g. Shmini Atzeret not matching `hallel()` for whole Hallel), add a targeted override with a comment explaining the gap — do not replace the whole function with hand-rolled logic
