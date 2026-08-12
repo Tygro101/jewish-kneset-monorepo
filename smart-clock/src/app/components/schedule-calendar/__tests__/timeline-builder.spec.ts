@@ -282,7 +282,7 @@ describe('timeline-window', () => {
     it('widens for an event before 06:00', () => {
       const day = {
         ...emptyDay,
-        events: [{ id: 'x', title: 't', type: 'tefilla' as const, startMin: 300, endMin: 360, clipped: false }],
+        events: [{ id: 'x', title: 't', type: 'tefilla' as const, startMin: 300, endMin: 360, clipped: false, hasExplicitEnd: false }],
       };
       const w = computeWindow([day]);
       expect(w.startMin).toBe(300); // 05:00
@@ -292,7 +292,7 @@ describe('timeline-window', () => {
     it('widens for an event after 22:00', () => {
       const day = {
         ...emptyDay,
-        events: [{ id: 'x', title: 't', type: 'tefilla' as const, startMin: 1350, endMin: 1410, clipped: false }],
+        events: [{ id: 'x', title: 't', type: 'tefilla' as const, startMin: 1350, endMin: 1410, clipped: false, hasExplicitEnd: false }],
       };
       const w = computeWindow([day]);
       expect(w.startMin).toBe(BASE_WINDOW.startMin);
@@ -307,7 +307,7 @@ describe('timeline-window', () => {
     it('does not shrink below base window', () => {
       const day = {
         ...emptyDay,
-        events: [{ id: 'x', title: 't', type: 'tefilla' as const, startMin: 480, endMin: 540, clipped: false }],
+        events: [{ id: 'x', title: 't', type: 'tefilla' as const, startMin: 480, endMin: 540, clipped: false, hasExplicitEnd: false }],
       };
       const w = computeWindow([day]);
       expect(w.startMin).toBe(BASE_WINDOW.startMin); // 360
@@ -317,7 +317,7 @@ describe('timeline-window', () => {
     it('caps endMin at 1440 (24:00)', () => {
       const day = {
         ...emptyDay,
-        events: [{ id: 'x', title: 't', type: 'tefilla' as const, startMin: 1430, endMin: 1450, clipped: false }],
+        events: [{ id: 'x', title: 't', type: 'tefilla' as const, startMin: 1430, endMin: 1450, clipped: false, hasExplicitEnd: false }],
       };
       const w = computeWindow([day]);
       expect(w.endMin).toBeLessThanOrEqual(1440);
@@ -331,12 +331,12 @@ describe('timeline-window', () => {
     it('aggregates across multiple days', () => {
       const early = {
         ...emptyDay,
-        events: [{ id: 'a', title: 't', type: 'tefilla' as const, startMin: 305, endMin: 340, clipped: false }],
+        events: [{ id: 'a', title: 't', type: 'tefilla' as const, startMin: 305, endMin: 340, clipped: false, hasExplicitEnd: false }],
       };
       const late = {
         ...emptyDay,
         offset: 1,
-        events: [{ id: 'b', title: 't', type: 'shiur' as const, startMin: 1330, endMin: 1385, clipped: false }],
+        events: [{ id: 'b', title: 't', type: 'shiur' as const, startMin: 1330, endMin: 1385, clipped: false, hasExplicitEnd: false }],
       };
       const w = computeWindow([early, late]);
       expect(w.startMin).toBe(300); // floor(305/60)*60

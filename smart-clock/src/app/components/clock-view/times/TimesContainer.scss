@@ -66,8 +66,8 @@
 
 .zman-time-main {
     font-family: var(--font-clock);
-    font-weight: 800;
-    font-size: calc(var(--ui-scale) * clamp(28px, min(6cqw, 20cqh), 96px));
+    font-weight: 880;
+    font-size: calc(var(--ui-scale) * clamp(32px, min(6.8cqw, 20cqh), 108px));
     color: var(--zman-blue);
     line-height: 1.1;
     .zman-time-seconds{

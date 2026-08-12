@@ -19,8 +19,8 @@ function makeDay(overrides: Partial<TimelineDay> = {}): TimelineDay {
     label: 'היום',
     sublabel: 'יום שני, 20 ביולי 2026',
     events: [
-      { id: 'e0', title: 'שחרית', type: 'tefilla', startMin: 390, endMin: 450, clipped: false },
-      { id: 'e1', title: 'מנחה', type: 'tefilla', startMin: 780, endMin: 805, clipped: false },
+      { id: 'e0', title: 'שחרית', type: 'tefilla', startMin: 390, endMin: 450, clipped: false, hasExplicitEnd: false },
+      { id: 'e1', title: 'מנחה', type: 'tefilla', startMin: 780, endMin: 805, clipped: false, hasExplicitEnd: false },
     ],
     ...overrides,
   };
@@ -168,7 +168,7 @@ describe('ScheduleTimeline', () => {
 
   it('in minimal density, only start pill is shown (no end pill)', () => {
     const day = makeDay({
-      events: [{ id: 'e0', title: 'שחרית', type: 'tefilla', startMin: 390, endMin: 450, clipped: false }],
+      events: [{ id: 'e0', title: 'שחרית', type: 'tefilla', startMin: 390, endMin: 450, clipped: false, hasExplicitEnd: true }],
     });
     const { container } = render(
       <ScheduleTimeline days={[day]} window={WINDOW} nowMin={null} density="minimal" />,
@@ -180,7 +180,7 @@ describe('ScheduleTimeline', () => {
 
   it('in comfortable density with long event, both pills and subtitle shown', () => {
     const day = makeDay({
-      events: [{ id: 'e0', title: 'שחרית', subtitle: 'תפילת הציבור', type: 'tefilla', startMin: 390, endMin: 450, clipped: false }],
+      events: [{ id: 'e0', title: 'שחרית', subtitle: 'תפילת הציבור', type: 'tefilla', startMin: 390, endMin: 450, clipped: false, hasExplicitEnd: true }],
     });
     const { container } = render(
       <ScheduleTimeline days={[day]} window={WINDOW} nowMin={null} density="comfortable" />,
@@ -214,7 +214,7 @@ describe('ScheduleTimeline', () => {
     // topPct       = (390-360)/960 * 100 = 3.125%
     // minHeight    = 60/960 * 100        = 6.25%
     // maxHeight    = (1320-390)/960 *100 = 96.875%  (grows to window end)
-    const days = [makeDay({ events: [{ id: 'e0', title: 'שחרית', type: 'tefilla', startMin: 390, endMin: 450, clipped: false }] })];
+    const days = [makeDay({ events: [{ id: 'e0', title: 'שחרית', type: 'tefilla', startMin: 390, endMin: 450, clipped: false, hasExplicitEnd: false }] })];
     const { container } = render(
       <ScheduleTimeline days={days} window={WINDOW} nowMin={null} density="comfortable" />,
     );
@@ -228,8 +228,8 @@ describe('ScheduleTimeline', () => {
   it('caps max-height at the next event start so blocks cannot overlap', () => {
     // e0 780–804 (24min → min 2.5%), e1 starts 828 → max (828-780)/960 = 5%
     const days = [makeDay({ events: [
-      { id: 'e0', title: 'מנחה', type: 'tefilla', startMin: 780, endMin: 804, clipped: false },
-      { id: 'e1', title: 'ערבית', type: 'tefilla', startMin: 828, endMin: 888, clipped: false },
+      { id: 'e0', title: 'מנחה', type: 'tefilla', startMin: 780, endMin: 804, clipped: false, hasExplicitEnd: false },
+      { id: 'e1', title: 'ערבית', type: 'tefilla', startMin: 828, endMin: 888, clipped: false, hasExplicitEnd: false },
     ] })];
     const { container } = render(
       <ScheduleTimeline days={days} window={WINDOW} nowMin={null} density="comfortable" />,
@@ -241,7 +241,7 @@ describe('ScheduleTimeline', () => {
 
   it('adds cal-block--pills-inline to short two-pill blocks', () => {
     // 30 minutes → standard variant (end pill shown) and under the 45min threshold
-    const days = [makeDay({ events: [{ id: 'e0', title: 'מנחה', type: 'tefilla', startMin: 780, endMin: 810, clipped: false }] })];
+    const days = [makeDay({ events: [{ id: 'e0', title: 'מנחה', type: 'tefilla', startMin: 780, endMin: 810, clipped: false, hasExplicitEnd: true }] })];
     const { container } = render(
       <ScheduleTimeline days={days} window={WINDOW} nowMin={null} density="comfortable" />,
     );
@@ -250,7 +250,7 @@ describe('ScheduleTimeline', () => {
   });
 
   it('keeps pills stacked on long blocks', () => {
-    const days = [makeDay({ events: [{ id: 'e0', title: 'שחרית', type: 'tefilla', startMin: 390, endMin: 450, clipped: false }] })];
+    const days = [makeDay({ events: [{ id: 'e0', title: 'שחרית', type: 'tefilla', startMin: 390, endMin: 450, clipped: false, hasExplicitEnd: true }] })];
     const { container } = render(
       <ScheduleTimeline days={days} window={WINDOW} nowMin={null} density="comfortable" />,
     );
