@@ -86,3 +86,19 @@
 }
 
 /* Single-line values with ellipsis to save vertical space */
+
+/* ── TV zmanim font overrides ──
+   Keep the original (smaller) sizes on TV; tablet-specific bumps
+   in TimesContainer.scss should NOT apply here. */
+.tv-app .zman-name {
+  font-size: calc(var(--ui-scale) * clamp(18px, min(4cqw, 11cqh), 48px));
+}
+
+.tv-app .zman-time-main {
+  font-size: calc(var(--ui-scale) * clamp(28px, min(6cqw, 20cqh), 96px));
+  font-weight: 800;
+}
+
+.tv-app .zman-time-main .zman-time-seconds {
+  font-size: calc(var(--ui-scale) * clamp(16px, min(3.5cqw, 8cqh), 40px));
+}
