@@ -50,7 +50,7 @@
 .zman-name {
     font-family: var(--font-hebrew);
     font-weight: 600;
-    font-size: calc(var(--ui-scale) * clamp(18px, min(4cqw, 11cqh), 48px));
+    font-size: calc(var(--ui-scale) * clamp(22px, min(4.4cqw, 11.6cqh), 60px));
     color: var(--text-secondary);
     line-height: 1.2;
     display: -webkit-box;
@@ -67,13 +67,13 @@
 .zman-time-main {
     font-family: var(--font-clock);
     font-weight: 880;
-    font-size: calc(var(--ui-scale) * clamp(32px, min(6.8cqw, 20cqh), 108px));
+    font-size: calc(var(--ui-scale) * clamp(48px, min(7.6cqw, 20cqh), 120px));
     color: var(--zman-blue);
     line-height: 1.1;
     .zman-time-seconds{
         font-family: var(--font-clock);
         font-weight: 600;
-        font-size: calc(var(--ui-scale) * clamp(16px, min(3.5cqw, 8cqh), 40px));
+        font-size: calc(var(--ui-scale) * clamp(12px, min(3.2cqw, 8cqh), 35px));
         opacity: 0.5;
     }
 }
