@@ -22,8 +22,13 @@
 }
 
 
+/* ── Dashboard column (right in RTL) ──
+   Auto-placed into grid-column 1 / grid-row 1. min-* 0 keeps the column from
+   being widened by its content so DashboardShell's container queries resolve
+   against the 35% track. */
 .tv-dashboard {
-
+  min-width: 0;
+  min-height: 0;
 }
 
 /* Remove tablet padding from zmanim section on TV */
@@ -59,46 +64,65 @@
 }
 
 
-/* ── TV info-card density: constrain cards within their grid row ── */
-.tv-dashboard .info-cards {
-  grid-template-rows: minmax(0, 1fr);
+/* ── TV info panel density: constrain the panel within its grid row ── */
+.tv-dashboard .info-panel-container {
   min-height: 0;
 }
 
-.tv-dashboard .info-card {
-  height: 100%;
-  min-height: 0;
-}
-
-.tv-dashboard .info-card-body {
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* Tighter row padding so 4 rows fit the constrained height */
-.tv-dashboard .info-card-row {
-  padding: clamp(2px, 1cqmin, 10px) clamp(8px, 2cqmin, 18px);
-}
-
-/* Card text at base scale (no 1.25 boost) for density */
-.tv-dashboard .info-cards {
+/* Panel text at base scale (no 1.25 boost) for density */
+.tv-dashboard .info-panel {
   --ui-scale: var(--fit-scale, 1.15);
 }
 
-/* Single-line values with ellipsis to save vertical space */
-
-/* ── TV zmanim font overrides ──
-   Keep the original (smaller) sizes on TV; tablet-specific bumps
-   in TimesContainer.scss should NOT apply here. */
-.tv-app .zman-name {
-  font-size: calc(var(--ui-scale) * clamp(18px, min(4cqw, 11cqh), 48px));
+/* ── TV zmanim typography ──
+   The dashboard column is only 35% of the screen, so a 6-card grid yields
+   ~206px cards at 1080p and ~145px at 768p. The tablet baseline's clamp floors
+   (32px main / 18px name) exceed what those cards can hold, which is why the
+   digits were clipped. Floors here are deliberately low; the cq multipliers are
+   width-aware ("H:mm" ≈ 2.78em plus ~0.4em for the seconds suffix).
+   The secondary (גר"א / ר"ת) time is raised to half the main digit. */
+.tv-app .zmanim-grid {
+  gap: clamp(8px, 2cqmin, 22px);
 }
 
-.tv-app .zman-time-main {
-  font-size: calc(var(--ui-scale) * clamp(28px, min(6cqw, 20cqh), 96px));
-  font-weight: 800;
+.tv-app .zmanim-grid .zman-card {
+  --zman-name-size: clamp(12px, min(17cqw, 16cqh), 44px);
+  --zman-main-size: clamp(20px, min(27cqw, 34cqh), 92px);
+  --zman-addition-ratio: 0.5;
+
+  gap: clamp(2px, 1.5cqmin, 10px);
+  padding: clamp(4px, 1.5cqmin, 12px);
 }
 
-.tv-app .zman-time-main .zman-time-seconds {
-  font-size: calc(var(--ui-scale) * clamp(16px, min(3.5cqw, 8cqh), 40px));
+/* 4-card TV: half the cards, so both axes allow more. */
+.tv-app .zmanim-grid[data-zman-count="4"] .zman-card {
+  --zman-name-size: clamp(14px, min(20cqw, 18cqh), 60px);
+  --zman-main-size: clamp(26px, min(34cqw, 40cqh), 130px);
+}
+
+/* ── TV header date overrides ──
+   .date-primary / .date-secondary resolve cqw against .dashboard-shell.
+   On a 4K TV the 35% column is wide enough to hit the tablet clamp ceilings,
+   which crowds the header against the clock — cap the maxima. */
+.tv-app .date-primary {
+  font-size: calc(var(--ui-scale) * clamp(18px, 5cqw, 48px));
+}
+
+.tv-app .date-secondary {
+  font-size: calc(var(--ui-scale) * clamp(12px, 2.4cqw, 28px));
+}
+
+.tv-app .date-calendar {
+  font-size: calc(var(--ui-scale) * clamp(13px, 2.6cqw, 30px));
+}
+
+/* ── TV info panel overrides ──
+   3 rows per page (vs 2 on tablet) in a narrower column: lower the ceilings so
+   long values stay on one line. cqw resolves against .info-section (`cards`). */
+.tv-app .info-panel-value {
+  font-size: calc(var(--ui-scale) * clamp(16px, 4.5cqw, 54px));
+}
+
+.tv-app .info-panel-label {
+  font-size: calc(var(--ui-scale) * clamp(11px, 2.8cqw, 28px));
 }

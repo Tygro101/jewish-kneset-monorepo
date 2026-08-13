@@ -20,6 +20,7 @@ import reducer, {
     setNetzCountdownEnabled,
     setNetzCountdownMinutes,
     setScheduleDaysAhead,
+    setZmanimCount,
     loadSettings,
 } from './settingsSlice';
 
@@ -76,21 +77,21 @@ describe('settingsSlice', () => {
     describe('loadSettings', () => {
         it('falls back to defaults on invalid JSON', () => {
             store['smartclock-settings'] = '{not valid';
-            expect(loadSettings()).toEqual({ netzCountdownEnabled: false, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false, scheduleDaysAheadTv: 6, scheduleDaysAheadTablet: 2 });
+            expect(loadSettings()).toEqual({ netzCountdownEnabled: false, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false, scheduleDaysAheadTv: 6, scheduleDaysAheadTablet: 2, zmanimCountTv: 6, zmanimCountTablet: 4 });
         });
 
         it('falls back to defaults when key is missing', () => {
-            expect(loadSettings()).toEqual({ netzCountdownEnabled: false, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false, scheduleDaysAheadTv: 6, scheduleDaysAheadTablet: 2 });
+            expect(loadSettings()).toEqual({ netzCountdownEnabled: false, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false, scheduleDaysAheadTv: 6, scheduleDaysAheadTablet: 2, zmanimCountTv: 6, zmanimCountTablet: 4 });
         });
 
         it('reads persisted values', () => {
             store['smartclock-settings'] = JSON.stringify({ netzCountdownEnabled: true, netzCountdownMinutes: 3 });
-            expect(loadSettings()).toEqual({ netzCountdownEnabled: true, netzCountdownMinutes: 3, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false, scheduleDaysAheadTv: 6, scheduleDaysAheadTablet: 2 });
+            expect(loadSettings()).toEqual({ netzCountdownEnabled: true, netzCountdownMinutes: 3, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false, scheduleDaysAheadTv: 6, scheduleDaysAheadTablet: 2, zmanimCountTv: 6, zmanimCountTablet: 4 });
         });
 
         it('ignores invalid minutes in storage', () => {
             store['smartclock-settings'] = JSON.stringify({ netzCountdownEnabled: true, netzCountdownMinutes: 99 });
-            expect(loadSettings()).toEqual({ netzCountdownEnabled: true, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false, scheduleDaysAheadTv: 6, scheduleDaysAheadTablet: 2 });
+            expect(loadSettings()).toEqual({ netzCountdownEnabled: true, netzCountdownMinutes: 5, presentationsBlocked: false, messagesBlocked: false, scheduleBlocked: false, scheduleDaysAheadTv: 6, scheduleDaysAheadTablet: 2, zmanimCountTv: 6, zmanimCountTablet: 4 });
         });
     });
 
@@ -132,6 +133,49 @@ describe('settingsSlice', () => {
             const state = loadSettings();
             expect(state.scheduleDaysAheadTv).toBe(7);
             expect(state.scheduleDaysAheadTablet).toBe(3);
+        });
+    });
+
+    describe('zmanimCount', () => {
+        it('defaults the device card counts to TV 6 / tablet 4', () => {
+            const state = loadSettings();
+            expect(state.zmanimCountTv).toBe(6);
+            expect(state.zmanimCountTablet).toBe(4);
+        });
+
+        it('setZmanimCount stores per target', () => {
+            let state = reducer(loadSettings(), setZmanimCount({ target: 'tv', count: 4 }));
+            expect(state.zmanimCountTv).toBe(4);
+            expect(state.zmanimCountTablet).toBe(4); // untouched
+
+            state = reducer(state, setZmanimCount({ target: 'tablet', count: 6 }));
+            expect(state.zmanimCountTablet).toBe(6);
+            expect(state.zmanimCountTv).toBe(4); // untouched
+        });
+
+        it('setZmanimCount falls back to the target default on a bad value', () => {
+            const state = reducer(
+                loadSettings(),
+                // @ts-expect-error – guarding the runtime path against invalid input
+                setZmanimCount({ target: 'tablet', count: 5 }),
+            );
+            expect(state.zmanimCountTablet).toBe(4);
+        });
+
+        it('persists card counts to localStorage', () => {
+            reducer(loadSettings(), setZmanimCount({ target: 'tv', count: 4 }));
+            const saved = JSON.parse(store['smartclock-settings']);
+            expect(saved.zmanimCountTv).toBe(4);
+        });
+
+        it('reads persisted card counts and clamps invalid ones', () => {
+            store['smartclock-settings'] = JSON.stringify({
+                zmanimCountTv: 4,
+                zmanimCountTablet: 99,
+            });
+            const state = loadSettings();
+            expect(state.zmanimCountTv).toBe(4);
+            expect(state.zmanimCountTablet).toBe(4); // default fallback
         });
     });
 });

@@ -11,6 +11,8 @@ import titlesReducer from '../store/titles/titlesSlice';
 import configReducer from '../store/config/configSlice';
 import settingsReducer from '../store/settings/settingsSlice';
 import { StateKeys } from '../../store.models';
+import { TitlesKeys } from '@shared/core/services/workers/handlers/models/titles-of-aiom';
+import { __resetInfoCursorForTests } from '../clock-view/info/infoRotationCursor';
 
 // ResizeObserver is not available in jsdom
 globalThis.ResizeObserver = class {
@@ -105,17 +107,34 @@ describe('TvClockView', () => {
     expect(shell!.querySelector('.zmanim-section')).toBeTruthy();
   });
 
-  it('renders info cards container (side-by-side layout, not stacked)', () => {
-    const { container } = renderTv(CONFIG_WITH_SCHEDULE);
-    // .info-cards exists — its CSS grid-template-columns: 1fr 1fr means side-by-side
-    // (no TV override to stack them into a single column)
-    const infoCards = container.querySelector('.info-cards');
-    expect(infoCards).toBeTruthy();
+  it('renders the full-width info panel instead of the old two-column info cards', () => {
+    const { container } = renderTv({
+      ...CONFIG_WITH_SCHEDULE,
+      [StateKeys.Titles]: {
+        [TitlesKeys.DafYomi]: { title: 'חולין דף ק״ד', streak: 99 },
+      },
+    });
+    expect(container.querySelector('.info-panel')).toBeTruthy();
+    expect(container.querySelector('.info-cards')).toBeNull();
   });
 
-  it('renders "זמני היום" section title', () => {
+  it('shows 3 info rows per page on TV (rowsPerPage=3)', () => {
+    __resetInfoCursorForTests();
+    const { container } = renderTv({
+      ...CONFIG_WITH_SCHEDULE,
+      [StateKeys.Titles]: {
+        // 3 prayer items → a single page of 3 rows when rowsPerPage=3
+        [TitlesKeys.Tachanun]: { title: 'אין אומרים תחנון במנחה', streak: 99 },
+        [TitlesKeys.MashivAruach]: { title: 'מוריד הטל', streak: 99 },
+        [TitlesKeys.BarechAlino]: { title: 'ברכנו', streak: 99 },
+      },
+    });
+    expect(container.querySelectorAll('.info-panel-row')).toHaveLength(3);
+  });
+
+  it('does not render redundant "זמני היום" section title', () => {
     renderTv();
-    expect(screen.getByText('זמני היום')).toBeTruthy();
+    expect(screen.queryByText('זמני היום')).toBeNull();
   });
 
   it('renders the settings gear hidden behind a hotspot', () => {

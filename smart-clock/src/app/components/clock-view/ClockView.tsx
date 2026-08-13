@@ -12,21 +12,32 @@ import { SettingsMenu } from '../settings/SettingsMenu';
 import { DashboardShell } from './DashboardShell';
 import { DashboardHeader } from './DashboardHeader';
 import { DashboardBody } from './DashboardBody';
+import { useDeviceZmanimCount } from './times/useDeviceZmanimCount';
+import { resolveZmanimCount } from './times/resolveZmanimCount';
+import { useRoute } from '../../routing/useRoute';
 import { now } from '../../debug/clock';
 import './ClockView.scss';
 
 export interface ClockViewProps {
   /** When provided, replaces the default DashboardBody (info cards + zmanim). */
   bodyOverride?: React.ReactNode;
+  /**
+   * Pauses the info panel rotation — used when the dashboard stays mounted but
+   * is hidden behind a presentation overlay.
+   */
+  infoPaused?: boolean;
 }
 
-export const ClockView = ({ bodyOverride }: ClockViewProps = {}) => {
+export const ClockView = ({ bodyOverride, infoPaused }: ClockViewProps = {}) => {
     const dispatch = useAppDispatch();
     const times = useAppSelector(getTimesSelector);
     const titles = useAppSelector(getTitlesSelector);
     const config = useAppSelector(getConfigDataSelector);
     const rootRef = useRef<HTMLDivElement>(null);
     const city = resolveCity(config?.tenant?.location);
+    const route = useRoute();
+    const deviceZmanimCount = useDeviceZmanimCount(route);
+    const zmanimCount = resolveZmanimCount(config, route, deviceZmanimCount);
 
     useFitToScreen(rootRef, [times, titles], { cssVar: '--fit-scale' });
 
@@ -51,7 +62,7 @@ export const ClockView = ({ bodyOverride }: ClockViewProps = {}) => {
             <SettingsMenu />
             <DashboardShell>
                 <DashboardHeader titles={titles} />
-                {bodyOverride ?? <DashboardBody titles={titles} times={times} />}
+                {bodyOverride ?? <DashboardBody titles={titles} times={times} count={zmanimCount} infoPaused={infoPaused} />}
             </DashboardShell>
         </div>
     );

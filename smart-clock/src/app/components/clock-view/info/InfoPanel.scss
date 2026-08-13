@@ -1,0 +1,65 @@
+/* Full-width rotating info panel — replaces the old two-column .info-cards. */
+
+.info-panel-container {
+    height: 100%;
+    min-height: 0;
+}
+
+.info-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    background: var(--card-bg-strong);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    padding: clamp(8px, 2cqmin, 20px);
+    transition: opacity 350ms ease;
+
+    &.is-fading {
+        opacity: 0;
+    }
+}
+
+.info-panel-rows {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(6px, 2cqmin, 18px);
+    height: 100%;
+}
+
+.info-panel-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: clamp(6px, 1.4cqw, 18px);
+    direction: rtl;
+    border-bottom: 1px solid var(--card-row-divider);
+    padding-block: clamp(4px, 1.5cqmin, 14px);
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.info-panel-label {
+    font-family: var(--font-hebrew);
+    font-weight: 600;
+    font-size: calc(var(--ui-scale) * clamp(14px, 3.6cqw, 38px));
+    color: var(--text-dim);
+    flex: 0 0 auto;
+}
+
+.info-panel-value {
+    font-family: var(--font-hebrew);
+    font-weight: 700;
+    font-size: calc(var(--ui-scale) * clamp(20px, 6cqw, 78px));
+    color: var(--text-primary);
+    line-height: 1.25;
+    flex: 0 1 auto;
+    min-width: 0;
+    text-align: start;
+    overflow-wrap: anywhere;
+}

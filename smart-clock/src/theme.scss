@@ -18,10 +18,10 @@
   /* ── Card Surfaces ── */
   --card-bg: rgba(15, 24, 41, 0.6);
   --card-bg-strong: rgba(15, 24, 41, 0.8);
-  --card-border: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(255, 255, 255, 0.14);
   --card-border-hover: rgba(255, 255, 255, 0.08);
   --card-radius: clamp(10px, 1.4vw, 18px);
-  --card-row-divider: rgba(255, 255, 255, 0.03);
+  --card-row-divider: rgba(255, 255, 255, 0.08);
 
   /* ── Accent (Emerald) ── */
   --accent-emerald: #34d399;
@@ -33,6 +33,7 @@
   /* ── Zman Time Colors ── */
   --zman-blue: #60a5fa;
   --zman-blue-featured: #93c5fd;
+  --zman-time: #7db8ff;
 
   /* ── Current Zman Highlight ── */
   --current-bg: rgba(52, 211, 153, 0.08);

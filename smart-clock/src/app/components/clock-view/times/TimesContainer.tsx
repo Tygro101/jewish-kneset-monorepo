@@ -1,51 +1,57 @@
 import { format } from 'date-fns';
 import './TimesContainer.scss';
-import { TimeState } from "../../store/times/timesState";
+import { TimeState } from '../../store/times/timesState';
 import { useTimesContainerLogic } from './TimesContainerHooks';
+import { resolveZmanName } from './zmanDisplayName';
+import type { ZmanimCount } from '@shared/core/display/zmanim-count';
 
 export interface TimesProps {
     times: TimeState;
+    count?: ZmanimCount;
 }
 
 export const TimesContainer = (props: TimesProps) => {
-    const { relevantKeys, closestIndex } = useTimesContainerLogic(props.times);
+    const count: ZmanimCount = props.count ?? 6;
+    const { entries, currentIndex } = useTimesContainerLogic(props.times, count);
 
-    if (!Object.keys(props.times ?? {}).length || !relevantKeys.length) {
+    if (!Object.keys(props.times ?? {}).length || !entries.length) {
         return null;
     }
 
-    const count = relevantKeys.filter((i) => props.times[i.main as unknown as string]?.date).length;
-    const cols = count <= 3 ? Math.max(count, 1) : count === 4 ? 2 : 3;
-    const rows = Math.ceil(count / cols) || 1;
+    const cols = entries.length <= 3 ? Math.max(entries.length, 1) : entries.length === 4 ? 2 : 3;
+    const rows = Math.ceil(entries.length / cols) || 1;
 
     return (
         <div
             className="zmanim-grid"
             data-fit-measure
+            data-zman-count={count}
             style={{ '--zman-cols': cols, '--zman-rows': rows } as React.CSSProperties}
         >
-            {relevantKeys.map((item, idx) => {
-                const timeData = props.times[item.main as unknown as string];
+            {entries.map((entry, idx) => {
+                const timeData = props.times[entry.main as unknown as string];
                 if (!timeData?.date) return null;
 
-                const isCurrent = idx === closestIndex;
-                const hebrewName = timeData.generalName || timeData.name;
-                const mainTime = format(new Date(timeData.date), 'H:mm');
-                const seconds = format(new Date(timeData.date), 'ss');
-                // Additions (e.g., Gra times shown as secondary)
-                const additionTimes = (item.additions ?? [])
-                    .filter((key) => !!props.times[key as unknown as string]?.date)
-                    .map((key) => format(new Date(props.times[key as unknown as string].date), 'H:mm'));
+                const isCurrent = idx === currentIndex;
+                const paired = entry.additions.length > 0;
+                const hebrewName = resolveZmanName(timeData, { paired, count });
+                const date = new Date(timeData.date);
+                const mainTime = format(date, 'H:mm');
+                const seconds = format(date, 'ss');
+                const additionTimes = entry.additions
+                    .map((key) => props.times[key as unknown as string])
+                    .filter((item) => !!item?.date)
+                    .map((item) => format(new Date(item.date), 'H:mm'));
 
                 return (
-                    <div
-                        key={String(item.main)}
-                        className={`zman-card ${isCurrent ? 'current' : ''}`}
-                    >
+                    <div key={entry.id} className={`zman-card ${isCurrent ? 'current' : ''}`}>
                         {isCurrent && <div className="zman-glow" />}
                         <div className="zman-name">{hebrewName}</div>
                         <div className="zman-time" dir="ltr">
-                            <span className="zman-time-main">{mainTime}<span className="zman-time-seconds">:{seconds}</span></span>
+                            <span className="zman-time-main">
+                                {mainTime}
+                              
+                            </span>
                             {additionTimes.map((t, i) => (
                                 <span key={i} className="zman-time-addition">{t}</span>
                             ))}

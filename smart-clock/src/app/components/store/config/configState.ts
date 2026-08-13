@@ -2,6 +2,7 @@
 export type DayKey = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'shabbat';
 
 import type { ScheduleDaysAheadSetting } from '@shared/core/schedule/days-ahead';
+import type { ZmanimCountSetting } from '@shared/core/display/zmanim-count';
 
 export interface ScheduleEvent {
   time: string;
@@ -68,6 +69,12 @@ export interface TenantConfig {
      * A plain number is the legacy form and applies to both screens.
      */
     scheduleDaysAhead?: number | ScheduleDaysAheadSetting;
+    /**
+     * Zmanim card count per screen: { tv: 4|6|'screen', tablet: 4|6|'screen' }.
+     * 'screen' (or a missing value) defers to the device's on-screen setting.
+     * A plain number is the legacy form and applies to both screens.
+     */
+    zmanimCount?: number | ZmanimCountSetting;
   };
   weeklySchedule: Record<DayKey, ScheduleEvent[]>;
   activePresentations: Presentation[];

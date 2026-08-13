@@ -1,4 +1,4 @@
-import { AlotHaShaharKey, ChatzotLailahKey, ChatzotYomKey, MinchaGdolaKey, MinchaKtanaKey, NerotShabatKey, NetzKey, PlagMinchaKey, ShkiahKey, SofBirkotKeriatShemaGraKey, SofBirkotKeriatShemaMagenAvrahamKey, SofShemaGraKey, SofShemaMagenAvrahamKey, TallitAndTefillinKey, TzetCochavimGeonimKey, TzetCochavimRabinoTamKey, TzetShabatKey, TzetTzumGadolKey } from "../constants/times.keys"
+import { AlotHaShaharKey, ChatzotLailahKey, ChatzotYomKey, MinchaGdolaKey, MinchaKtanaKey, NerotShabatKey, NetzKey, PlagMinchaKey, ShkiahKey, SofBirkotKeriatShemaGraKey, SofBirkotKeriatShemaMagenAvrahamKey, SofShemaGraKey, SofShemaMagenAvrahamKey, TallitAndTefillinKey, TzetCochavimGeonimKey, TzetCochavimRabinoTamKey, TzetShabatKey, TzetTzumGadolKey, TzetTzumKatanKey } from "../constants/times.keys"
 import { CitiesEnum } from "../models/shared-models"
 
 export const cities: { [key: string]: { lat: number, long: number, elevation?: number } } = {
@@ -61,6 +61,7 @@ export const nameConfiguration: { [key: string]: string } = {
     [ShkiahKey]: "שקיעה",
     [TzetCochavimGeonimKey]: "צאת כוכבים",
     [TzetTzumGadolKey]: "צאת צום",
+    [TzetTzumKatanKey]: "צאת צום",
     [TzetShabatKey]: "צאת שבת",
     [TzetCochavimRabinoTamKey]: "רבינו תם",
     [ChatzotYomKey]: "חצות יום",
@@ -81,6 +82,7 @@ export const shortNameConfiguration: { [key: string]: string } = {
     [ShkiahKey]: "שקיעה",
     [TzetCochavimGeonimKey]: "צאת כוכבים",
     [TzetTzumGadolKey]: "צאת צום",
+    [TzetTzumKatanKey]: "צאת צום",
     [TzetShabatKey]: "צאת שבת",
     [TzetCochavimRabinoTamKey]: "רבינו תם",
     [ChatzotYomKey]: "חצות יום",

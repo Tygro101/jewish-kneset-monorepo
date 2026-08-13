@@ -21,3 +21,7 @@ export const getScheduleDaysAheadTvSelector = (state: RootState) =>
 
 export const getScheduleDaysAheadTabletSelector = (state: RootState) =>
     state.settings.scheduleDaysAheadTablet;
+
+export const getZmanimCountTvSelector = (state: RootState) => state.settings.zmanimCountTv;
+
+export const getZmanimCountTabletSelector = (state: RootState) => state.settings.zmanimCountTablet;

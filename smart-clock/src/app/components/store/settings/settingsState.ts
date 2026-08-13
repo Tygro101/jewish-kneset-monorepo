@@ -1,3 +1,5 @@
+import type { ZmanimCount } from '@shared/core/display/zmanim-count';
+
 /** Allowed values for the netz countdown window (minutes), shown in the dropdown. */
 export const NETZ_COUNTDOWN_MINUTE_OPTIONS = [1, 2, 3, 4, 5, 10] as const;
 
@@ -16,4 +18,8 @@ export interface SettingsState {
     scheduleDaysAheadTv: number;
     /** On-screen (device-local) day count for the tablet layout. Used when the CMS says "screen". */
     scheduleDaysAheadTablet: number;
+    /** On-screen (device-local) zmanim card count for the TV layout. */
+    zmanimCountTv: ZmanimCount;
+    /** On-screen (device-local) zmanim card count for the tablet layout. */
+    zmanimCountTablet: ZmanimCount;
 }

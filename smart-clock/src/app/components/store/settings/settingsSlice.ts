@@ -3,6 +3,12 @@ import { StateKeys } from '../../../store.models';
 import { NETZ_COUNTDOWN_MINUTE_OPTIONS, SettingsState } from './settingsState';
 import { clampDaysAhead } from '@shared/core/schedule/timeline-builder';
 import { DAYS_AHEAD_LIMITS, type DaysAheadTarget } from '@shared/core/schedule/days-ahead';
+import {
+    clampZmanimCount,
+    ZMANIM_COUNT_DEFAULTS,
+    type ZmanimCount,
+    type ZmanimCountTarget,
+} from '@shared/core/display/zmanim-count';
 
 const STORAGE_KEY = 'smartclock-settings';
 
@@ -14,6 +20,8 @@ const DEFAULTS: SettingsState = {
     scheduleBlocked: false,
     scheduleDaysAheadTv: DAYS_AHEAD_LIMITS.tv.default,
     scheduleDaysAheadTablet: DAYS_AHEAD_LIMITS.tablet.default,
+    zmanimCountTv: ZMANIM_COUNT_DEFAULTS.tv,
+    zmanimCountTablet: ZMANIM_COUNT_DEFAULTS.tablet,
 };
 
 /** Loads settings from localStorage, falling back to DEFAULTS on any problem. */
@@ -54,6 +62,11 @@ export function loadSettings(): SettingsState {
             DEFAULTS.scheduleDaysAheadTablet,
             DAYS_AHEAD_LIMITS.tablet.max,
         );
+        const zmanimCountTv = clampZmanimCount(parsed.zmanimCountTv, DEFAULTS.zmanimCountTv);
+        const zmanimCountTablet = clampZmanimCount(
+            parsed.zmanimCountTablet,
+            DEFAULTS.zmanimCountTablet,
+        );
         return {
             netzCountdownEnabled: enabled,
             netzCountdownMinutes: minutes,
@@ -62,6 +75,8 @@ export function loadSettings(): SettingsState {
             scheduleBlocked,
             scheduleDaysAheadTv,
             scheduleDaysAheadTablet,
+            zmanimCountTv,
+            zmanimCountTablet,
         };
     } catch {
         return { ...DEFAULTS };
@@ -117,8 +132,18 @@ export const settingsSlice = createSlice({
             else state.scheduleDaysAheadTablet = value;
             persist(state);
         },
+        setZmanimCount: (
+            state,
+            action: PayloadAction<{ target: ZmanimCountTarget; count: ZmanimCount }>,
+        ) => {
+            const { target, count } = action.payload;
+            const value = clampZmanimCount(count, ZMANIM_COUNT_DEFAULTS[target]);
+            if (target === 'tv') state.zmanimCountTv = value;
+            else state.zmanimCountTablet = value;
+            persist(state);
+        },
     },
 });
 
-export const { setNetzCountdownEnabled, setNetzCountdownMinutes, setPresentationsBlocked, setMessagesBlocked, setScheduleBlocked, setScheduleDaysAhead } = settingsSlice.actions;
+export const { setNetzCountdownEnabled, setNetzCountdownMinutes, setPresentationsBlocked, setMessagesBlocked, setScheduleBlocked, setScheduleDaysAhead, setZmanimCount } = settingsSlice.actions;
 export default settingsSlice.reducer;

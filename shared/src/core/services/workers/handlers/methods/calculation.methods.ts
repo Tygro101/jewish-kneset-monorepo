@@ -78,7 +78,9 @@ export const calcGraSofBirkotShema = (shaaZmanit: number, netz: Date): TypedMap<
 // Mincha 
 
 export const calcMinchaGdola = (shaaZmanit: number, hatzotYom: Date): TypedMap<Date> => {
-    return { [MinchaGdolaKey]: addMilliseconds(hatzotYom, (msToMinute(shaaZmanit)) * 0.5 > 30 ? msToMinute(shaaZmanit) * 0.5 : ShaaFactors.MINCHA_GDOLA) }
+    const halfShaaMs = shaaZmanit * 0.5;
+    const thirtyMinMs = ShaaFactors.MINCHA_GDOLA; // 30 * 60 * 1000
+    return { [MinchaGdolaKey]: addMilliseconds(hatzotYom, Math.max(halfShaaMs, thirtyMinMs)) };
 }
 
 export const calcMinchaKtana = (shaaZmanit: number, netz: Date): TypedMap<Date> => {

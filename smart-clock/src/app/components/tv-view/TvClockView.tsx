@@ -15,6 +15,8 @@ import { DashboardBody } from '../clock-view/DashboardBody';
 import { ScheduleCalendar } from '../schedule-calendar/ScheduleCalendar';
 import { resolveDaysAhead } from '../schedule-calendar/resolveDaysAhead';
 import { useDeviceDaysAhead } from '../schedule-calendar/useDeviceDaysAhead';
+import { useDeviceZmanimCount } from '../clock-view/times/useDeviceZmanimCount';
+import { resolveZmanimCount } from '../clock-view/times/resolveZmanimCount';
 import { now } from '../../debug/clock';
 import './TvClockView.scss';
 
@@ -25,6 +27,11 @@ export interface TvClockViewProps {
    * clock in it — stays visible.
    */
   calendarOverride?: React.ReactNode;
+  /**
+   * Pauses the info panel rotation — used when the dashboard stays mounted but
+   * is hidden behind a presentation overlay.
+   */
+  infoPaused?: boolean;
 }
 
 /**
@@ -36,7 +43,7 @@ export interface TvClockViewProps {
  *
  * Calendar is permanent on TV (not part of the display rotation).
  */
-export const TvClockView = ({ calendarOverride }: TvClockViewProps = {}) => {
+export const TvClockView = ({ calendarOverride, infoPaused }: TvClockViewProps = {}) => {
   const dispatch = useAppDispatch();
   const times = useAppSelector(getTimesSelector);
   const titles = useAppSelector(getTitlesSelector);
@@ -64,6 +71,8 @@ export const TvClockView = ({ calendarOverride }: TvClockViewProps = {}) => {
 
   const deviceDaysAhead = useDeviceDaysAhead('tv');
   const daysAhead = resolveDaysAhead(config, 'tv', deviceDaysAhead);
+  const deviceZmanimCount = useDeviceZmanimCount('tv');
+  const zmanimCount = resolveZmanimCount(config, 'tv', deviceZmanimCount);
 
   return (
     <div className="tv-app" ref={rootRef} data-route="tv">
@@ -77,7 +86,8 @@ export const TvClockView = ({ calendarOverride }: TvClockViewProps = {}) => {
       <aside className="tv-dashboard">
         <DashboardShell>
           <DashboardHeader titles={titles} />
-          <DashboardBody titles={titles} times={times} />
+          {/* Landscape column is taller relative to its width — 3 info rows per page (tablet uses 2) */}
+          <DashboardBody titles={titles} times={times} count={zmanimCount} rowsPerPage={3} infoPaused={infoPaused} />
         </DashboardShell>
       </aside>
 

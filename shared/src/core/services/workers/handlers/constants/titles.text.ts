@@ -1,5 +1,6 @@
 export const TitlesTexts = {
     FastDate: "{יום} ב{חודש}",
+    ErevRoshChodesh: 'ערב ראש חודש',
     YaalehVeYavo: 'יעלה ויבוא',
     AlHaNissimChanukah: 'על הנסים בחנוכה',
     AlHaNissimPurim: 'על הנסים בפורים',

@@ -15,6 +15,7 @@ import {
     setMessagesBlocked,
     setScheduleBlocked,
     setScheduleDaysAhead,
+    setZmanimCount,
 } from '../store/settings/settingsSlice';
 import { NETZ_COUNTDOWN_MINUTE_OPTIONS } from '../store/settings/settingsState';
 import { useRoute } from '../../routing/useRoute';
@@ -22,6 +23,13 @@ import { getConfigDataSelector } from '../store/config/configSelectors';
 import { daysAheadOptions, readCmsDaysAhead, SCREEN_CONFIG } from '@shared/core/schedule/days-ahead';
 import { useDeviceDaysAhead } from '../schedule-calendar/useDeviceDaysAhead';
 import { resolveDaysAhead } from '../schedule-calendar/resolveDaysAhead';
+import {
+    readCmsZmanimCount,
+    ZMANIM_COUNT_OPTIONS,
+    SCREEN_CONFIG as ZMANIM_SCREEN_CONFIG,
+} from '@shared/core/display/zmanim-count';
+import { useDeviceZmanimCount } from '../clock-view/times/useDeviceZmanimCount';
+import { resolveZmanimCount } from '../clock-view/times/resolveZmanimCount';
 import { useGearReveal } from './useGearReveal';
 import { revealTriggerFor } from './gearReveal';
 import './SettingsMenu.scss';
@@ -47,6 +55,13 @@ export const SettingsMenu = () => {
     // A CMS number overrides the screen, so the control is read-only in that case.
     const daysAheadLockedByCms =
         readCmsDaysAhead(config?.displaySettings?.scheduleDaysAhead, route) !== SCREEN_CONFIG;
+
+    const deviceZmanimCount = useDeviceZmanimCount(route);
+    // Shown in the dropdown: the count actually in effect on this screen.
+    const effectiveZmanimCount = resolveZmanimCount(config, route, deviceZmanimCount);
+    // A CMS value overrides the screen, so the control is read-only in that case.
+    const zmanimCountLockedByCms =
+        readCmsZmanimCount(config?.displaySettings?.zmanimCount, route) !== ZMANIM_SCREEN_CONFIG;
 
     // Gear visibility — hidden by default, revealed by hotspot or 3-finger gesture.
     const { visible: gearVisible, reveal } = useGearReveal({ route, paused: open });
@@ -229,6 +244,30 @@ export const SettingsMenu = () => {
                             </select>
                         </div>
                         {daysAheadLockedByCms && (
+                            <div className="settings-hint">נקבע במערכת הניהול (CMS)</div>
+                        )}
+
+                        <div className="settings-divider" />
+
+                        {/* Zmanim card count (this screen) */}
+                        <div className="settings-section-label">מספר זמנים במסך</div>
+                        <div className="settings-row">
+                            <span className="settings-toggle-label">כרטיסים</span>
+                            <select
+                                className="settings-minutes"
+                                aria-label="מספר זמנים במסך"
+                                value={effectiveZmanimCount}
+                                disabled={zmanimCountLockedByCms}
+                                onChange={(e) =>
+                                    dispatch(setZmanimCount({ target: route, count: Number(e.target.value) as 4 | 6 }))
+                                }
+                            >
+                                {ZMANIM_COUNT_OPTIONS.map((n) => (
+                                    <option key={n} value={n}>{n} זמנים</option>
+                                ))}
+                            </select>
+                        </div>
+                        {zmanimCountLockedByCms && (
                             <div className="settings-hint">נקבע במערכת הניהול (CMS)</div>
                         )}
 

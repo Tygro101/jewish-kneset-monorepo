@@ -1,31 +1,32 @@
-import { TitlesContainer } from './titles/TitlesView';
+import { InfoPanelRotator } from './info/InfoPanelRotator';
 import { TimesContainer } from './times/TimesContainer';
 import type { TitlesState } from '../store/titles/titlesState';
 import type { TimeState } from '../store/times/timesState';
+import type { ZmanimCount } from '@shared/core/display/zmanim-count';
 
 interface DashboardBodyProps {
   titles: TitlesState;
   times: TimeState;
+  count?: ZmanimCount;
+  rowsPerPage?: number;
+  infoPaused?: boolean;
 }
 
 /**
- * Reusable dashboard body: info cards (תפילה / לימוד יומי) + zmanim grid.
+ * Reusable dashboard body: rotating info panel + zmanim grid.
  * Keeps the container-type declarations so cq units resolve correctly.
  * Used by both tablet ClockView and TV dashboard column.
  */
-export const DashboardBody = ({ titles, times }: DashboardBodyProps) => (
+export const DashboardBody = ({ titles, times, count, rowsPerPage, infoPaused }: DashboardBodyProps) => (
   <>
-    {/* Info Cards: תפילה / לימוד יומי */}
+    {/* Info Panel: rotating pages of prayer/study info */}
     <section className="info-section">
-      <TitlesContainer titles={titles} />
+      <InfoPanelRotator titles={titles} rowsPerPage={rowsPerPage ?? 2} paused={infoPaused} />
     </section>
 
     {/* Zmanim */}
     <section className="zmanim-section">
-      <div className="zmanim-header">
-        <span className="zmanim-title">זמני היום</span>
-      </div>
-      <TimesContainer times={times} />
+      <TimesContainer times={times} count={count} />
     </section>
   </>
 );

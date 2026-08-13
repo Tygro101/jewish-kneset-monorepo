@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { applyTheme, loadTheme, THEME_FAMILIES } from './themes';
+import { applyTheme, loadTheme, THEME_FAMILIES, VARIANTS } from './themes';
 
 // jsdom in this vitest config doesn't provide localStorage; mock it.
 const store: Record<string, string> = {};
@@ -62,7 +62,7 @@ describe('themes', () => {
     it('applyTheme sets CSS variables on :root and persists the choice', () => {
         applyTheme('purple', 'light');
         const root = document.documentElement;
-        expect(root.style.getPropertyValue('--accent-emerald')).toBe('#7c3aed');
+        expect(root.style.getPropertyValue('--accent-emerald')).toBe(VARIANTS.purple.light.accent);
         expect(root.style.getPropertyValue('--app-bg')).toBe('#faf5ff');
         expect(loadTheme()).toEqual({ familyId: 'purple', mode: 'light' });
     });

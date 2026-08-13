@@ -124,10 +124,11 @@ function AppRoot() {
     }
 
     if (view.kind === 'presentation') {
-      // Overlay the presentation on top of the dashboard.
+      // Overlay the presentation on top of the dashboard. The dashboard stays
+      // mounted but hidden, so freeze its info rotation until the overlay clears.
       return (
         <>
-          <Dashboard />
+          <Dashboard infoPaused />
           <PresentationView presentation={view.presentation} />
         </>
       );

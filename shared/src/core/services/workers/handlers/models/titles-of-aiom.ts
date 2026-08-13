@@ -27,6 +27,7 @@ export enum TitlesKeys {
     Barechino = 'barechino',
     HebrewDate = 'hebrew-date',
     RoshChodesh = 'rosh-chodesh',
+    ErevRoshChodesh = 'erev-rosh-chodesh',
     Parsha = 'parsha',
     SpecialShabbat = 'special-shabbat',
     MinorHoliday = 'minor-holiday',
@@ -197,6 +198,18 @@ export class TitlesAiom {
         const hasFast = todayHasFlag(flags.MINOR_FAST) || todayHasFlag(flags.MAJOR_FAST);
         const hasRoshChodesh = todayHasFlag(flags.ROSH_CHODESH);
         const hasChag = todayHasFlag(flags.CHAG) || todayHasFlag(flags.CHOL_HAMOED);
+
+        // Erev Rosh Chodesh: hebcal emits no event for it (flags.EREV covers holidays
+        // only), so it is derived from tomorrow's calendar instead of by date arithmetic.
+        // Works for 30-day months too: the 29th sees RC on the 30th, and the 30th is
+        // itself RC so the !hasRoshChodesh guard suppresses a duplicate.
+        // 29 Elul self-excludes because hebcal does not flag 1 Tishrei as Rosh Chodesh.
+        const tomorrowIsRoshChodesh = tomorrowCalendar.some(
+            (item) => (item.mask & flags.ROSH_CHODESH) !== 0,
+        );
+        if (tomorrowIsRoshChodesh && !hasRoshChodesh) {
+            this.setTitle(TitlesKeys.ErevRoshChodesh, TitlesTexts.ErevRoshChodesh);
+        }
 
         if (hasRoshChodesh || hasChag) {
             this.setTitle(TitlesKeys.YaalehVeYavo, TitlesTexts.YaalehVeYavo);
